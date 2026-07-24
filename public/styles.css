@@ -61,7 +61,7 @@ background-size:
     transform: translate(100px,50px);
   }
 }
- 
+
 }
 
 }
@@ -273,8 +273,11 @@ background-size:
 /* order summary (pre-selected tier, read-only) */
 .order-summary{display:flex;justify-content:space-between;align-items:baseline;padding:.2rem 0 1.1rem;margin-bottom:1.1rem;border-bottom:1px solid var(--glass-border)}
 .order-tier{font-size:.78rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted2)}
+.order-amount-wrap{display:flex;align-items:baseline;gap:.5rem}
 .order-amount{
   font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-weight:700;font-size:1.7rem;background:var(--gold-grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.order-amount-strike{color:var(--muted);text-decoration:line-through;font-size:.95rem;font-weight:600}
+.order-amount-strike[hidden]{display:none}
 
 /* wallets (Apple Pay / Google Pay) */
 .wallet-container{display:flex;flex-direction:column;gap:.55rem;margin-bottom:.2rem}
@@ -285,6 +288,33 @@ background-size:
 .wallet-sep::before,.wallet-sep::after{content:"";flex:1;height:1px;background:var(--glass-border)}
 .wallet-sep[hidden]{display:none}
 #success-card .crest{display:flex;justify-content:center;margin-bottom:.4rem}
+
+/* ---- promo / discount code ---- */
+.promo-banner{
+  display:flex;align-items:center;justify-content:center;gap:.4rem;flex-wrap:wrap;
+  margin:0 0 1.4rem;padding:.65rem 1rem;border-radius:12px;
+  background:linear-gradient(135deg,rgba(168,85,247,.2),rgba(239,68,68,.1));
+  border:1px solid rgba(168,85,247,.45);color:#f5e4ff;font-size:.82rem;font-weight:700;
+  letter-spacing:.01em;text-align:center;animation:promo-pulse 1.8s ease-in-out infinite;
+}
+.promo-banner b{color:#fff}
+.promo-banner[hidden]{display:none}
+@keyframes promo-pulse{0%,100%{box-shadow:0 0 0 0 rgba(168,85,247,.35)}50%{box-shadow:0 0 0 6px rgba(168,85,247,0)}}
+
+.promo-row{display:flex;gap:.5rem;margin-bottom:.5rem}
+.promo-input{flex:1;min-width:0;background:rgba(255,255,255,.04);border:1px solid var(--glass-border);border-radius:11px;padding:.7rem .85rem;color:#fff;font-family:inherit;font-size:.85rem;text-transform:uppercase;letter-spacing:.04em}
+.promo-input:focus{outline:none;border-color:rgba(168,85,247,.6)}
+.promo-input::placeholder{text-transform:none;color:var(--muted);letter-spacing:normal}
+.promo-input:disabled{opacity:.6}
+.promo-apply{background:rgba(168,85,247,.16);border:1px solid rgba(168,85,247,.4);color:var(--gold);font-weight:800;font-size:.78rem;font-family:inherit;border-radius:11px;padding:0 1.1rem;cursor:pointer;white-space:nowrap;transition:all .2s}
+.promo-apply:hover{background:var(--gold-grad);color:#0a0a0a;border-color:transparent}
+.promo-apply:disabled{opacity:.75;cursor:default;background:rgba(74,222,128,.16);border-color:rgba(74,222,128,.4);color:#4ade80}
+.promo-msg{font-size:.76rem;margin:-.1rem 0 1rem;text-align:center}
+.promo-msg[hidden]{display:none}
+.promo-msg.ok{color:#4ade80}
+.promo-msg.err{color:#fca5a5}
+
+.tier-price-strike{font-size:.8rem;font-weight:700;color:#4ade80;margin-top:.3rem}
 
 /* ---- toast ---- */
 .toast{position:fixed;bottom:1.4rem;left:50%;transform:translateX(-50%);background:rgba(20,20,20,.97);border:1px solid rgba(168,85,247,.35);color:#fff;padding:.7rem 1.2rem;border-radius:10px;font-size:.82rem;font-weight:600;z-index:200;box-shadow:0 12px 30px rgba(0,0,0,.6)}
