@@ -85,8 +85,8 @@ background-size:
 
 /* ---- hero ---- */
 .wordmark{
-  font-family:'Anton','Space Grotesk','Plus Jakarta Sans',system-ui,sans-serif;font-weight:400;font-size:clamp(2.6rem,11vw,4rem);
-  letter-spacing:.01em;margin:.6rem 0 .4rem;line-height:1;
+  font-family:'Jost','Space Grotesk','Plus Jakarta Sans',system-ui,sans-serif;font-weight:400;font-size:clamp(2.4rem,10vw,3.7rem);
+  letter-spacing:.1em;margin:.6rem 0 .4rem;line-height:1;
   background:var(--gold-grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
   text-shadow:0 0 42px rgba(99,102,241,.5),0 0 90px rgba(99,102,241,.22);
 }
