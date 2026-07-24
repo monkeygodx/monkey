@@ -56,19 +56,23 @@ function amountCents() {
   return Math.round((base * (100 - appliedDiscount.percent)) / 100);
 }
 
-function fmtCountdown(ms) {
-  if (ms <= 0) return 'ended';
-  const s = Math.floor(ms / 1000);
-  const d = Math.floor(s / 86400);
-  const h = Math.floor((s % 86400) / 3600);
+// Sale window is 48h total, but the on-page countdown is deliberately shown in
+// 24h laps -- it counts 24h -> 0, then relaunches at ~24h if real time remains,
+// and only ever counts a true zero on the final lap. The server-side expiry
+// (`CONFIG.promo.expiresAt`) is what actually cuts the code off either way.
+const PROMO_CYCLE_MS = 24 * 60 * 60 * 1000;
+function cycleRemaining(totalMs) {
+  if (totalMs <= PROMO_CYCLE_MS) return totalMs;
+  const mod = totalMs % PROMO_CYCLE_MS;
+  return mod === 0 ? PROMO_CYCLE_MS : mod;
+}
+function fmtHMS(ms) {
+  if (ms <= 0) return '00h 00m 00s';
+  const s = Math.ceil(ms / 1000);
+  const h = Math.floor(s / 3600);
   const m = Math.floor((s % 3600) / 60);
   const sec = s % 60;
-  const parts = [];
-  if (d) parts.push(d + 'd');
-  parts.push(String(h).padStart(2, '0') + 'h');
-  parts.push(String(m).padStart(2, '0') + 'm');
-  if (!d) parts.push(String(sec).padStart(2, '0') + 's');
-  return parts.join(' ');
+  return `${String(h).padStart(2, '0')}h ${String(m).padStart(2, '0')}m ${String(sec).padStart(2, '0')}s`;
 }
 
 /* ---------------- promo banner + code entry ---------------- */
@@ -94,14 +98,14 @@ function initPromoBanner() {
   if (!promo) { banner.hidden = true; return; }
   clearInterval(promoCountdownTimer);
   const tick = () => {
-    const remaining = promo.expiresAt - Date.now();
-    if (remaining <= 0) {
+    const totalRemaining = promo.expiresAt - Date.now();
+    if (totalRemaining <= 0) {
       banner.hidden = true;
       clearInterval(promoCountdownTimer);
       return;
     }
     banner.hidden = false;
-    banner.innerHTML = `🔥 Flash sale — code <b>${promo.code}</b> for <b>${promo.percent}% off</b> — ends in ${fmtCountdown(remaining)}`;
+    banner.innerHTML = `🔥 Flash sale — code <b>${promo.code}</b> for <b>${promo.percent}% off</b> — ends in ${fmtHMS(cycleRemaining(totalRemaining))}`;
   };
   tick();
   promoCountdownTimer = setInterval(tick, 1000);
@@ -271,7 +275,7 @@ async function initCard(payments) {
     input: { color: '#000000', fontSize: '16px' },
     'input::placeholder': { color: '#6b7280' },
     '.input-container': { borderColor: 'rgba(255,255,255,0.14)', borderRadius: '12px' },
-    '.input-container.is-focus': { borderColor: '#a855f7' },
+    '.input-container.is-focus': { borderColor: '#818cf8' },
     '.input-container.is-error': { borderColor: '#ef4444' },
     '.message-text.is-error': { color: '#fca5a5' },
   };
