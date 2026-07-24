@@ -85,10 +85,10 @@ background-size:
 
 /* ---- hero ---- */
 .wordmark{
-  font-family:'Space Grotesk','Plus Jakarta Sans',system-ui,sans-serif;font-weight:700;font-size:clamp(2.6rem,11vw,4rem);
-  letter-spacing:-.015em;margin:.6rem 0 .4rem;line-height:1;
+  font-family:'Anton','Space Grotesk','Plus Jakarta Sans',system-ui,sans-serif;font-weight:400;font-size:clamp(2.6rem,11vw,4rem);
+  letter-spacing:.01em;margin:.6rem 0 .4rem;line-height:1;
   background:var(--gold-grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
-  text-shadow:0 0 34px rgba(99,102,241,.32);
+  text-shadow:0 0 42px rgba(99,102,241,.5),0 0 90px rgba(99,102,241,.22);
 }
 .tagline{color:var(--muted2);font-size:1rem;line-height:1.55;max-width:30rem;margin:0 auto .2rem}
 .tagline strong{color:var(--gold)}
@@ -136,15 +136,15 @@ background-size:
 .tier-tag.gold{background:var(--gold-grad);color:#0a0a0a;border:none;box-shadow:0 4px 14px rgba(99,102,241,.5)}
 .tier-name{font-size:1.45rem;font-weight:900;color:#fff;letter-spacing:-.01em;line-height:1.1;text-transform:uppercase}
 .tier-price{
-  font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:2.7rem;font-weight:700;line-height:1;margin:.45rem 0 0;background:var(--gold-grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:2.7rem;font-weight:700;line-height:1;margin:.45rem 0 0;background:var(--gold-grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 18px rgba(99,102,241,.5))}
 .tier-price small{font-family:'Plus Jakarta Sans',sans-serif;font-size:.7rem;font-weight:600;color:var(--muted);-webkit-text-fill-color:var(--muted);margin-left:.45rem}
-.tier-features{list-style:none;margin:1.2rem 0 1.5rem;display:flex;flex-direction:column;gap:.65rem;flex:1}
-.tier-features li{display:flex;align-items:flex-start;gap:.6rem;font-size:.88rem;color:var(--muted2);line-height:1.4}
+.tier-features{list-style:none;margin:1.2rem 0 1.5rem;display:flex;flex-direction:column;gap:.65rem;flex:1;align-items:center}
+.tier-features li{display:flex;align-items:flex-start;justify-content:center;gap:.6rem;font-size:.88rem;color:var(--muted2);line-height:1.4;text-align:center;width:100%}
 .tier-features li::before{content:'✓';flex:0 0 18px;width:18px;height:18px;margin-top:.05rem;border-radius:50%;background:var(--gold-grad);color:#0a0a0a;font-size:.66rem;font-weight:900;display:flex;align-items:center;justify-content:center}
 .tier-features li.no{color:var(--muted);opacity:.6;text-decoration:line-through;text-decoration-color:rgba(255,255,255,.3)}
 .tier-features li.no::before{content:'✕';background:rgba(255,255,255,.08);color:var(--muted)}
-.tier-btn{display:flex;align-items:center;justify-content:center;gap:.4rem;width:100%;border:none;cursor:pointer;border-radius:13px;padding:1rem .6rem;font-weight:800;font-size:.92rem;font-family:inherit;background:var(--gold-grad);color:#0a0a0a;box-shadow:0 14px 28px -14px rgba(99,102,241,.85);transition:all .25s ease}
-.tier-btn:hover{transform:translateY(-2px);filter:brightness(1.07)}
+.tier-btn{display:flex;align-items:center;justify-content:center;gap:.4rem;width:100%;border:none;cursor:pointer;border-radius:13px;padding:1rem .6rem;font-weight:800;font-size:.92rem;font-family:inherit;background:var(--gold-grad);color:#0a0a0a;box-shadow:0 16px 34px -12px rgba(99,102,241,.95),0 0 26px rgba(99,102,241,.4);transition:all .25s ease}
+.tier-btn:hover{transform:translateY(-2px);filter:brightness(1.07);box-shadow:0 18px 38px -10px rgba(99,102,241,1),0 0 38px rgba(99,102,241,.55)}
 .tier-btn:disabled{opacity:.7;cursor:wait;transform:none}
 .tier-crypto{display:block;width:100%;text-align:center;margin-top:.7rem;background:none;border:none;cursor:pointer;color:var(--muted);font-size:.76rem;font-weight:600;font-family:inherit;transition:color .2s}
 .tier-crypto:hover{color:var(--gold)}
@@ -233,8 +233,8 @@ background-size:
 .order-total span:last-child{font-family:'Cinzel',serif;color:var(--gold);font-size:1.4rem}
 .pay-btn{display:flex;align-items:center;justify-content:center;gap:.4rem;width:100%;border:none;cursor:pointer;border-radius:13px;padding:.95rem;font-weight:800;font-size:.92rem;font-family:inherit;margin-bottom:.7rem;transition:all .25s ease;text-decoration:none}
 .pay-btn small{font-weight:600;opacity:.7;font-size:.72rem}
-.pay-btn-card{background:var(--gold-grad);color:#000;box-shadow:0 10px 26px -10px rgba(99,102,241,.6)}
-.pay-btn-card:hover{transform:translateY(-2px);filter:brightness(1.05)}
+.pay-btn-card{background:var(--gold-grad);color:#000;box-shadow:0 12px 32px -10px rgba(99,102,241,.85),0 0 24px rgba(99,102,241,.35)}
+.pay-btn-card:hover{transform:translateY(-2px);filter:brightness(1.05);box-shadow:0 14px 36px -8px rgba(99,102,241,1),0 0 34px rgba(99,102,241,.5)}
 .pay-btn-crypto{background:rgba(255,255,255,.06);color:#fff;border:1px solid var(--glass-border)}
 .pay-btn-crypto:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.35)}
 .co-error{color:#fca5a5;font-size:.8rem;margin:.2rem 0 .6rem;text-align:center}
@@ -264,7 +264,7 @@ background-size:
 .tier-pill.active{background:rgba(99,102,241,.14);border-color:rgba(99,102,241,.7);box-shadow:0 0 0 1px rgba(99,102,241,.25)}
 .tp-name{font-size:.74rem;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.04em}
 .tp-price{
-  font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:1.25rem;font-weight:700;background:var(--gold-grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:1.25rem;font-weight:700;background:var(--gold-grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 12px rgba(99,102,241,.45))}
 .tier-pill.active .tp-name{color:#fff}
 .card-container{min-height:48px;margin-bottom:1rem}
 .pay-card .order-total{padding:.4rem 0 1.2rem;margin-bottom:.6rem;border-bottom:1px solid var(--glass-border)}
@@ -275,7 +275,7 @@ background-size:
 .order-tier{font-size:.78rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted2)}
 .order-amount-wrap{display:flex;align-items:baseline;gap:.5rem}
 .order-amount{
-  font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-weight:700;font-size:1.7rem;background:var(--gold-grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-weight:700;font-size:1.7rem;background:var(--gold-grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 14px rgba(99,102,241,.5))}
 .order-amount-strike{color:var(--muted);text-decoration:line-through;font-size:.95rem;font-weight:600}
 .order-amount-strike[hidden]{display:none}
 
@@ -332,6 +332,7 @@ background-size:
 .resource-card h3{
   font-size:1.05rem;font-weight:800;letter-spacing:-.01em;
   background:var(--gold-grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 0 14px rgba(99,102,241,.45));
   margin-bottom:.5rem;
 }
 .resource-card p{color:var(--muted2);font-size:.85rem;line-height:1.55;margin-bottom:1.1rem}
