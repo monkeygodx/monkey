@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css?v=10" />
+  <link rel="stylesheet" href="/styles.css?v=11" />
 </head>
 <body>
   <div class="mesh-bg" aria-hidden="true"></div>
@@ -23,10 +23,21 @@
 
     <!-- CHECKOUT -->
     <div class="pay-card" id="checkout-card">
+      <div class="promo-banner" id="promo-banner" hidden></div>
+
       <div class="order-summary">
         <span class="order-tier" id="order-tier">—</span>
-        <span class="order-amount" id="order-amount">—</span>
+        <span class="order-amount-wrap">
+          <span class="order-amount-strike" id="order-amount-strike" hidden></span>
+          <span class="order-amount" id="order-amount">—</span>
+        </span>
       </div>
+
+      <div class="promo-row">
+        <input id="promo-input" class="promo-input" type="text" placeholder="Discount code" maxlength="20" autocomplete="off" />
+        <button id="promo-apply" class="promo-apply" type="button">Apply</button>
+      </div>
+      <div class="promo-msg" id="promo-msg" hidden></div>
 
       <div id="wallet-container" class="wallet-container"></div>
       <div id="wallet-sep" class="wallet-sep" hidden><span>or pay with card</span></div>
@@ -70,6 +81,6 @@
 
   <div id="toast" class="toast" hidden></div>
 
-  <script src="/pay.js?v=12"></script>
+  <script src="/pay.js?v=13"></script>
 </body>
 </html>
