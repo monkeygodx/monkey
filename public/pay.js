@@ -4,7 +4,8 @@
    Tier is pre-chosen on the previous page (?tier=). No tier picker here.
    Flow: load config -> mount Apple Pay / Google Pay + card -> tokenize on pay ->
    POST /api/charge -> reveal the tier's private link inline (no redirect).
-   The server owns the price. */
+   The server owns the price — a discount code only ever changes what /api/charge
+   is asked to apply; it never sets the amount client-side. */
 
 const $ = (s) => document.querySelector(s);
 const moneyShort = (cents) => {
@@ -18,6 +19,8 @@ let CONFIG = null;
 let card = null;
 let selectedTier = 'premium';
 let paid = false;
+let appliedDiscount = null; // { code, percent } once a valid code is applied
+let promoCountdownTimer = null;
 
 function toast(msg, ms) {
   const t = $('#toast');
@@ -42,9 +45,98 @@ function tierFromUrl() {
   return t && TIER_ORDER.includes(t) ? t : null;
 }
 
-function amountCents() {
+function baseAmountCents() {
   const p = CONFIG.products[selectedTier];
   return p ? p.amount : 0;
+}
+
+function amountCents() {
+  const base = baseAmountCents();
+  if (!appliedDiscount) return base;
+  return Math.round((base * (100 - appliedDiscount.percent)) / 100);
+}
+
+function fmtCountdown(ms) {
+  if (ms <= 0) return 'ended';
+  const s = Math.floor(ms / 1000);
+  const d = Math.floor(s / 86400);
+  const h = Math.floor((s % 86400) / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  const parts = [];
+  if (d) parts.push(d + 'd');
+  parts.push(String(h).padStart(2, '0') + 'h');
+  parts.push(String(m).padStart(2, '0') + 'm');
+  if (!d) parts.push(String(sec).padStart(2, '0') + 's');
+  return parts.join(' ');
+}
+
+/* ---------------- promo banner + code entry ---------------- */
+function renderOrderAmount() {
+  const p = CONFIG.products[selectedTier];
+  if (!p) return;
+  const strike = $('#order-amount-strike');
+  const amt = $('#order-amount');
+  if (appliedDiscount) {
+    strike.textContent = moneyShort(p.amount);
+    strike.hidden = false;
+    amt.textContent = moneyShort(amountCents());
+  } else {
+    strike.hidden = true;
+    amt.textContent = moneyShort(p.amount);
+  }
+  $('#pay-btn-text').textContent = paid ? $('#pay-btn-text').textContent : `Pay ${moneyShort(amountCents())}`;
+}
+
+function initPromoBanner() {
+  const promo = CONFIG.promo;
+  const banner = $('#promo-banner');
+  if (!promo) { banner.hidden = true; return; }
+  clearInterval(promoCountdownTimer);
+  const tick = () => {
+    const remaining = promo.expiresAt - Date.now();
+    if (remaining <= 0) {
+      banner.hidden = true;
+      clearInterval(promoCountdownTimer);
+      return;
+    }
+    banner.hidden = false;
+    banner.innerHTML = `🔥 Flash sale — code <b>${promo.code}</b> for <b>${promo.percent}% off</b> — ends in ${fmtCountdown(remaining)}`;
+  };
+  tick();
+  promoCountdownTimer = setInterval(tick, 1000);
+}
+
+function showPromoMsg(msg, ok) {
+  const el = $('#promo-msg');
+  if (!msg) { el.hidden = true; el.textContent = ''; return; }
+  el.hidden = false;
+  el.textContent = msg;
+  el.className = 'promo-msg ' + (ok ? 'ok' : 'err');
+}
+
+function applyPromoCode() {
+  const raw = $('#promo-input').value.trim().toUpperCase();
+  if (!raw) { showPromoMsg('Enter a code first.', false); return; }
+  const promo = CONFIG.promo;
+  if (promo && promo.code === raw && Date.now() < promo.expiresAt) {
+    appliedDiscount = { code: promo.code, percent: promo.percent };
+    showPromoMsg(`${promo.code} applied — ${promo.percent}% off.`, true);
+    $('#promo-input').disabled = true;
+    $('#promo-apply').disabled = true;
+    $('#promo-apply').textContent = 'Applied';
+  } else {
+    appliedDiscount = null;
+    showPromoMsg('That code is invalid or expired.', false);
+  }
+  renderOrderAmount();
+}
+
+function wirePromo() {
+  $('#promo-apply').addEventListener('click', applyPromoCode);
+  $('#promo-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); applyPromoCode(); }
+  });
 }
 
 function loadSquareSdk(env) {
@@ -70,12 +162,19 @@ function buildPaymentRequest(payments) {
 }
 
 // Charge a tokenized source (card or wallet) and reveal the success panel.
+// The discount CODE is sent, never the amount — the server recomputes and
+// enforces the price from PRODUCTS + the code's live expiry.
 async function charge(sourceId, verificationToken) {
   showError('');
   const res = await fetch('/api/charge', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ tier: selectedTier, sourceId, buyerVerificationToken: verificationToken }),
+    body: JSON.stringify({
+      tier: selectedTier,
+      sourceId,
+      buyerVerificationToken: verificationToken,
+      code: appliedDiscount ? appliedDiscount.code : undefined,
+    }),
   });
   const data = await res.json().catch(() => ({}));
   if (res.ok && data.ok) {
@@ -246,8 +345,10 @@ async function boot() {
 
   const p = CONFIG.products[selectedTier];
   $('#order-tier').textContent = TIER_LABEL[selectedTier] || selectedTier;
-  $('#order-amount').textContent = p ? moneyShort(p.amount) : '—';
-  $('#pay-btn-text').textContent = p ? `Pay ${moneyShort(p.amount)}` : 'Pay';
+  renderOrderAmount();
+
+  initPromoBanner();
+  wirePromo();
 
   $('#pay-btn').addEventListener('click', payWithCard);
 
