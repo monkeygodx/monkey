@@ -25,7 +25,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css?v=10" />
+  <link rel="stylesheet" href="/styles.css?v=11" />
 </head>
 <body>
   <div class="mesh-bg" aria-hidden="true"></div>
@@ -34,6 +34,9 @@
 
     <!-- hero -->
     <h1 class="wordmark">MONKEYGOD</h1>
+
+    <!-- flash-sale promo banner (injected/hidden by script.js based on /api/config) -->
+    <div class="promo-banner" id="promo-banner" hidden></div>
 
     <!-- preview slider (coverflow) -->
     <div class="preview-slider" id="preview-slider" hidden>
@@ -124,6 +127,10 @@
           <button class="faq-question">Is it a one-time payment? <span class="faq-chevron">▾</span></button>
           <div class="faq-answer"><p>Yes — every tier is a single one-time payment for lifetime access. No subscriptions, no recurring charges.</p></div>
         </div>
+        <div class="faq-item">
+          <button class="faq-question">Do you have discount codes? <span class="faq-chevron">▾</span></button>
+          <div class="faq-answer"><p>When a promo is running you'll see a banner at the top of the page with the code. Enter it in the discount code field on the checkout page to apply it — the price updates before you pay.</p></div>
+        </div>
       </div>
     </section>
 
@@ -152,6 +159,6 @@
 
   <div id="toast" class="toast" hidden></div>
 
-  <script src="/script.js?v=10"></script>
+  <script src="/script.js?v=11"></script>
 </body>
 </html>
