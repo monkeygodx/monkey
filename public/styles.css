@@ -85,8 +85,8 @@ background-size:
 
 /* ---- hero ---- */
 .wordmark{
-  font-family:'Jost','Space Grotesk','Plus Jakarta Sans',system-ui,sans-serif;font-weight:400;font-size:clamp(2.4rem,10vw,3.7rem);
-  letter-spacing:.1em;margin:.6rem 0 .4rem;line-height:1;
+  font-family:'Playfair Display','Space Grotesk','Plus Jakarta Sans',system-ui,serif;font-weight:900;font-size:clamp(2.6rem,11vw,4.2rem);
+  letter-spacing:0;margin:.6rem 0 .4rem;line-height:1;
   background:var(--gold-grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
   text-shadow:0 0 42px rgba(99,102,241,.5),0 0 90px rgba(99,102,241,.22);
 }
@@ -138,8 +138,8 @@ background-size:
 .tier-price{
   font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:2.7rem;font-weight:700;line-height:1;margin:.45rem 0 0;background:var(--gold-grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 18px rgba(99,102,241,.5))}
 .tier-price small{font-family:'Plus Jakarta Sans',sans-serif;font-size:.7rem;font-weight:600;color:var(--muted);-webkit-text-fill-color:var(--muted);margin-left:.45rem}
-.tier-features{list-style:none;margin:1.2rem 0 1.5rem;display:flex;flex-direction:column;gap:.65rem;flex:1;align-items:center}
-.tier-features li{display:flex;align-items:flex-start;justify-content:center;gap:.6rem;font-size:.88rem;color:var(--muted2);line-height:1.4;text-align:center;width:100%}
+.tier-features{list-style:none;margin:1.2rem 0 1.5rem;display:flex;flex-direction:column;gap:.65rem;flex:1;align-items:stretch}
+.tier-features li{display:flex;align-items:flex-start;justify-content:flex-start;gap:.6rem;font-size:.88rem;color:var(--muted2);line-height:1.4;text-align:left;width:100%}
 .tier-features li::before{content:'✓';flex:0 0 18px;width:18px;height:18px;margin-top:.05rem;border-radius:50%;background:var(--gold-grad);color:#0a0a0a;font-size:.66rem;font-weight:900;display:flex;align-items:center;justify-content:center}
 .tier-features li.no{color:var(--muted);opacity:.6;text-decoration:line-through;text-decoration-color:rgba(255,255,255,.3)}
 .tier-features li.no::before{content:'✕';background:rgba(255,255,255,.08);color:var(--muted)}
