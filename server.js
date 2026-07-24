@@ -68,6 +68,50 @@ const PRODUCTS = {
 };
 
 // ---------------------------------------------------------------------------
+// Discount codes — SERVER is the source of truth here too. A code is only
+// honored while `Date.now()` is before its `expiresAt`; nothing client-side
+// can extend it or change the percent. Env-overridable so the code/expiry can
+// be rotated (e.g. from Railway Variables) without touching this file again.
+// ---------------------------------------------------------------------------
+const DISCOUNTS = {
+  [(process.env.DISCOUNT_CODE || '4K').toUpperCase()]: {
+    percent: parseInt(process.env.DISCOUNT_PERCENT || '40', 10),
+    // Defaults to a fixed 48h window from the moment this file was wired up.
+    // Override with DISCOUNT_EXPIRES_AT (ISO string) to change it without a
+    // code change.
+    expiresAt: Date.parse(process.env.DISCOUNT_EXPIRES_AT || '2026-07-26T22:30:00Z'),
+  },
+};
+
+function activeDiscount(code) {
+  if (!code) return null;
+  const key = String(code).trim().toUpperCase();
+  const d = DISCOUNTS[key];
+  if (!d) return null;
+  if (!Number.isFinite(d.expiresAt) || Date.now() >= d.expiresAt) return null;
+  return { code: key, percent: d.percent, expiresAt: d.expiresAt };
+}
+
+// Any discount that's currently live, regardless of what the caller typed —
+// used to advertise the promo on /api/config (banner text, countdown, etc.).
+function currentPromo() {
+  for (const key of Object.keys(DISCOUNTS)) {
+    const d = activeDiscount(key);
+    if (d) return d;
+  }
+  return null;
+}
+
+// Resolves the real, server-enforced price for a tier + optional code.
+function priceFor(tier, code) {
+  const product = PRODUCTS[tier];
+  if (!product) return null;
+  const discount = activeDiscount(code);
+  const amount = discount ? Math.round((product.amount * (100 - discount.percent)) / 100) : product.amount;
+  return { product, originalAmount: product.amount, amount, discount };
+}
+
+// ---------------------------------------------------------------------------
 // Cloudflare R2 (S3 API) — where the live config/secrets live.
 // ---------------------------------------------------------------------------
 const R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID || '';
@@ -283,6 +327,7 @@ app.use(async (req, res, next) => {
 app.get('/api/config', async (req, res) => {
   const cfg = await loadConfig();
   const { sq, ready, embedReady } = squareCtx(cfg);
+  const promo = currentPromo();
   res.json({
     products: PRODUCTS,
     previews: listPreviews(),
@@ -297,17 +342,21 @@ app.get('/api/config', async (req, res) => {
     squareLocationId: sq.locationId,
     paymentSiteUrl: PAYMENT_SITE_URL,
     mainSiteUrl: MAIN_SITE_URL,
+    // Active flash-sale promo (null once expired) — the code itself is meant to
+    // be advertised, the ENFORCEMENT lives server-side in /api/charge + /api/checkout.
+    promo: promo ? { code: promo.code, percent: promo.percent, expiresAt: promo.expiresAt } : null,
   });
 });
 
 // EMBEDDED card charge: the browser tokenizes the card with the Web Payments SDK
 // and posts the one-time {sourceId} here; we charge it server-side. The amount is
-// taken from the SERVER product table — the client cannot set the price.
+// taken from the SERVER product table (+ a validated discount code, if any) —
+// the client cannot set the price.
 app.post('/api/charge', async (req, res) => {
   try {
-    const { tier, sourceId, buyerVerificationToken } = req.body || {};
-    const product = PRODUCTS[tier];
-    if (!product) return res.status(400).json({ error: 'Unknown tier.' });
+    const { tier, sourceId, buyerVerificationToken, code } = req.body || {};
+    const priced = priceFor(tier, code);
+    if (!priced) return res.status(400).json({ error: 'Unknown tier.' });
     if (!sourceId) return res.status(400).json({ error: 'Missing card token.' });
 
     const cfg = await loadConfig();
@@ -323,9 +372,9 @@ app.post('/api/charge', async (req, res) => {
       idempotency_key: crypto.randomUUID(),
       source_id: sourceId,
       location_id: sq.locationId,
-      amount_money: { amount: product.amount, currency: 'USD' },
+      amount_money: { amount: priced.amount, currency: 'USD' },
       autocomplete: true,
-      note: product.name,
+      note: priced.discount ? `${priced.product.name} (code ${priced.discount.code} -${priced.discount.percent}%)` : priced.product.name,
     };
     if (buyerVerificationToken) body.verification_token = buyerVerificationToken;
 
@@ -344,8 +393,8 @@ app.post('/api/charge', async (req, res) => {
     const payment = data && data.payment;
     // Ping Discord (don't block the buyer's response on it).
     notifyDiscord(cfg.discordWebhook, {
-      product: product.name,
-      amountCents: product.amount,
+      product: priced.discount ? `${priced.product.name} [${priced.discount.code} -${priced.discount.percent}%]` : priced.product.name,
+      amountCents: priced.amount,
       paymentId: payment && payment.id,
       status: payment && payment.status,
     });
@@ -353,6 +402,8 @@ app.post('/api/charge', async (req, res) => {
       ok: true,
       paymentId: payment && payment.id,
       status: payment && payment.status,
+      amount: priced.amount,
+      discountApplied: priced.discount ? priced.discount.code : null,
       redirect: `/success?tier=${encodeURIComponent(tier)}`,
     });
   } catch (err) {
@@ -364,9 +415,9 @@ app.post('/api/charge', async (req, res) => {
 // Create a Square hosted-checkout link for {tier} and return its URL.
 app.post('/api/checkout', async (req, res) => {
   try {
-    const { tier } = req.body || {};
-    const product = PRODUCTS[tier];
-    if (!product) return res.status(400).json({ error: 'Unknown tier.' });
+    const { tier, code } = req.body || {};
+    const priced = priceFor(tier, code);
+    if (!priced) return res.status(400).json({ error: 'Unknown tier.' });
 
     const cfg = await loadConfig();
     const { sq, apiBase, ready } = squareCtx(cfg);
@@ -377,11 +428,15 @@ app.post('/api/checkout', async (req, res) => {
       });
     }
 
+    const lineItemName = priced.discount
+      ? `${priced.product.name} (code ${priced.discount.code} -${priced.discount.percent}%)`
+      : priced.product.name;
+
     const body = {
       idempotency_key: crypto.randomUUID(),
       order: {
         location_id: sq.locationId,
-        line_items: [{ name: product.name, quantity: '1', base_price_money: { amount: product.amount, currency: 'USD' } }],
+        line_items: [{ name: lineItemName, quantity: '1', base_price_money: { amount: priced.amount, currency: 'USD' } }],
       },
       checkout_options: {
         redirect_url: `${PUBLIC_BASE_URL}/success?tier=${encodeURIComponent(tier)}`,
@@ -449,6 +504,7 @@ app.get('/success', (req, res) => {
 app.listen(PORT, async () => {
   const cfg = await loadConfig();
   const { sq, embedReady } = squareCtx(cfg);
+  const promo = currentPromo();
   console.log('');
   console.log('  MONKEYGOD running');
   console.log(`  Local:        ${PUBLIC_BASE_URL}  (landing: /  ·  payment: /pay)`);
@@ -457,5 +513,6 @@ app.listen(PORT, async () => {
   console.log(`  Config from:  ${R2_READY ? `R2 bucket "${R2_BUCKET}" (${R2_CONFIG_KEY})` : 'env vars (.env) — R2 not configured'}`);
   console.log(`  Square card:  ${embedReady ? `EMBEDDED ready (${sq.env})` : 'NOT live yet — needs token + location + appId (crypto/DM still work)'}`);
   console.log(`  Crypto coins: ${cfg.crypto.length ? cfg.crypto.map((c) => c.coin).join(', ') : 'none set'}`);
+  console.log(`  Promo:        ${promo ? `${promo.code} -${promo.percent}% until ${new Date(promo.expiresAt).toISOString()}` : 'none active'}`);
   console.log('');
 });
