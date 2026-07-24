@@ -37,6 +37,7 @@ const TIER_DATA = {
 const TIER_ORDER = ['basic', 'premium', 'exclusive'];
 
 let CONFIG = null;
+let promoCountdownTimer = null;
 const $ = (s) => document.querySelector(s);
 const moneyShort = (cents) => {
   const d = cents / 100;
@@ -51,6 +52,41 @@ function toast(msg, ms) {
   toast._t = setTimeout(() => (t.hidden = true), ms || 3200);
 }
 
+function fmtCountdown(ms) {
+  if (ms <= 0) return 'ended';
+  const s = Math.floor(ms / 1000);
+  const d = Math.floor(s / 86400);
+  const h = Math.floor((s % 86400) / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  const parts = [];
+  if (d) parts.push(d + 'd');
+  parts.push(String(h).padStart(2, '0') + 'h');
+  parts.push(String(m).padStart(2, '0') + 'm');
+  if (!d) parts.push(String(sec).padStart(2, '0') + 's');
+  return parts.join(' ');
+}
+
+function initPromoBanner() {
+  const banner = $('#promo-banner');
+  const promo = CONFIG.promo;
+  if (!banner || !promo) { if (banner) banner.hidden = true; return; }
+  clearInterval(promoCountdownTimer);
+  const tick = () => {
+    const remaining = promo.expiresAt - Date.now();
+    if (remaining <= 0) {
+      banner.hidden = true;
+      clearInterval(promoCountdownTimer);
+      renderTiers(); // drop the "or $X with code" hint once it expires
+      return;
+    }
+    banner.hidden = false;
+    banner.innerHTML = `🔥 <b>${promo.percent}% OFF</b> everything — code <b>${promo.code}</b> at checkout — ends in ${fmtCountdown(remaining)}`;
+  };
+  tick();
+  promoCountdownTimer = setInterval(tick, 1000);
+}
+
 async function boot() {
   try {
     CONFIG = await (await fetch('/api/config')).json();
@@ -63,6 +99,7 @@ async function boot() {
   $('#btn-admin').href = CONFIG.links.admin;
   $('#cr-admin').href = CONFIG.links.admin;
 
+  initPromoBanner();
   buildSlider(CONFIG.previews || []);
   renderTiers();
   wireCryptoModal();
@@ -178,6 +215,7 @@ function toggleMute() {
 function renderTiers() {
   const grid = $('#tier-grid');
   grid.innerHTML = '';
+  const promo = CONFIG.promo && CONFIG.promo.expiresAt > Date.now() ? CONFIG.promo : null;
   for (const key of TIER_ORDER) {
     const p = CONFIG.products[key];
     const d = TIER_DATA[key];
@@ -185,10 +223,14 @@ function renderTiers() {
     const card = document.createElement('div');
     card.className = 'tier-card' + (d.featured ? ' featured' : '');
     const tag = d.tag ? `<span class="tier-tag${d.featured ? ' gold' : ''}">${d.tag}</span>` : '';
+    const promoHint = promo
+      ? `<div class="tier-price-strike">or ${moneyShort(Math.round((p.amount * (100 - promo.percent)) / 100))} with code ${promo.code}</div>`
+      : '';
     card.innerHTML = `
       ${tag}
       <div class="tier-name">${d.name}</div>
       <div class="tier-price">${moneyShort(p.amount)}<small>one-time</small></div>
+      ${promoHint}
       <ul class="tier-features">${d.features.map((f) => `<li class="${f.in ? '' : 'no'}">${f.t}</li>`).join('')}</ul>
       <button class="tier-btn" data-tier="${key}">Get ${d.name} — ${moneyShort(p.amount)}</button>
       <button class="tier-crypto" data-crypto="${key}">or pay with crypto</button>`;
