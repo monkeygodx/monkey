@@ -61,9 +61,12 @@ const PREVIEW_BASE_URL = (process.env.PREVIEW_BASE_URL || '').replace(/\/$/, '')
 // Product catalog — SERVER is the source of truth for prices (never trust the
 // client). Amounts are in cents (USD).
 // ---------------------------------------------------------------------------
+// Base prices evened out so the 40%-off "4K" code lands close to the old
+// sticker price instead of gutting margin — advertised discount stays 40%,
+// real discount off the *previous* price works out to roughly 10-20%.
 const PRODUCTS = {
-  basic: { id: 'basic', name: 'MONKEYGOD — BASIC', amount: 1500 },
-  premium: { id: 'premium', name: 'MONKEYGOD — PREMIUM', amount: 2500 },
+  basic: { id: 'basic', name: 'MONKEYGOD — BASIC', amount: 2000 },
+  premium: { id: 'premium', name: 'MONKEYGOD — PREMIUM', amount: 3000 },
   exclusive: { id: 'exclusive', name: 'MONKEYGOD — EXCLUSIVE', amount: 5000 },
 };
 
