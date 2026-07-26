@@ -13,7 +13,7 @@ const TIER_DATA = {
       { t: 'Access 1,000+ Videos', in: true },
       { t: 'Fresh Content', in: true },
       { t: 'High Quality Videos', in: true },
-      { t: 'Weekly Updates', in: false },
+      { t: 'Premium Content & Early Access', in: false },
     ],
   },
   premium: {
@@ -24,7 +24,6 @@ const TIER_DATA = {
       { t: 'Exclusive Content & Early Access', in: true },
       { t: 'Fresh Content & Updates', in: true },
       { t: 'High Quality Videos', in: true },
-      { t: 'Priority Access to New Drops', in: false },
     ],
   },
   exclusive: {
@@ -33,9 +32,10 @@ const TIER_DATA = {
     featured: true,
     features: [
       { t: 'Access 10,000+ Videos', in: true },
+      { t: 'Everything in Premium', in: true },
       { t: 'Extra Private Channel', in: true },
       { t: 'Lifetime Content Updates', in: true },
-      { t: 'Priority Access to New Drops', in: true },
+      { t: 'Priority Access', in: true },
     ],
   },
 };
