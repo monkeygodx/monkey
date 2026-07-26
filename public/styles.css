@@ -2,6 +2,10 @@
 :root{
   --gold:#8b7cf9;
   --gold-grad:linear-gradient(135deg,#c7d2fe 0%,#818cf8 45%,#4f46e5 100%);
+  /* Wordmark-only gradient -- deliberately skips --gold-grad's pale #c7d2fe
+     lead stop, which reads as near-white on the light end. Buttons/prices/
+     everything else keep --gold-grad untouched; only the heading uses this. */
+  --wordmark-grad:linear-gradient(135deg,#a5b4fc 0%,#818cf8 45%,#4f46e5 100%);
   --obsidian:#000000;
   --glass-bg:rgba(255,255,255,0.03);
   --glass-border:rgba(255,255,255,0.10);
@@ -85,10 +89,14 @@ background-size:
 
 /* ---- hero ---- */
 .wordmark{
-  font-family:'Playfair Display','Space Grotesk','Plus Jakarta Sans',system-ui,serif;font-weight:900;font-size:clamp(2.6rem,11vw,4.2rem);
-  letter-spacing:0;margin:.6rem 0 .4rem;line-height:1;
-  background:var(--gold-grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
-  text-shadow:0 0 42px rgba(99,102,241,.5),0 0 90px rgba(99,102,241,.22);
+  font-family:'Poppins','Space Grotesk','Plus Jakarta Sans',system-ui,sans-serif;font-weight:800;font-size:clamp(2.6rem,10vw,4rem);
+  letter-spacing:-.01em;margin:.6rem 0 .4rem;line-height:1;
+  background:var(--wordmark-grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  /* Tighter, more saturated glow -- the old wide 90px layer at low opacity
+     read as a soft white haze bleeding off the letters against the black
+     background. Both layers now sit closer and pull from darker, more
+     saturated stops so the shine stays colored instead of washing out. */
+  text-shadow:0 0 18px rgba(129,140,248,.65),0 0 42px rgba(79,70,229,.4);
 }
 .tagline{color:var(--muted2);font-size:1rem;line-height:1.55;max-width:30rem;margin:0 auto .2rem}
 .tagline strong{color:var(--gold)}
