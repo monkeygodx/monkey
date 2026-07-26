@@ -1,6 +1,10 @@
 'use strict';
 
 /* Display data per product (server stays the source of truth for prices). */
+// Deliberate upsell ladder: each lower tier shows one greyed-out ✕ item for
+// whatever the tier above it actually has -- gives the eye a reason to look
+// at the next card up instead of just listing "everything, checked" three
+// times in a row. Exclusive stays all-checkmarks and short on purpose.
 const TIER_DATA = {
   basic: {
     name: 'Basic',
@@ -9,7 +13,7 @@ const TIER_DATA = {
       { t: 'Access 1,000+ Videos', in: true },
       { t: 'Fresh Content', in: true },
       { t: 'High Quality Videos', in: true },
-      { t: 'Weekly Updates', in: true },
+      { t: 'Weekly Updates', in: false },
     ],
   },
   premium: {
@@ -20,7 +24,7 @@ const TIER_DATA = {
       { t: 'Exclusive Content & Early Access', in: true },
       { t: 'Fresh Content & Updates', in: true },
       { t: 'High Quality Videos', in: true },
-      { t: 'Premium Categories', in: true },
+      { t: 'Priority Access to New Drops', in: false },
     ],
   },
   exclusive: {
@@ -29,10 +33,8 @@ const TIER_DATA = {
     featured: true,
     features: [
       { t: 'Access 10,000+ Videos', in: true },
-      { t: 'Everything in Premium', in: true },
       { t: 'Extra Private Channel', in: true },
       { t: 'Lifetime Content Updates', in: true },
-      { t: 'Exclusive Uploads', in: true },
       { t: 'Priority Access to New Drops', in: true },
     ],
   },
