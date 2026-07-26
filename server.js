@@ -79,10 +79,14 @@ const PRODUCTS = {
 const DISCOUNTS = {
   [(process.env.DISCOUNT_CODE || '4K').toUpperCase()]: {
     percent: parseInt(process.env.DISCOUNT_PERCENT || '40', 10),
-    // Defaults to a fixed 48h window from the moment this file was wired up.
-    // Override with DISCOUNT_EXPIRES_AT (ISO string) to change it without a
-    // code change.
-    expiresAt: Date.parse(process.env.DISCOUNT_EXPIRES_AT || '2026-07-26T22:30:00Z'),
+    // Sale killed early, on purpose -- expiresAt moved into the past instead
+    // of stripping the code out. activeDiscount()/currentPromo() both already
+    // treat "expired" as "doesn't exist": /api/charge and /api/checkout stop
+    // honoring "4K" entirely, and /api/config stops returning `promo`, which
+    // is what makes the banner and the "or $X with code 4K" tier hints
+    // disappear on their own -- no separate UI change needed for either.
+    // Override with DISCOUNT_EXPIRES_AT (ISO string) to run a future sale.
+    expiresAt: Date.parse(process.env.DISCOUNT_EXPIRES_AT || '2026-07-26T00:00:00Z'),
   },
 };
 
