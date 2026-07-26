@@ -6,10 +6,10 @@ const TIER_DATA = {
     name: 'Basic',
     tag: '',
     features: [
-      { t: 'Access 1000+ Videos', in: true },
+      { t: 'Access 1,000+ Videos', in: true },
       { t: 'Fresh Content', in: true },
       { t: 'High Quality Videos', in: true },
-      { t: 'HD Audio (With Sound)', in: false },
+      { t: 'Weekly Updates', in: true },
     ],
   },
   premium: {
@@ -20,6 +20,7 @@ const TIER_DATA = {
       { t: 'Exclusive Content & Early Access', in: true },
       { t: 'Fresh Content & Updates', in: true },
       { t: 'High Quality Videos', in: true },
+      { t: 'Premium Categories', in: true },
     ],
   },
   exclusive: {
@@ -28,9 +29,11 @@ const TIER_DATA = {
     featured: true,
     features: [
       { t: 'Access 10,000+ Videos', in: true },
-      { t: 'Extra Omegle Wins Channel', in: true },
-      { t: 'High Quality Videos', in: true },
-      { t: 'Lifetime Access', in: true },
+      { t: 'Everything in Premium', in: true },
+      { t: 'Extra Private Channel', in: true },
+      { t: 'Lifetime Content Updates', in: true },
+      { t: 'Exclusive Uploads', in: true },
+      { t: 'Priority Access to New Drops', in: true },
     ],
   },
 };
