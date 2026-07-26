@@ -130,13 +130,21 @@ function buildSlider(urls) {
     const slide = document.createElement('div');
     slide.className = 'ps-slide';
     const v = document.createElement('video');
-    v.src = u;
     v.muted = true;
+    v.defaultMuted = true;
     v.loop = true;
+    v.autoplay = true;
     v.playsInline = true;
+    // Browser autoplay policies check these as HTML attributes, not just JS
+    // properties, at the moment playback is requested -- Safari in particular
+    // will silently refuse an unmuted-looking <video> even if `.muted` was set
+    // in JS a tick earlier. Setting them before `src` closes that gap.
+    v.setAttribute('muted', '');
+    v.setAttribute('autoplay', '');
     v.setAttribute('playsinline', '');
     v.setAttribute('webkit-playsinline', '');
     v.preload = i === 0 ? 'auto' : 'metadata';
+    v.src = u;
     slide.appendChild(v);
     track.appendChild(slide);
     slide.addEventListener('click', () => {
@@ -153,6 +161,15 @@ function buildSlider(urls) {
 
   slideEls = [...track.querySelectorAll('.ps-slide')];
   videos = [...track.querySelectorAll('video')];
+
+  // goSlide(0) below fires .play() immediately, often before the first slide
+  // has buffered anything -- some browsers just drop that call instead of
+  // queuing it. Retry once real playback data is actually available.
+  videos.forEach((v, i) => {
+    v.addEventListener('canplay', () => {
+      if (i === slideIdx && v.paused) v.play().catch(() => {});
+    }, { once: true });
+  });
 
   $('#ps-prev').addEventListener('click', () => { ensureUnmute(); goSlide(slideIdx - 1); });
   $('#ps-next').addEventListener('click', () => { ensureUnmute(); goSlide(slideIdx + 1); });
@@ -226,7 +243,11 @@ function renderTiers() {
     if (!p || !d) continue;
     const card = document.createElement('div');
     card.className = 'tier-card' + (d.featured ? ' featured' : '');
-    const tag = d.tag ? `<span class="tier-tag${d.featured ? ' gold' : ''}">${d.tag}</span>` : '';
+    // Every card gets a tag slot, even tiers with no tag -- an invisible one
+    // reserves the exact same height as Exclusive's "★ HIGHEST TIER" pill so
+    // BASIC/PREMIUM/EXCLUSIVE all start their name/price/features at the same
+    // row instead of Exclusive sitting lower than the other two.
+    const tag = `<span class="tier-tag${d.featured ? ' gold' : ''}"${d.tag ? '' : ' style="visibility:hidden"'}>${d.tag || '—'}</span>`;
     const promoHint = promo
       ? `<div class="tier-price-strike">or ${moneyShort(Math.round((p.amount * (100 - promo.percent)) / 100))} with code ${promo.code}</div>`
       : '';
@@ -236,8 +257,10 @@ function renderTiers() {
       <div class="tier-price">${moneyShort(p.amount)}<small>one-time</small></div>
       ${promoHint}
       <ul class="tier-features">${d.features.map((f) => `<li class="${f.in ? '' : 'no'}">${f.t}</li>`).join('')}</ul>
-      <button class="tier-btn" data-tier="${key}">Get ${d.name} — ${moneyShort(p.amount)}</button>
-      <button class="tier-crypto" data-crypto="${key}">or pay with crypto</button>`;
+      <div class="tier-footer">
+        <button class="tier-btn" data-tier="${key}">Get ${d.name} — ${moneyShort(p.amount)}</button>
+        <button class="tier-crypto" data-crypto="${key}">or pay with crypto</button>
+      </div>`;
     grid.appendChild(card);
   }
   grid.querySelectorAll('.tier-btn').forEach((b) => b.addEventListener('click', () => buy(b.dataset.tier, b)));
