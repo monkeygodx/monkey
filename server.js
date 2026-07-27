@@ -36,9 +36,9 @@ const PREVIEW_BASE_URL = (process.env.PREVIEW_BASE_URL || '').replace(/\/$/, '')
 // Product catalog — server is source of truth for prices (cents USD).
 // ---------------------------------------------------------------------------
 const PRODUCTS = {
-  basic:     { id: 'basic',     name: 'MONKEYGOD — BASIC',     amount: 1500 },
-  premium:   { id: 'premium',   name: 'MONKEYGOD — PREMIUM',   amount: 2500 },
-  exclusive: { id: 'exclusive', name: 'MONKEYGOD — EXCLUSIVE', amount: 5000 },
+  basic:     { id: 'basic',     name: 'MONKEYGOD — BASIC',     amount: 2900 },
+  premium:   { id: 'premium',   name: 'MONKEYGOD — PREMIUM',   amount: 4900 },
+  exclusive: { id: 'exclusive', name: 'MONKEYGOD — EXCLUSIVE', amount: 7900 },
 };
 
 // ---------------------------------------------------------------------------
