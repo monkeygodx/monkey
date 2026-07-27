@@ -4,83 +4,85 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="dark only" />
-  <meta name="robots" content="noindex" />
-  <title>Checkout — MONKEYGOD</title>
-  <meta name="description" content="Secure checkout for MONKEYGOD vault access." />
-
+  <title>MONKEYGOD | Checkout</title>
+  <meta name="robots" content="noindex,nofollow" />
   <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css?v=20" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css?v=11" />
 </head>
 <body>
   <div class="mesh-bg" aria-hidden="true"></div>
 
   <main class="content-container pay-page">
-    <h1 class="wordmark" style="font-size:clamp(2rem,9vw,3rem)">MONKEYGOD</h1>
-    <div class="status-badge"><span class="status-dot"></span> SECURE CHECKOUT</div>
 
-    <!-- CHECKOUT -->
+    <a class="pay-back" href="/">← Back</a>
+
+    <!-- ── Order summary ── -->
     <div class="pay-card" id="checkout-card">
-      <div class="promo-banner" id="promo-banner" hidden></div>
-
       <div class="order-summary">
-        <span class="order-tier" id="order-tier">—</span>
-        <span class="order-amount-wrap">
-          <span class="order-amount-strike" id="order-amount-strike" hidden></span>
-          <span class="order-amount" id="order-amount">—</span>
-        </span>
+        <span class="order-tier" id="order-tier">Loading…</span>
+        <span class="order-amount" id="order-amount">—</span>
       </div>
 
-      <div class="promo-row">
-        <input id="promo-input" class="promo-input" type="text" placeholder="Discount code" maxlength="20" autocomplete="off" />
-        <button id="promo-apply" class="promo-apply" type="button">Apply</button>
+      <!-- ── Discount code input ── -->
+      <div style="margin-bottom: 1.4rem;">
+        <div style="font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-bright); margin-bottom: 10px; font-weight: 600;">
+          Discount Code
+        </div>
+        <div class="disc-field-wrap">
+          <input
+            id="disc-input"
+            type="text"
+            placeholder="Enter code (e.g. FUN)"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="characters"
+            spellcheck="false"
+            maxlength="32"
+          />
+          <button id="disc-apply" type="button">Apply</button>
+        </div>
+        <div class="disc-status" id="disc-status"></div>
       </div>
-      <div class="promo-msg" id="promo-msg" hidden></div>
 
+      <!-- ── Wallet buttons (Apple Pay / Google Pay) ── -->
       <div id="wallet-container" class="wallet-container"></div>
-      <div id="wallet-sep" class="wallet-sep" hidden><span>or pay with card</span></div>
+      <div id="wallet-sep" class="wallet-sep" hidden>or pay by card</div>
 
-      <div id="card-status" class="pay-note">Loading secure checkout…</div>
+      <!-- ── Card input ── -->
+      <p class="pay-h">Card Details</p>
       <div id="card-container" class="card-container"></div>
+      <p id="card-status" class="pay-note" style="text-align:center; margin-bottom: 0.9rem;"></p>
 
       <div id="pay-error" class="co-error" hidden></div>
 
       <button id="pay-btn" class="pay-btn pay-btn-card" disabled>
-        <span id="pay-btn-text">Pay</span>
+        <span id="pay-btn-text">Loading…</span>
       </button>
 
-      <p class="co-fineprint">
-        Encrypted checkout. Your card details never touch our servers.
+      <p class="co-fineprint" style="margin-top: 0.8rem;">
+        🔒 Secured by Square &bull; One-time payment &bull; Instant access
       </p>
     </div>
 
-    <!-- SUCCESS (revealed after payment, no redirect) -->
-    <div class="pay-card" id="success-card" hidden>
-      <div class="crest" aria-hidden="true">
-        <svg viewBox="0 0 240 240" width="96" height="96">
-          <defs>
-            <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="#c7d2fe"/><stop offset="0.45" stop-color="#818cf8"/><stop offset="1" stop-color="#4f46e5"/>
-            </linearGradient>
-            <radialGradient id="d" cx="50%" cy="38%" r="65%"><stop offset="0" stop-color="#1c1c1c"/><stop offset="1" stop-color="#090909"/></radialGradient>
-          </defs>
-          <circle cx="120" cy="120" r="104" fill="url(#d)" stroke="url(#g)" stroke-width="3"/>
-          <path d="M78 130 l26 26 l58 -64" fill="none" stroke="url(#g)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
-      <h2 class="pay-h" style="text-align:center">Payment received</h2>
-      <p class="pay-note" style="text-align:center">You're in. Tap below to open your private channel.</p>
-      <a id="join-link" class="pay-btn pay-btn-card" target="_blank" rel="noopener" href="#">Join your channel →</a>
-      <p class="co-fineprint">Save this link — it's your access. Having trouble? Message the admin.</p>
+    <!-- ── Success state ── -->
+    <div class="resource-card" id="success-card" hidden>
+      <h3>✅ Payment Confirmed</h3>
+      <p>You're in. Click the link below to join your private channel — access is lifetime.</p>
+      <a id="join-link" class="pay-btn pay-btn-card" href="#" target="_blank" rel="noopener">
+        Join Your Channel →
+      </a>
+      <p class="co-fineprint" style="margin-top: 0.6rem;">
+        Having trouble? <a href="https://t.me/cynski" target="_blank" rel="noopener" style="color:var(--accent-bright); text-decoration:none; font-weight:700;">DM @cynski</a>
+      </p>
     </div>
 
-    <footer class="site-footer">&copy; 2026 MONKEYGOD &bull; SECURE NODES ACTIVE</footer>
   </main>
 
   <div id="toast" class="toast" hidden></div>
 
-  <script src="/pay.js?v=14"></script>
+  <script src="/pay.js?v=11"></script>
 </body>
 </html>
