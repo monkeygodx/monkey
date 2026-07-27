@@ -161,11 +161,24 @@ async function charge(sourceId, verificationToken) {
   return false;
 }
 
-function showSuccess() {
+function showSuccess(link) {
   paid = true;
-  const link = (CONFIG.tierLinks && CONFIG.tierLinks[selectedTier]) || '';
+  const resolvedLink = link || (CONFIG && CONFIG.tierLinks && CONFIG.tierLinks[selectedTier]) || '';
   const a = $('#join-link');
-  if (link) { a.href = link; } else { a.textContent = 'Message the admin to get added'; a.href = (CONFIG.links && CONFIG.links.admin) || '#'; }
+  if (resolvedLink) {
+    a.href = resolvedLink;
+  } else {
+    a.textContent = 'Message the admin to get added';
+    a.href = (CONFIG && CONFIG.links && CONFIG.links.admin) || 'https://t.me/cynski';
+  }
+  // Persist so reload still shows success
+  try {
+    localStorage.setItem('mg_access', JSON.stringify({
+      tier: selectedTier,
+      link: resolvedLink,
+      ts: Date.now(),
+    }));
+  } catch (e) {}
   $('#checkout-card').hidden = true;
   $('#success-card').hidden = false;
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -269,6 +282,19 @@ async function initPayments() {
 }
 
 async function boot() {
+  // ── Restore success state from localStorage (survives reload) ──
+  try {
+    const saved = localStorage.getItem('mg_access');
+    if (saved) {
+      const { tier, link } = JSON.parse(saved);
+      if (link) {
+        selectedTier = tier || 'basic';
+        showSuccess(link);
+        return; // skip loading Square entirely
+      }
+    }
+  } catch (e) {}
+
   try { CONFIG = await (await fetch('/api/config')).json(); } catch (e) { showError('Could not load checkout. Refresh the page.'); return; }
 
   selectedTier =
