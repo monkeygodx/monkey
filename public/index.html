@@ -196,7 +196,7 @@
         <svg class="disc-tg-icon" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.19 13.6l-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.957.96z"/></svg>
         Join Telegram — Get Code
       </a>
-      <div class="disc-code-row" id="disc-code-row">
+      <div class="disc-code-row" id="disc-code-row" hidden>
         <span class="disc-code-label">Your code</span>
         <button class="disc-code-pill" id="disc-copy" title="Click to copy">FUN</button>
         <span class="disc-code-note">10% off · use at checkout</span>
@@ -205,42 +205,60 @@
     </div>
   </div>
 
-  <script src="/script.js?v=11"></script>
+  <script src="/script.js?v=13"></script>
   <script>
     (function () {
-      var STORAGE_KEY = 'mg_disc_seen';
-      var overlay = document.getElementById('discount-overlay');
+      var SEEN_KEY = 'mg_disc_seen';
+      var CODE_KEY = 'mg_code';
+      var CODE     = 'FUN';
+
+      var overlay  = document.getElementById('discount-overlay');
       var closeBtn = document.getElementById('disc-close');
       var skipBtn  = document.getElementById('disc-skip');
       var copyBtn  = document.getElementById('disc-copy');
       var joinBtn  = document.getElementById('disc-join');
+      var codeRow  = document.getElementById('disc-code-row');
+      var discSub  = overlay.querySelector('.disc-sub');
 
       function dismiss() {
         overlay.classList.add('disc-out');
         setTimeout(function () { overlay.hidden = true; }, 350);
-        try { localStorage.setItem(STORAGE_KEY, '1'); } catch(e) {}
+        try { localStorage.setItem(SEEN_KEY, '1'); } catch(e) {}
       }
+
+      // Reveal the code row — called when user clicks the Telegram join button.
+      function revealCode() {
+        try { localStorage.setItem(CODE_KEY, CODE); } catch(e) {}
+        codeRow.hidden = false;
+        if (discSub) discSub.textContent = 'Code unlocked! Use it at checkout for 10% off.';
+      }
+
+      joinBtn.addEventListener('click', function () {
+        // Reveal immediately on click (they opened Telegram).
+        setTimeout(revealCode, 300);
+      });
+
+      copyBtn.addEventListener('click', function () {
+        navigator.clipboard.writeText(CODE).then(function () {
+          copyBtn.textContent = 'COPIED ✓';
+          setTimeout(function () { copyBtn.textContent = CODE; }, 2000);
+        }).catch(function () { copyBtn.select && copyBtn.select(); });
+      });
 
       closeBtn.addEventListener('click', dismiss);
       skipBtn.addEventListener('click', dismiss);
       overlay.addEventListener('click', function(e) { if (e.target === overlay) dismiss(); });
 
-      copyBtn.addEventListener('click', function () {
-        navigator.clipboard.writeText('FUN').then(function () {
-          copyBtn.textContent = 'COPIED ✓';
-          setTimeout(function () { copyBtn.textContent = 'FUN'; }, 2000);
-        }).catch(function () {
-          copyBtn.textContent = 'FUN';
-        });
-      });
+      // If they already have the code stored, show the code row immediately in the popup.
+      var hasCode = false;
+      try { hasCode = !!localStorage.getItem(CODE_KEY); } catch(e) {}
+      if (hasCode) codeRow.hidden = false;
 
-      // Show after 1.8s on first visit only
+      // Show popup after 1.8s on first visit only.
       var seen = false;
-      try { seen = !!localStorage.getItem(STORAGE_KEY); } catch(e) {}
+      try { seen = !!localStorage.getItem(SEEN_KEY); } catch(e) {}
       if (!seen) {
-        setTimeout(function () {
-          overlay.hidden = false;
-        }, 1800);
+        setTimeout(function () { overlay.hidden = false; }, 1800);
       }
     })();
   </script>
