@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css?v=11" />
+  <link rel="stylesheet" href="/styles.css?v=12" />
 </head>
 <body>
   <div class="mesh-bg" aria-hidden="true"></div>
@@ -69,13 +69,40 @@
 
     <!-- ── Success state ── -->
     <div class="resource-card" id="success-card" hidden>
-      <h3>✅ Payment Confirmed</h3>
-      <p>You're in. Click the link below to join your private channel — access is lifetime.</p>
-      <a id="join-link" class="pay-btn pay-btn-card" href="#" target="_blank" rel="noopener">
-        Join Your Channel →
+      <div style="text-align:center; margin-bottom: 1.6rem;">
+        <div style="font-size: 3rem; margin-bottom: 0.6rem;">✅</div>
+        <h3 style="font-size: 1.6rem; font-weight: 800; letter-spacing: -0.02em; margin: 0 0 0.5rem;">Payment Confirmed</h3>
+        <p style="color: var(--dim); font-size: 1rem; margin: 0;">You're in. Tap the button below to join your private channel — access is lifetime.</p>
+      </div>
+
+      <!-- Big Telegram CTA box -->
+      <a id="join-link" href="#" target="_blank" rel="noopener" style="
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        width: 100%;
+        padding: 1.3rem 1.6rem;
+        background: linear-gradient(135deg, rgba(168,85,247,0.18), rgba(192,132,252,0.10));
+        border: 1.5px solid rgba(168,85,247,0.5);
+        border-radius: 16px;
+        color: #fff;
+        font-family: var(--sans);
+        font-size: 1.15rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-decoration: none;
+        text-transform: uppercase;
+        transition: border-color 0.2s, background 0.2s;
+        box-sizing: border-box;
+        margin-bottom: 1.1rem;
+      " onmouseover="this.style.borderColor='rgba(168,85,247,0.9)'; this.style.background='linear-gradient(135deg,rgba(168,85,247,0.28),rgba(192,132,252,0.18))'" onmouseout="this.style.borderColor='rgba(168,85,247,0.5)'; this.style.background='linear-gradient(135deg,rgba(168,85,247,0.18),rgba(192,132,252,0.10))'">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="26" height="26" style="flex-shrink:0;color:#a855f7"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.19 13.6l-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.957.96z"/></svg>
+        <span>Join Your Private Channel →</span>
       </a>
-      <p class="co-fineprint" style="margin-top: 0.6rem;">
-        Having trouble? <a href="https://t.me/cynski" target="_blank" rel="noopener" style="color:var(--accent-bright); text-decoration:none; font-weight:700;">DM @cynski</a>
+
+      <p class="co-fineprint" style="text-align:center; margin-top: 0;">
+        Bookmark this page — your link is saved here. Having trouble? <a href="https://t.me/cynski" target="_blank" rel="noopener" style="color:var(--accent-bright); text-decoration:none; font-weight:700;">DM @cynski</a>
       </p>
     </div>
 
@@ -83,6 +110,6 @@
 
   <div id="toast" class="toast" hidden></div>
 
-  <script src="/pay.js?v=11"></script>
+  <script src="/pay.js?v=12"></script>
 </body>
 </html>
