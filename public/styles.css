@@ -138,23 +138,36 @@ body {
 
 /* ── Eyebrow label ── */
 .eyebrow {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  gap: 12px;
   font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.18em;
+  font-size: 14px;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--accent-bright);
-  margin-bottom: 12px;
-  justify-content: center;
+  margin-bottom: 14px;
+  width: 100%;
 }
 .eyebrow::before {
   content: "";
-  width: 20px; height: 1px;
+  width: 28px; height: 1px;
   background: var(--accent);
   display: block;
   flex-shrink: 0;
+}
+
+/* ── Top wordmark ── */
+.top-wordmark {
+  font-family: var(--sans);
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text);
+  margin-bottom: 2rem;
+  display: block;
 }
 
 /* ── Section heads ── */
