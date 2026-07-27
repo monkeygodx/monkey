@@ -76,7 +76,7 @@ body {
 .content-container {
   max-width: 560px;
   width: 92%;
-  padding: 2rem 0 4rem;
+  padding: 1.2rem 0 4rem;
   z-index: 10;
   text-align: center;
 }
@@ -688,9 +688,10 @@ body {
 .ps-inner { position: relative; max-width: 780px; margin: 0 auto; padding: 0 12px; }
 .ps-viewport { position: relative; overflow: hidden; }
 .ps-track { display: flex; align-items: center; position: relative; transition: transform 0.5s cubic-bezier(0.23,1,0.32,1); }
-.ps-slide { flex: 0 0 64%; margin: 0 1%; aspect-ratio: 1/1; border-radius: 18px; overflow: hidden; background: #070707; border: 1px solid rgba(168,85,247,0.22); cursor: pointer; filter: blur(7px) brightness(0.42); transform: scale(0.9); transition: filter 0.45s ease, transform 0.45s ease, border-color 0.45s, box-shadow 0.45s; }
+.ps-slide { flex: 0 0 64%; margin: 0 1%; aspect-ratio: 1/1; border-radius: 18px; overflow: hidden; background: #000; border: 1px solid rgba(168,85,247,0.22); cursor: pointer; filter: blur(7px) brightness(0.42); transform: scale(0.9); transition: filter 0.45s ease, transform 0.45s ease, border-color 0.45s, box-shadow 0.45s; }
 .ps-slide.active { filter: none; transform: scale(1); border-color: rgba(168,85,247,0.6); box-shadow: 0 22px 56px -26px rgba(168,85,247,0.85); cursor: default; }
-.ps-slide video { width: 100%; height: 100%; object-fit: cover; display: block; background: #070707; }
+.ps-slide video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; background: #000; }
+.ps-slide { position: relative; }
 .ps-arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.15); background: rgba(7,5,14,0.7); backdrop-filter: blur(8px); color: #fff; font-size: 1.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; z-index: 6; }
 .ps-arrow:hover { background: rgba(168,85,247,0.6); border-color: var(--accent); }
 .ps-prev { left: 6px; } .ps-next { right: 6px; }
