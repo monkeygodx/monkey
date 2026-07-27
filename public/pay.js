@@ -1,12 +1,5 @@
 'use strict';
 
-/* MONKEYGOD — embedded checkout (Web Payments SDK).
-   Tier is pre-chosen on the previous page (?tier=). No tier picker here.
-   Flow: load config -> mount Apple Pay / Google Pay + card -> tokenize on pay ->
-   POST /api/charge -> reveal the tier's private link inline (no redirect).
-   The server owns the price — a discount code only ever changes what /api/charge
-   is asked to apply; it never sets the amount client-side. */
-
 const $ = (s) => document.querySelector(s);
 const moneyShort = (cents) => {
   const d = cents / 100;
@@ -19,8 +12,8 @@ let CONFIG = null;
 let card = null;
 let selectedTier = 'premium';
 let paid = false;
-let appliedDiscount = null; // { code, percent } once a valid code is applied
-let promoCountdownTimer = null;
+let appliedCode = null;   // validated discount code string
+let appliedPct  = 0;      // discount percentage (e.g. 10)
 
 function toast(msg, ms) {
   const t = $('#toast');
@@ -38,120 +31,105 @@ function showError(msg) {
 }
 
 function tierFromUrl() {
-  // Path form first: /basic, /premium, /exclusive. Then ?tier= fallback.
   const seg = location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
   if (TIER_ORDER.includes(seg)) return seg;
   const t = new URLSearchParams(location.search).get('tier');
   return t && TIER_ORDER.includes(t) ? t : null;
 }
 
+function codeFromUrl() {
+  const c = new URLSearchParams(location.search).get('code');
+  return c ? c.toUpperCase().trim() : null;
+}
+
 function baseAmountCents() {
-  const p = CONFIG.products[selectedTier];
+  const p = CONFIG && CONFIG.products[selectedTier];
   return p ? p.amount : 0;
 }
 
-function amountCents() {
+function finalAmountCents() {
   const base = baseAmountCents();
-  if (!appliedDiscount) return base;
-  return Math.round((base * (100 - appliedDiscount.percent)) / 100);
+  if (!appliedCode || !appliedPct) return base;
+  return Math.round(base * (1 - appliedPct / 100));
 }
 
-// Sale window is 48h total, but the on-page countdown is deliberately shown in
-// 24h laps -- it counts 24h -> 0, then relaunches at ~24h if real time remains,
-// and only ever counts a true zero on the final lap. The server-side expiry
-// (`CONFIG.promo.expiresAt`) is what actually cuts the code off either way.
-const PROMO_CYCLE_MS = 24 * 60 * 60 * 1000;
-function cycleRemaining(totalMs) {
-  if (totalMs <= PROMO_CYCLE_MS) return totalMs;
-  const mod = totalMs % PROMO_CYCLE_MS;
-  return mod === 0 ? PROMO_CYCLE_MS : mod;
-}
-function fmtHMS(ms) {
-  if (ms <= 0) return '00h 00m 00s';
-  const s = Math.ceil(ms / 1000);
-  const h = Math.floor(s / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  const sec = s % 60;
-  return `${String(h).padStart(2, '0')}h ${String(m).padStart(2, '0')}m ${String(sec).padStart(2, '0')}s`;
-}
+function updatePriceDisplay() {
+  const base  = baseAmountCents();
+  const final = finalAmountCents();
+  const amtEl = $('#order-amount');
+  const btnEl = $('#pay-btn-text');
 
-/* ---------------- promo banner + code entry ---------------- */
-function renderOrderAmount() {
-  const p = CONFIG.products[selectedTier];
-  if (!p) return;
-  const strike = $('#order-amount-strike');
-  const amt = $('#order-amount');
-  if (appliedDiscount) {
-    strike.textContent = moneyShort(p.amount);
-    strike.hidden = false;
-    amt.textContent = moneyShort(amountCents());
+  if (appliedCode && final < base) {
+    amtEl.innerHTML =
+      `<span style="text-decoration:line-through;opacity:0.45;font-size:0.75em;">${moneyShort(base)}</span> ` +
+      `<span style="color:var(--accent-bright)">${moneyShort(final)}</span>`;
   } else {
-    strike.hidden = true;
-    amt.textContent = moneyShort(p.amount);
+    amtEl.textContent = moneyShort(final);
   }
-  $('#pay-btn-text').textContent = paid ? $('#pay-btn-text').textContent : `Pay ${moneyShort(amountCents())}`;
+  if (btnEl) btnEl.textContent = `Pay ${moneyShort(final)}`;
 }
 
-function initPromoBanner() {
-  const promo = CONFIG.promo;
-  const banner = $('#promo-banner');
-  if (!promo) { banner.hidden = true; return; }
-  clearInterval(promoCountdownTimer);
-  const tick = () => {
-    const totalRemaining = promo.expiresAt - Date.now();
-    if (totalRemaining <= 0) {
-      banner.hidden = true;
-      clearInterval(promoCountdownTimer);
-      return;
+// --- Discount code UI ---
+async function applyCode(code) {
+  const statusEl = $('#disc-status');
+  const inputEl  = $('#disc-input');
+  if (!code) return;
+
+  statusEl.textContent = 'Checking…';
+  statusEl.className = 'disc-status checking';
+
+  try {
+    const res  = await fetch('/api/validate-code', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code }),
+    });
+    const data = await res.json().catch(() => ({}));
+
+    if (res.ok && data.valid) {
+      appliedCode = code.toUpperCase();
+      appliedPct  = data.pct;
+      statusEl.textContent = `✓ ${data.description} applied`;
+      statusEl.className = 'disc-status success';
+      if (inputEl) { inputEl.value = appliedCode; inputEl.disabled = true; }
+      const applyBtn = $('#disc-apply');
+      if (applyBtn) { applyBtn.textContent = 'Applied'; applyBtn.disabled = true; }
+      updatePriceDisplay();
+    } else {
+      appliedCode = null; appliedPct = 0;
+      statusEl.textContent = data.message || 'Invalid code.';
+      statusEl.className = 'disc-status error';
     }
-    banner.hidden = false;
-    banner.innerHTML = `🔥 Flash sale — code <b>${promo.code}</b> for <b>${promo.percent}% off</b> — ends in ${fmtHMS(cycleRemaining(totalRemaining))}`;
-  };
-  tick();
-  promoCountdownTimer = setInterval(tick, 1000);
-}
-
-function showPromoMsg(msg, ok) {
-  const el = $('#promo-msg');
-  if (!msg) { el.hidden = true; el.textContent = ''; return; }
-  el.hidden = false;
-  el.textContent = msg;
-  el.className = 'promo-msg ' + (ok ? 'ok' : 'err');
-}
-
-function applyPromoCode() {
-  const raw = $('#promo-input').value.trim().toUpperCase();
-  if (!raw) { showPromoMsg('Enter a code first.', false); return; }
-  const promo = CONFIG.promo;
-  if (promo && promo.code === raw && Date.now() < promo.expiresAt) {
-    appliedDiscount = { code: promo.code, percent: promo.percent };
-    showPromoMsg(`${promo.code} applied — ${promo.percent}% off.`, true);
-    $('#promo-input').disabled = true;
-    $('#promo-apply').disabled = true;
-    $('#promo-apply').textContent = 'Applied';
-  } else {
-    appliedDiscount = null;
-    showPromoMsg('That code is invalid or expired.', false);
+  } catch (e) {
+    statusEl.textContent = 'Could not check code. Try again.';
+    statusEl.className = 'disc-status error';
   }
-  renderOrderAmount();
 }
 
-function wirePromo() {
-  $('#promo-apply').addEventListener('click', applyPromoCode);
-  $('#promo-input').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') { e.preventDefault(); applyPromoCode(); }
-  });
+function initDiscountUI() {
+  const applyBtn = $('#disc-apply');
+  const inputEl  = $('#disc-input');
+  if (!applyBtn || !inputEl) return;
+
+  applyBtn.addEventListener('click', () => applyCode(inputEl.value.trim()));
+  inputEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') applyCode(inputEl.value.trim()); });
+
+  // Pre-fill from URL param and auto-apply
+  const urlCode = codeFromUrl();
+  if (urlCode) {
+    inputEl.value = urlCode;
+    setTimeout(() => applyCode(urlCode), 600); // slight delay so config loads first
+  }
 }
 
+// --- Square SDK ---
 function loadSquareSdk(env) {
   return new Promise((resolve, reject) => {
-    const src =
-      env === 'production'
-        ? 'https://web.squarecdn.com/v1/square.js'
-        : 'https://sandbox.web.squarecdn.com/v1/square.js';
+    const src = env === 'production'
+      ? 'https://web.squarecdn.com/v1/square.js'
+      : 'https://sandbox.web.squarecdn.com/v1/square.js';
     const s = document.createElement('script');
-    s.src = src;
-    s.onload = resolve;
+    s.src = src; s.onload = resolve;
     s.onerror = () => reject(new Error('payment SDK failed to load'));
     document.head.appendChild(s);
   });
@@ -161,13 +139,10 @@ function buildPaymentRequest(payments) {
   return payments.paymentRequest({
     countryCode: 'US',
     currencyCode: 'USD',
-    total: { amount: (amountCents() / 100).toFixed(2), label: 'Total' },
+    total: { amount: (finalAmountCents() / 100).toFixed(2), label: 'Total' },
   });
 }
 
-// Charge a tokenized source (card or wallet) and reveal the success panel.
-// The discount CODE is sent, never the amount — the server recomputes and
-// enforces the price from PRODUCTS + the code's live expiry.
 async function charge(sourceId, verificationToken) {
   showError('');
   const res = await fetch('/api/charge', {
@@ -177,14 +152,11 @@ async function charge(sourceId, verificationToken) {
       tier: selectedTier,
       sourceId,
       buyerVerificationToken: verificationToken,
-      code: appliedDiscount ? appliedDiscount.code : undefined,
+      discountCode: appliedCode || undefined,
     }),
   });
   const data = await res.json().catch(() => ({}));
-  if (res.ok && data.ok) {
-    showSuccess();
-    return true;
-  }
+  if (res.ok && data.ok) { showSuccess(); return true; }
   showError(data.message || 'Payment could not be completed. Try another card.');
   return false;
 }
@@ -193,32 +165,21 @@ function showSuccess() {
   paid = true;
   const link = (CONFIG.tierLinks && CONFIG.tierLinks[selectedTier]) || '';
   const a = $('#join-link');
-  if (link) {
-    a.href = link;
-  } else {
-    a.textContent = 'Message the admin to get added';
-    a.href = (CONFIG.links && CONFIG.links.admin) || '#';
-  }
+  if (link) { a.href = link; } else { a.textContent = 'Message the admin to get added'; a.href = (CONFIG.links && CONFIG.links.admin) || '#'; }
   $('#checkout-card').hidden = true;
   $('#success-card').hidden = false;
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ---- Wallets (Apple Pay / Google Pay) ----
 async function tokenizeWallet(method, label) {
   let result;
-  try {
-    result = await method.tokenize();
-  } catch (err) {
-    console.error('[wallet] tokenize threw', err);
-    showError(`${label} couldn't start${err && err.message ? ' — ' + err.message : '. Make sure a card is set up and pop-ups are allowed.'}`);
+  try { result = await method.tokenize(); } catch (err) {
+    showError(`${label} couldn't start${err && err.message ? ' — ' + err.message : '.'}`);
     return;
   }
   if (result.status === 'OK') {
     await charge(result.token, result.details && result.details.verificationToken);
-  } else if (result.status === 'Cancel') {
-    /* buyer closed the wallet sheet — not an error */
-  } else {
+  } else if (result.status !== 'Cancel') {
     showError((result.errors && result.errors[0] && result.errors[0].message) || `${label} was not completed.`);
   }
 }
@@ -226,65 +187,41 @@ async function tokenizeWallet(method, label) {
 async function initWallets(payments) {
   const container = $('#wallet-container');
   let any = false;
-
-  // Google Pay
   try {
     const pr = buildPaymentRequest(payments);
     const googlePay = await payments.googlePay(pr);
     const el = document.createElement('div');
-    el.id = 'gpay-btn';
-    el.className = 'wallet-btn';
+    el.id = 'gpay-btn'; el.className = 'wallet-btn';
     container.appendChild(el);
     await googlePay.attach('#gpay-btn', { buttonColor: 'white', buttonType: 'long', buttonSizeMode: 'fill' });
-    el.addEventListener('click', async (e) => {
-      e.preventDefault();
-      await tokenizeWallet(googlePay, 'Google Pay');
-    });
+    el.addEventListener('click', async (e) => { e.preventDefault(); await tokenizeWallet(googlePay, 'Google Pay'); });
     any = true;
-  } catch (e) {
-    console.warn('[wallet] google pay unavailable', e && e.message);
-  }
+  } catch (e) { console.warn('[wallet] google pay unavailable', e && e.message); }
 
-  // Apple Pay (Safari on Apple devices; requires the domain registered in Square)
   try {
     const pr = buildPaymentRequest(payments);
     const applePay = await payments.applePay(pr);
     const btn = document.createElement('button');
-    btn.id = 'applepay-btn';
-    btn.className = 'apple-pay-button';
+    btn.id = 'applepay-btn'; btn.className = 'apple-pay-button';
     btn.setAttribute('aria-label', 'Pay with Apple Pay');
     container.appendChild(btn);
-    btn.addEventListener('click', async (e) => {
-      e.preventDefault();
-      await tokenizeWallet(applePay, 'Apple Pay');
-    });
+    btn.addEventListener('click', async (e) => { e.preventDefault(); await tokenizeWallet(applePay, 'Apple Pay'); });
     any = true;
-  } catch (e) {
-    console.warn('[wallet] apple pay unavailable', e && e.message);
-  }
+  } catch (e) { console.warn('[wallet] apple pay unavailable', e && e.message); }
 
   if (any) $('#wallet-sep').hidden = false;
 }
 
-// ---- Card field ----
 async function initCard(payments) {
-  // Only Square-valid style selectors here. If the styled card ever fails to
-  // build, fall back to an unstyled (but fully working) field so checkout
-  // can't be blocked by a styling issue.
   const style = {
-    input: { color: '#000000', fontSize: '16px' },
+    input: { color: '#ffffff', fontSize: '16px' },
     'input::placeholder': { color: '#6b7280' },
     '.input-container': { borderColor: 'rgba(255,255,255,0.14)', borderRadius: '12px' },
-    '.input-container.is-focus': { borderColor: '#818cf8' },
+    '.input-container.is-focus': { borderColor: '#a855f7' },
     '.input-container.is-error': { borderColor: '#ef4444' },
     '.message-text.is-error': { color: '#fca5a5' },
   };
-  try {
-    card = await payments.card({ style });
-  } catch (e) {
-    console.warn('[card] styled init failed, retrying unstyled', e);
-    card = await payments.card();
-  }
+  try { card = await payments.card({ style }); } catch (e) { card = await payments.card(); }
   await card.attach('#card-container');
   $('#card-status').hidden = true;
   $('#pay-btn').disabled = false;
@@ -308,10 +245,7 @@ async function payWithCard() {
     console.error('[pay] error', e);
     showError('Network error — please try again.');
   } finally {
-    if (!paid) {
-      btn.disabled = false;
-      $('#pay-btn-text').textContent = label;
-    }
+    if (!paid) { btn.disabled = false; $('#pay-btn-text').textContent = label; }
   }
 }
 
@@ -335,12 +269,7 @@ async function initPayments() {
 }
 
 async function boot() {
-  try {
-    CONFIG = await (await fetch('/api/config')).json();
-  } catch (e) {
-    showError('Could not load checkout. Refresh the page.');
-    return;
-  }
+  try { CONFIG = await (await fetch('/api/config')).json(); } catch (e) { showError('Could not load checkout. Refresh the page.'); return; }
 
   selectedTier =
     tierFromUrl() ||
@@ -349,13 +278,11 @@ async function boot() {
 
   const p = CONFIG.products[selectedTier];
   $('#order-tier').textContent = TIER_LABEL[selectedTier] || selectedTier;
-  renderOrderAmount();
-
-  initPromoBanner();
-  wirePromo();
-
+  $('#order-amount').textContent = p ? moneyShort(p.amount) : '—';
+  $('#pay-btn-text').textContent  = p ? `Pay ${moneyShort(p.amount)}` : 'Pay';
   $('#pay-btn').addEventListener('click', payWithCard);
 
+  initDiscountUI();
   await initPayments();
 }
 
