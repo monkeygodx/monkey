@@ -9,7 +9,7 @@
   <meta name="keywords" content="monkeygod, monkey app, omegle, ometv, no ban, unban system, vault" />
   <meta name="author" content="MONKEYGOD" />
 
-  <!-- Open Graph / share thumbnail -->
+  <!-- Open Graph -->
   <meta property="og:site_name" content="MONKEYGOD" />
   <meta property="og:title" content="MONKEYGOD | Exclusive Access Vault" />
   <meta property="og:description" content="Unlock the full vault. Stay unbanned. Join the verified inner circle." />
@@ -24,19 +24,27 @@
   <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css?v=20" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css?v=11" />
 </head>
 <body>
   <div class="mesh-bg" aria-hidden="true"></div>
 
   <main class="content-container">
 
-    <!-- hero -->
-    <h1 class="wordmark">MONKEYGOD</h1>
+    <!-- ── Hero ── -->
+    <div style="text-align:center; margin-bottom: 28px;">
+      <div class="live-badge">
+        <span class="live-dot"></span>
+        MonkeyGod · Live Now
+      </div>
+    </div>
 
-    <!-- flash-sale promo banner (injected/hidden by script.js based on /api/config) -->
-    <div class="promo-banner" id="promo-banner" hidden></div>
+    <h1 class="hero-h1">
+      Dominate the app.<br>
+      <span class="grad">Own the vault.</span>
+    </h1>
+    <p class="hero-sub">One-time payment. Lifetime access. Stay unbanned and in full control.</p>
 
     <!-- preview slider (coverflow) -->
     <div class="preview-slider" id="preview-slider" hidden>
@@ -51,42 +59,60 @@
       </div>
     </div>
 
-    <!-- tiers -->
+    <!-- ── Tiers ── -->
     <section class="section tier-section">
       <div class="tier-inner">
+        <div class="eyebrow">Pricing</div>
         <h2 class="section-title">Choose Your Tier</h2>
         <p class="section-subtitle">One-time payment · lifetime access · instant delivery</p>
         <div id="tier-grid" class="tier-grid"><!-- injected by script.js --></div>
         <div class="pay-methods">
-          Accepted: <span class="chip chip-card">💳 Card</span> <span class="chip chip-crypto">₿ Crypto</span>
+          Accepted: <span class="chip">💳 Card</span> <span class="chip">₿ Crypto</span>
         </div>
       </div>
     </section>
 
-    <!-- community -->
+    <!-- ── Community ── -->
     <section class="section">
+      <div class="eyebrow">Community</div>
       <h2 class="section-title">Join The Community</h2>
       <p class="section-subtitle">Free channel, live chatroom &amp; direct admin support</p>
-      <a id="btn-channel" class="glossy-button channel-blue-glow" href="#" target="_blank" rel="noopener">
-        <span class="gb-icon">📡</span>
-        <span class="gb-text"><b>Join Free Channel</b><small>Official link · previews &amp; drops</small></span>
-        <span class="gb-arrow">→</span>
-      </a>
-      <a id="btn-chatroom" class="glossy-button chatroom-red-glow" href="#" target="_blank" rel="noopener">
-        <span class="gb-icon">💬</span>
-        <span class="gb-text"><b>Official Chatroom</b><small>Active now · talk to members</small></span>
-        <span class="gb-arrow">→</span>
-      </a>
-      <a id="btn-admin" class="glossy-button" href="#" target="_blank" rel="noopener">
-        <span class="gb-icon">🛡️</span>
-        <span class="gb-text"><b>Contact Admin</b><small>Support &amp; manual orders</small></span>
-        <span class="gb-arrow">→</span>
-      </a>
+
+      <div class="comm-stack">
+        <a id="btn-channel" class="comm-link" href="#" target="_blank" rel="noopener">
+          <span class="comm-num">01</span>
+          <span class="comm-divider"></span>
+          <span class="comm-text">
+            <span class="comm-title">Join Free Channel</span>
+            <span class="comm-sub">Official link · previews &amp; drops</span>
+          </span>
+          <span class="comm-arrow">→</span>
+        </a>
+        <a id="btn-chatroom" class="comm-link" href="#" target="_blank" rel="noopener">
+          <span class="comm-num">02</span>
+          <span class="comm-divider"></span>
+          <span class="comm-text">
+            <span class="comm-title">Official Chatroom</span>
+            <span class="comm-sub">Active now · talk to members</span>
+          </span>
+          <span class="comm-arrow">→</span>
+        </a>
+        <a id="btn-admin" class="comm-link" href="#" target="_blank" rel="noopener">
+          <span class="comm-num">03</span>
+          <span class="comm-divider"></span>
+          <span class="comm-text">
+            <span class="comm-title">Contact Admin</span>
+            <span class="comm-sub">Support &amp; manual orders</span>
+          </span>
+          <span class="comm-arrow">→</span>
+        </a>
+      </div>
     </section>
 
-    <!-- how it works -->
+    <!-- ── How It Works ── -->
     <section class="section">
-      <h2 class="section-title">How It Works</h2>
+      <div class="eyebrow">How It Works</div>
+      <h2 class="section-title">Simple. Instant. Lifetime.</h2>
       <p class="section-subtitle">From payment to access in seconds</p>
       <div class="steps-grid">
         <div class="step-card">
@@ -107,9 +133,10 @@
       </div>
     </section>
 
-    <!-- faq -->
+    <!-- ── FAQ ── -->
     <section class="section">
-      <h2 class="section-title">FAQ</h2>
+      <div class="eyebrow">FAQ</div>
+      <h2 class="section-title">Questions</h2>
       <div class="faq">
         <div class="faq-item">
           <button class="faq-question">What payment methods do you accept? <span class="faq-chevron">▾</span></button>
@@ -117,7 +144,7 @@
         </div>
         <div class="faq-item">
           <button class="faq-question">How long does it take to get access? <span class="faq-chevron">▾</span></button>
-          <div class="faq-answer"><p>Orders come nearly instantly. After you pay you will be given a link to your channel and will have access forever after that! DM <a href="https://t.me/cynski" target="_blank" rel="noopener">@cynski</a> if you have any problems.</p></div>
+          <div class="faq-answer"><p>Orders come nearly instantly. After you pay you will be given a link to your channel and will have access forever. DM <a href="https://t.me/cynski" target="_blank" rel="noopener">@cynski</a> if you have any problems.</p></div>
         </div>
         <div class="faq-item">
           <button class="faq-question">What's the difference between tiers? <span class="faq-chevron">▾</span></button>
@@ -126,10 +153,6 @@
         <div class="faq-item">
           <button class="faq-question">Is it a one-time payment? <span class="faq-chevron">▾</span></button>
           <div class="faq-answer"><p>Yes — every tier is a single one-time payment for lifetime access. No subscriptions, no recurring charges.</p></div>
-        </div>
-        <div class="faq-item">
-          <button class="faq-question">Do you have discount codes? <span class="faq-chevron">▾</span></button>
-          <div class="faq-answer"><p>When a promo is running you'll see a banner at the top of the page with the code. Enter it in the discount code field on the checkout page to apply it — the price updates before you pay.</p></div>
         </div>
       </div>
     </section>
@@ -145,7 +168,7 @@
     </footer>
   </main>
 
-  <!-- ===== Crypto modal ===== -->
+  <!-- ── Crypto modal ── -->
   <div id="crypto-modal" class="modal-overlay" hidden>
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="cr-title">
       <button class="modal-close" data-close>✕</button>
@@ -159,6 +182,6 @@
 
   <div id="toast" class="toast" hidden></div>
 
-  <script src="/script.js?v=13"></script>
+  <script src="/script.js?v=11"></script>
 </body>
 </html>
