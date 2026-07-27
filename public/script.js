@@ -1,19 +1,14 @@
 'use strict';
 
-/* Display data per product (server stays the source of truth for prices). */
-// Deliberate upsell ladder: each lower tier shows one greyed-out ✕ item for
-// whatever the tier above it actually has -- gives the eye a reason to look
-// at the next card up instead of just listing "everything, checked" three
-// times in a row. Exclusive stays all-checkmarks and short on purpose.
 const TIER_DATA = {
   basic: {
     name: 'Basic',
     tag: '',
     features: [
-      { t: 'Access 1,000+ Videos', in: true },
+      { t: 'Access 1000+ Videos', in: true },
       { t: 'Fresh Content', in: true },
       { t: 'High Quality Videos', in: true },
-      { t: 'Premium Content & Early Access', in: false },
+      { t: 'HD Audio (With Sound)', in: false },
     ],
   },
   premium: {
@@ -32,17 +27,15 @@ const TIER_DATA = {
     featured: true,
     features: [
       { t: 'Access 10,000+ Videos', in: true },
-      { t: 'Everything in Premium', in: true },
-      { t: 'Extra Private Channel', in: true },
-      { t: 'Lifetime Content Updates', in: true },
-      { t: 'Priority Access', in: true },
+      { t: 'Extra Omegle Wins Channel', in: true },
+      { t: 'High Quality Videos', in: true },
+      { t: 'Lifetime Access', in: true },
     ],
   },
 };
 const TIER_ORDER = ['basic', 'premium', 'exclusive'];
 
 let CONFIG = null;
-let promoCountdownTimer = null;
 const $ = (s) => document.querySelector(s);
 const moneyShort = (cents) => {
   const d = cents / 100;
@@ -57,43 +50,9 @@ function toast(msg, ms) {
   toast._t = setTimeout(() => (t.hidden = true), ms || 3200);
 }
 
-// Sale window is 48h total, but the on-page countdown is deliberately shown in
-// 24h laps -- it counts 24h -> 0, then relaunches at ~24h if real time remains,
-// and only ever counts a true zero on the final lap. The server-side expiry
-// (`CONFIG.promo.expiresAt`) is what actually cuts the code off either way.
-const PROMO_CYCLE_MS = 24 * 60 * 60 * 1000;
-function cycleRemaining(totalMs) {
-  if (totalMs <= PROMO_CYCLE_MS) return totalMs;
-  const mod = totalMs % PROMO_CYCLE_MS;
-  return mod === 0 ? PROMO_CYCLE_MS : mod;
-}
-function fmtHMS(ms) {
-  if (ms <= 0) return '00h 00m 00s';
-  const s = Math.ceil(ms / 1000);
-  const h = Math.floor(s / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  const sec = s % 60;
-  return `${String(h).padStart(2, '0')}h ${String(m).padStart(2, '0')}m ${String(sec).padStart(2, '0')}s`;
-}
-
-function initPromoBanner() {
-  const banner = $('#promo-banner');
-  const promo = CONFIG.promo;
-  if (!banner || !promo) { if (banner) banner.hidden = true; return; }
-  clearInterval(promoCountdownTimer);
-  const tick = () => {
-    const totalRemaining = promo.expiresAt - Date.now();
-    if (totalRemaining <= 0) {
-      banner.hidden = true;
-      clearInterval(promoCountdownTimer);
-      renderTiers(); // drop the "or $X with code" hint once it expires
-      return;
-    }
-    banner.hidden = false;
-    banner.innerHTML = `🔥 <b>${promo.percent}% OFF</b> everything — code <b>${promo.code}</b> at checkout — ends in ${fmtHMS(cycleRemaining(totalRemaining))}`;
-  };
-  tick();
-  promoCountdownTimer = setInterval(tick, 1000);
+// Returns the stored discount code (set when user clicks Telegram join in popup).
+function storedCode() {
+  try { return localStorage.getItem('mg_code') || ''; } catch (e) { return ''; }
 }
 
 async function boot() {
@@ -108,7 +67,6 @@ async function boot() {
   $('#btn-admin').href = CONFIG.links.admin;
   $('#cr-admin').href = CONFIG.links.admin;
 
-  initPromoBanner();
   buildSlider(CONFIG.previews || []);
   renderTiers();
   wireCryptoModal();
@@ -116,11 +74,8 @@ async function boot() {
   animateMembers();
 }
 
-/* ---------------- preview slider (coverflow) ---------------- */
-let slideEls = [];
-let videos = [];
-let slideIdx = 0;
-let slideMuted = true;
+/* ---------------- preview slider ---------------- */
+let slideEls = [], videos = [], slideIdx = 0, slideMuted = true;
 
 function buildSlider(urls) {
   if (!urls.length) return;
@@ -130,57 +85,26 @@ function buildSlider(urls) {
   slider.hidden = false;
   track.innerHTML = '';
   dots.innerHTML = '';
-
   urls.forEach((u, i) => {
     const slide = document.createElement('div');
     slide.className = 'ps-slide';
     const v = document.createElement('video');
-    v.muted = true;
-    v.defaultMuted = true;
-    v.loop = true;
-    v.autoplay = true;
-    v.playsInline = true;
-    // Browser autoplay policies check these as HTML attributes, not just JS
-    // properties, at the moment playback is requested -- Safari in particular
-    // will silently refuse an unmuted-looking <video> even if `.muted` was set
-    // in JS a tick earlier. Setting them before `src` closes that gap.
-    v.setAttribute('muted', '');
-    v.setAttribute('autoplay', '');
-    v.setAttribute('playsinline', '');
-    v.setAttribute('webkit-playsinline', '');
+    v.src = u; v.muted = true; v.loop = true; v.playsInline = true;
+    v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', '');
     v.preload = i === 0 ? 'auto' : 'metadata';
-    v.src = u;
     slide.appendChild(v);
     track.appendChild(slide);
-    slide.addEventListener('click', () => {
-      ensureUnmute();
-      if (i === slideIdx) v.play().catch(() => {});
-      else goSlide(i);
-    });
-
+    slide.addEventListener('click', () => { ensureUnmute(); if (i === slideIdx) v.play().catch(() => {}); else goSlide(i); });
     const dot = document.createElement('button');
     dot.className = 'ps-dot' + (i === 0 ? ' active' : '');
     dot.addEventListener('click', () => { ensureUnmute(); goSlide(i); });
     dots.appendChild(dot);
   });
-
   slideEls = [...track.querySelectorAll('.ps-slide')];
   videos = [...track.querySelectorAll('video')];
-
-  // goSlide(0) below fires .play() immediately, often before the first slide
-  // has buffered anything -- some browsers just drop that call instead of
-  // queuing it. Retry once real playback data is actually available.
-  videos.forEach((v, i) => {
-    v.addEventListener('canplay', () => {
-      if (i === slideIdx && v.paused) v.play().catch(() => {});
-    }, { once: true });
-  });
-
   $('#ps-prev').addEventListener('click', () => { ensureUnmute(); goSlide(slideIdx - 1); });
   $('#ps-next').addEventListener('click', () => { ensureUnmute(); goSlide(slideIdx + 1); });
   $('#ps-mute').addEventListener('click', toggleMute);
-
-  // swipe
   let sx = null;
   const vp = slider.querySelector('.ps-viewport');
   vp.addEventListener('touchstart', (e) => (sx = e.touches[0].clientX), { passive: true });
@@ -190,7 +114,6 @@ function buildSlider(urls) {
     if (Math.abs(dx) > 40) { ensureUnmute(); goSlide(dx < 0 ? slideIdx + 1 : slideIdx - 1); }
     sx = null;
   });
-
   window.addEventListener('resize', centerActive);
   goSlide(0);
   if (videos[0]) videos[0].addEventListener('loadeddata', centerActive, { once: true });
@@ -212,8 +135,7 @@ function goSlide(n) {
   $('#ps-dots').querySelectorAll('.ps-dot').forEach((d, i) => d.classList.toggle('active', i === slideIdx));
   videos.forEach((v, i) => {
     if (Math.abs(i - slideIdx) <= 1) v.preload = 'auto';
-    if (i === slideIdx) { v.muted = slideMuted; v.play().catch(() => {}); }
-    else v.pause();
+    if (i === slideIdx) { v.muted = slideMuted; v.play().catch(() => {}); } else v.pause();
   });
   centerActive();
 }
@@ -228,60 +150,44 @@ function ensureUnmute() {
 }
 
 function toggleMute() {
-  if (slideMuted) {
-    ensureUnmute();
-  } else {
-    slideMuted = true;
-    videos.forEach((v) => (v.muted = true));
-    $('#ps-mute').textContent = '🔇';
-  }
+  if (slideMuted) { ensureUnmute(); }
+  else { slideMuted = true; videos.forEach((v) => (v.muted = true)); $('#ps-mute').textContent = '🔇'; }
 }
 
 /* ---------------- tiers ---------------- */
 function renderTiers() {
   const grid = $('#tier-grid');
   grid.innerHTML = '';
-  const promo = CONFIG.promo && CONFIG.promo.expiresAt > Date.now() ? CONFIG.promo : null;
   for (const key of TIER_ORDER) {
     const p = CONFIG.products[key];
     const d = TIER_DATA[key];
     if (!p || !d) continue;
     const card = document.createElement('div');
     card.className = 'tier-card' + (d.featured ? ' featured' : '');
-    // Every card gets a tag slot, even tiers with no tag -- an invisible one
-    // reserves the exact same height as Exclusive's "★ HIGHEST TIER" pill so
-    // BASIC/PREMIUM/EXCLUSIVE all start their name/price/features at the same
-    // row instead of Exclusive sitting lower than the other two.
-    const tag = `<span class="tier-tag${d.featured ? ' gold' : ''}"${d.tag ? '' : ' style="visibility:hidden"'}>${d.tag || '—'}</span>`;
-    const promoHint = promo
-      ? `<div class="tier-price-strike">or ${moneyShort(Math.round((p.amount * (100 - promo.percent)) / 100))} with code ${promo.code}</div>`
-      : '';
+    const tag = d.tag ? `<span class="tier-tag${d.featured ? ' gold' : ''}">${d.tag}</span>` : '';
     card.innerHTML = `
       ${tag}
       <div class="tier-name">${d.name}</div>
       <div class="tier-price">${moneyShort(p.amount)}<small>one-time</small></div>
-      ${promoHint}
       <ul class="tier-features">${d.features.map((f) => `<li class="${f.in ? '' : 'no'}">${f.t}</li>`).join('')}</ul>
-      <div class="tier-footer">
-        <button class="tier-btn" data-tier="${key}">Get ${d.name} — ${moneyShort(p.amount)}</button>
-        <button class="tier-crypto" data-crypto="${key}">or pay with crypto</button>
-      </div>`;
+      <button class="tier-btn" data-tier="${key}">Get ${d.name} — ${moneyShort(p.amount)}</button>
+      <button class="tier-crypto" data-crypto="${key}">or pay with crypto</button>`;
     grid.appendChild(card);
   }
   grid.querySelectorAll('.tier-btn').forEach((b) => b.addEventListener('click', () => buy(b.dataset.tier, b)));
   grid.querySelectorAll('.tier-crypto').forEach((b) => b.addEventListener('click', () => openCrypto(b.dataset.crypto)));
 }
 
-/* Get -> hand off to the payment site (monkeygod.cloud) at the clean per-tier
-   URL (/basic, /premium, /exclusive) where the embedded checkout lives. Falls
-   back to the local /pay?tier= page if the payment site URL isn't configured. */
+/* Redirect to payment site, appending discount code if user has one. */
 function buy(tier, btn) {
   if (!CONFIG.products[tier]) return;
   if (btn) { btn.disabled = true; btn.innerHTML = 'Loading…'; }
   const base = CONFIG.paymentSiteUrl;
+  const code = storedCode();
+  const codeParam = code ? `?code=${encodeURIComponent(code)}` : '';
   window.location.href = base
-    ? `${base.replace(/\/$/, '')}/${encodeURIComponent(tier)}`
-    : `/pay?tier=${encodeURIComponent(tier)}`;
+    ? `${base.replace(/\/$/, '')}/${encodeURIComponent(tier)}${codeParam}`
+    : `/pay?tier=${encodeURIComponent(tier)}${code ? '&code=' + encodeURIComponent(code) : ''}`;
 }
 
 /* ---------------- crypto modal ---------------- */
@@ -290,12 +196,10 @@ function openCrypto(tier) {
   if (!p) return;
   $('#cr-amount').textContent = moneyShort(p.amount);
   $('#cr-product').textContent = p.name;
-
   const list = $('#crypto-list');
   list.innerHTML = '';
   if (!CONFIG.crypto.length) {
-    list.innerHTML =
-      '<div class="crypto-empty">Wallet addresses aren’t published yet.<br>Tap “DM Admin” below and they’ll send you the current address.</div>';
+    list.innerHTML = '<div class="crypto-empty">Wallet addresses aren\'t published yet.<br>Tap "DM Admin" below and they\'ll send you the current address.</div>';
   } else {
     for (const c of CONFIG.crypto) {
       const row = document.createElement('div');
@@ -318,7 +222,6 @@ function openCrypto(tier) {
   show('#crypto-modal');
 }
 
-/* ---------------- modal plumbing ---------------- */
 function show(sel) { $(sel).hidden = false; document.body.style.overflow = 'hidden'; }
 function hide(sel) { $(sel).hidden = true; document.body.style.overflow = ''; }
 
@@ -329,7 +232,6 @@ function wireCryptoModal() {
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') hide('#crypto-modal'); });
 }
 
-/* ---------------- faq ---------------- */
 function wireFaq() {
   document.querySelectorAll('.faq-item').forEach((item) => {
     const q = item.querySelector('.faq-question');
@@ -341,7 +243,6 @@ function wireFaq() {
   });
 }
 
-/* ---------------- members counter (cosmetic) ---------------- */
 function animateMembers() {
   const el = $('#members-count');
   let n = 1204;
