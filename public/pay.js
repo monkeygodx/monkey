@@ -227,12 +227,25 @@ async function initWallets(payments) {
 
 async function initCard(payments) {
   const style = {
-    input: { color: '#ffffff', fontSize: '16px' },
-    'input::placeholder': { color: '#6b7280' },
-    '.input-container': { borderColor: 'rgba(255,255,255,0.14)', borderRadius: '12px' },
-    '.input-container.is-focus': { borderColor: '#a855f7' },
-    '.input-container.is-error': { borderColor: '#ef4444' },
-    '.message-text.is-error': { color: '#fca5a5' },
+  input: {
+    color: '#ffffff',
+    fontSize: '16px',
+    backgroundColor: '#0f0f0f',
+    caretColor: '#a855f7',
+  },
+  'input::placeholder': { color: 'rgba(255,255,255,0.35)' },
+  '.input-container': {
+    borderColor: 'rgba(255,255,255,0.12)',
+    borderRadius: '12px',
+    borderWidth: '1px',
+  },
+  '.input-container.is-focus': { borderColor: '#a855f7' },
+  '.input-container.is-error': { borderColor: '#ef4444' },
+  '.message-text': { color: 'rgba(255,255,255,0.65)' },
+  '.message-text.is-error': { color: '#fca5a5' },
+  '.message-icon': { color: 'rgba(255,255,255,0.5)' },
+  '.message-icon.is-error': { color: '#fca5a5' },
+};
   };
   try { card = await payments.card({ style }); } catch (e) { card = await payments.card(); }
   await card.attach('#card-container');
