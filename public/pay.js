@@ -124,7 +124,7 @@ function loadSquareSdk(env) {
     const s = document.createElement('script');
     s.src = src;
     s.onload = resolve;
-    s.onerror = () => reject(new Error('payment SDK failed to load'));
+    s.onerror = () => reject(new Error('Square SDK failed to load — check network/CSP'));
     document.head.appendChild(s);
   });
 }
@@ -137,6 +137,7 @@ function buildPaymentRequest(payments) {
   });
 }
 
+// ── Fix: pass data.tierLink so showSuccess shows the real channel link ──
 async function charge(sourceId, verificationToken) {
   showError('');
   const res = await fetch('/api/charge', {
@@ -150,7 +151,10 @@ async function charge(sourceId, verificationToken) {
     }),
   });
   const data = await res.json().catch(() => ({}));
-  if (res.ok && data.ok) { showSuccess(); return true; }
+  if (res.ok && data.ok) {
+    showSuccess(data.tierLink || undefined); // ← pass tier link from server response
+    return true;
+  }
   showError(data.message || 'Payment could not be completed. Try another card.');
   return false;
 }
@@ -220,13 +224,14 @@ async function initWallets(payments) {
   if (any) $('#wallet-sep').hidden = false;
 }
 
+// ── Fix: removed caretColor (not a valid Square style property — throws on init).
+//    Two-step fallback: try styled → if it fails, try plain → then attach.
 async function initCard(payments) {
   const style = {
     input: {
       color: '#ffffff',
       fontSize: '16px',
       backgroundColor: '#0f0f0f',
-      caretColor: '#a855f7',
     },
     'input::placeholder': { color: 'rgba(255,255,255,0.35)' },
     '.input-container': {
@@ -241,15 +246,66 @@ async function initCard(payments) {
     '.message-icon': { color: 'rgba(255,255,255,0.5)' },
     '.message-icon.is-error': { color: '#fca5a5' },
   };
+
+  // Step 1: try with dark style
   try {
     card = await payments.card({ style });
   } catch (e) {
-    console.warn('[card] styled init failed, retrying unstyled', e);
-    card = await payments.card();
+    console.warn('[card] styled init failed:', e && e.message);
+    card = null;
   }
+
+  // Step 2: fall back to plain card (no style) if styled failed
+  if (!card) {
+    try {
+      card = await payments.card();
+    } catch (e) {
+      throw new Error('Card field could not be initialized: ' + (e && e.message));
+    }
+  }
+
   await card.attach('#card-container');
   $('#card-status').hidden = true;
   $('#pay-btn').disabled = false;
+}
+
+// ── Fix: split SDK init, wallet init, and card init into separate try/catch
+//    blocks so a wallet failure can't mask a card failure (and vice versa).
+async function initPayments() {
+  if (!CONFIG.squareEmbedReady || !CONFIG.squareAppId || !CONFIG.squareLocationId) {
+    $('#card-status').textContent = 'Checkout is being set up — please try again shortly.';
+    $('#pay-btn').disabled = true;
+    return;
+  }
+
+  // 1. Load SDK + create payments instance
+  let payments;
+  try {
+    await loadSquareSdk(CONFIG.squareEnv);
+    if (!window.Square) throw new Error('Square global not found after SDK load');
+    payments = window.Square.payments(CONFIG.squareAppId, CONFIG.squareLocationId);
+  } catch (err) {
+    console.error('[checkout] SDK init failed:', err);
+    $('#card-status').textContent = 'Checkout failed to load. Refresh the page or message the admin.';
+    $('#pay-btn').disabled = true;
+    return;
+  }
+
+  // 2. Wallets — non-fatal; failure here does not block card
+  try {
+    await initWallets(payments);
+  } catch (e) {
+    console.warn('[checkout] wallets init failed (non-fatal):', e && e.message);
+  }
+
+  // 3. Card field
+  try {
+    await initCard(payments);
+  } catch (err) {
+    console.error('[card] init failed:', err);
+    $('#card-status').textContent = 'Card form failed to load. Refresh the page or pay with crypto.';
+    $('#pay-btn').disabled = true;
+  }
 }
 
 async function payWithCard() {
@@ -274,26 +330,8 @@ async function payWithCard() {
   }
 }
 
-async function initPayments() {
-  if (!CONFIG.squareEmbedReady || !CONFIG.squareAppId || !CONFIG.squareLocationId) {
-    $('#card-status').textContent = 'Checkout is being set up — please try again shortly.';
-    $('#pay-btn').disabled = true;
-    return;
-  }
-  try {
-    await loadSquareSdk(CONFIG.squareEnv);
-    if (!window.Square) throw new Error('SDK unavailable');
-    const payments = window.Square.payments(CONFIG.squareAppId, CONFIG.squareLocationId);
-    await initWallets(payments);
-    await initCard(payments);
-  } catch (err) {
-    console.error('[checkout] init failed', err);
-    $('#card-status').textContent = 'Checkout failed to load. Refresh the page or message the admin.';
-    $('#pay-btn').disabled = true;
-  }
-}
-
 async function boot() {
+  // Restore success state from localStorage (survives reload)
   try {
     const saved = localStorage.getItem('mg_access');
     if (saved) {
@@ -319,9 +357,9 @@ async function boot() {
     'basic';
 
   const p = CONFIG.products[selectedTier];
-  $('#order-tier').textContent    = TIER_LABEL[selectedTier] || selectedTier;
-  $('#order-amount').textContent  = p ? moneyShort(p.amount) : '—';
-  $('#pay-btn-text').textContent  = p ? `Pay ${moneyShort(p.amount)}` : 'Pay';
+  $('#order-tier').textContent   = TIER_LABEL[selectedTier] || selectedTier;
+  $('#order-amount').textContent = p ? moneyShort(p.amount) : '—';
+  $('#pay-btn-text').textContent = p ? `Pay ${moneyShort(p.amount)}` : 'Pay';
 
   $('#pay-btn').addEventListener('click', payWithCard);
   initDiscountUI();
