@@ -224,27 +224,26 @@ async function initWallets(payments) {
   if (any) $('#wallet-sep').hidden = false;
 }
 
-// ── Fix: removed caretColor (not a valid Square style property — throws on init).
-//    Two-step fallback: try styled → if it fails, try plain → then attach.
 async function initCard(payments) {
+  // White box, black text — Square's default iframe background is white,
+  // so we don't touch backgroundColor at all. Just set text color + purple border.
   const style = {
     input: {
-      color: '#ffffff',
+      color: '#000000',
       fontSize: '16px',
-      backgroundColor: '#0f0f0f',
     },
-    'input::placeholder': { color: 'rgba(255,255,255,0.35)' },
+    'input::placeholder': { color: '#9ca3af' },
     '.input-container': {
-      borderColor: 'rgba(255,255,255,0.12)',
+      borderColor: 'rgba(168,85,247,0.5)',
       borderRadius: '12px',
-      borderWidth: '1px',
+      borderWidth: '1.5px',
     },
     '.input-container.is-focus': { borderColor: '#a855f7' },
     '.input-container.is-error': { borderColor: '#ef4444' },
-    '.message-text': { color: 'rgba(255,255,255,0.65)' },
-    '.message-text.is-error': { color: '#fca5a5' },
-    '.message-icon': { color: 'rgba(255,255,255,0.5)' },
-    '.message-icon.is-error': { color: '#fca5a5' },
+    '.message-text': { color: '#374151' },
+    '.message-text.is-error': { color: '#ef4444' },
+    '.message-icon': { color: '#6b7280' },
+    '.message-icon.is-error': { color: '#ef4444' },
   };
 
   // Step 1: try with dark style
