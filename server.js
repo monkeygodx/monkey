@@ -26,11 +26,11 @@ const express = require('express');
 })();
 
 const PORT = parseInt(process.env.PORT || '4000', 10);
-const PUBLIC_BASE_URL = (process.env.PUBLIC_BASE_URL || `http://localhost:${PORT}`).replace(/\/$/, '');
-const PAYMENT_HOST = (process.env.PAYMENT_HOST || 'monkeygod.cloud').toLowerCase();
-const PAYMENT_SITE_URL = (process.env.PAYMENT_SITE_URL || 'https://monkeygod.cloud').replace(/\/$/, '');
-const MAIN_SITE_URL = (process.env.MAIN_SITE_URL || 'https://monkeygod.fun').replace(/\/$/, '');
-const PREVIEW_BASE_URL = (process.env.PREVIEW_BASE_URL || '').replace(/\/$/, '');
+const PUBLIC_BASE_URL   = (process.env.PUBLIC_BASE_URL   || `http://localhost:${PORT}`).replace(/\/$/, '');
+const PAYMENT_HOST      = (process.env.PAYMENT_HOST      || 'monkeygod.cloud').toLowerCase();
+const PAYMENT_SITE_URL  = (process.env.PAYMENT_SITE_URL  || 'https://monkeygod.cloud').replace(/\/$/, '');
+const MAIN_SITE_URL     = (process.env.MAIN_SITE_URL     || 'https://monkeygod.fun').replace(/\/$/, '');
+const PREVIEW_BASE_URL  = (process.env.PREVIEW_BASE_URL  || '').replace(/\/$/, '');
 
 // ---------------------------------------------------------------------------
 // Product catalog — server is source of truth for prices (cents USD).
@@ -49,7 +49,6 @@ const DISCOUNT_CODES = {
 };
 
 // Track which fingerprints have used each code (in-memory; resets on redeploy).
-// fingerprint = first 16 chars of SHA-256(ip|ua)
 const usedCodeFingerprints = new Map(); // Map<code, Set<fingerprint>>
 
 function clientFingerprint(req) {
@@ -57,17 +56,14 @@ function clientFingerprint(req) {
   const ua = (req.headers && req.headers['user-agent']) || '';
   return crypto.createHash('sha256').update(ip + '|' + ua).digest('hex').slice(0, 16);
 }
-
 function hasUsedCode(code, fp) {
   const s = usedCodeFingerprints.get(code);
   return s ? s.has(fp) : false;
 }
-
 function markCodeUsed(code, fp) {
   if (!usedCodeFingerprints.has(code)) usedCodeFingerprints.set(code, new Set());
   usedCodeFingerprints.get(code).add(fp);
 }
-
 function applyDiscountCents(amountCents, code) {
   const d = DISCOUNT_CODES[code && code.toUpperCase()];
   if (!d) return amountCents;
@@ -77,11 +73,11 @@ function applyDiscountCents(amountCents, code) {
 // ---------------------------------------------------------------------------
 // Cloudflare R2 (S3 API)
 // ---------------------------------------------------------------------------
-const R2_ACCOUNT_ID      = process.env.R2_ACCOUNT_ID || '';
-const R2_BUCKET          = process.env.R2_BUCKET || 'monkeygod';
-const R2_CONFIG_KEY      = process.env.R2_CONFIG_KEY || 'data/config.json';
-const R2_OVERRIDE_KEY    = process.env.R2_OVERRIDE_KEY || 'data/override.html';
-const R2_ACCESS_KEY_ID   = process.env.R2_ACCESS_KEY_ID || '';
+const R2_ACCOUNT_ID        = process.env.R2_ACCOUNT_ID        || '';
+const R2_BUCKET            = process.env.R2_BUCKET            || 'monkeygod';
+const R2_CONFIG_KEY        = process.env.R2_CONFIG_KEY        || 'data/config.json';
+const R2_OVERRIDE_KEY      = process.env.R2_OVERRIDE_KEY      || 'data/override.html';
+const R2_ACCESS_KEY_ID     = process.env.R2_ACCESS_KEY_ID     || '';
 const R2_SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY || '';
 const R2_READY = Boolean(R2_ACCOUNT_ID && R2_ACCESS_KEY_ID && R2_SECRET_ACCESS_KEY);
 const CONFIG_TTL_MS = parseInt(process.env.CONFIG_TTL_MS || '30000', 10);
@@ -132,18 +128,18 @@ async function loadOverride() {
 function envDefaults() {
   return {
     square: {
-      env: (process.env.SQUARE_ENV || 'sandbox').toLowerCase(),
-      accessToken: process.env.SQUARE_ACCESS_TOKEN || '',
-      locationId:  process.env.SQUARE_LOCATION_ID  || '',
-      appId:       process.env.SQUARE_APP_ID        || '',
-      version:     process.env.SQUARE_VERSION       || '',
+      env:         (process.env.SQUARE_ENV          || 'sandbox').toLowerCase(),
+      accessToken:  process.env.SQUARE_ACCESS_TOKEN  || '',
+      locationId:   process.env.SQUARE_LOCATION_ID   || '',
+      appId:        process.env.SQUARE_APP_ID         || '',
+      version:      process.env.SQUARE_VERSION        || '',
     },
     crypto: [
-      { coin: 'BTC',  label: 'Bitcoin',         address: process.env.CRYPTO_BTC         || '' },
-      { coin: 'ETH',  label: 'Ethereum (ERC-20)',address: process.env.CRYPTO_ETH         || '' },
-      { coin: 'USDT', label: 'USDT (TRC-20)',    address: process.env.CRYPTO_USDT_TRC20  || '' },
-      { coin: 'LTC',  label: 'Litecoin',         address: process.env.CRYPTO_LTC         || '' },
-      { coin: 'SOL',  label: 'Solana',           address: process.env.CRYPTO_SOL         || '' },
+      { coin: 'BTC',  label: 'Bitcoin',          address: process.env.CRYPTO_BTC        || '' },
+      { coin: 'ETH',  label: 'Ethereum (ERC-20)', address: process.env.CRYPTO_ETH        || '' },
+      { coin: 'USDT', label: 'USDT (TRC-20)',     address: process.env.CRYPTO_USDT_TRC20 || '' },
+      { coin: 'LTC',  label: 'Litecoin',          address: process.env.CRYPTO_LTC        || '' },
+      { coin: 'SOL',  label: 'Solana',            address: process.env.CRYPTO_SOL        || '' },
     ].filter((c) => c.address),
     links: {
       admin:    process.env.TELEGRAM_ADMIN    || 'https://t.me/youradmin',
@@ -169,13 +165,13 @@ async function loadConfig() {
       const rs = remote.square || {};
       base.square = {
         env:         (rs.env || base.square.env).toLowerCase(),
-        accessToken: rs.accessToken || base.square.accessToken,
-        locationId:  rs.locationId  || base.square.locationId,
-        appId:       rs.appId       || base.square.appId,
-        version:     rs.version     || base.square.version,
+        accessToken:  rs.accessToken || base.square.accessToken,
+        locationId:   rs.locationId  || base.square.locationId,
+        appId:        rs.appId       || base.square.appId,
+        version:      rs.version     || base.square.version,
       };
       if (Array.isArray(remote.crypto)) { const c = remote.crypto.filter((x) => x && x.address); if (c.length) base.crypto = c; }
-      if (remote.links && typeof remote.links === 'object') for (const kk of Object.keys(remote.links)) if (remote.links[kk]) base.links[kk] = remote.links[kk];
+      if (remote.links     && typeof remote.links     === 'object') for (const kk of Object.keys(remote.links))     if (remote.links[kk])     base.links[kk]     = remote.links[kk];
       if (remote.tierLinks && typeof remote.tierLinks === 'object') for (const kk of Object.keys(remote.tierLinks)) if (remote.tierLinks[kk]) base.tierLinks[kk] = remote.tierLinks[kk];
       if (remote.discordWebhook) base.discordWebhook = remote.discordWebhook;
     }
@@ -208,7 +204,7 @@ async function notifyDiscord(webhook, { product, amountCents, paymentId, status,
             { name: 'Amount',  value: `$${(amountCents / 100).toFixed(2)}`, inline: true },
             { name: 'Status',  value: String(status || 'COMPLETED'), inline: true },
             ...(discountCode ? [{ name: 'Discount', value: discountCode, inline: true }] : []),
-            ...(paymentId ? [{ name: 'Payment ID', value: '`' + paymentId + '`', inline: false }] : []),
+            ...(paymentId    ? [{ name: 'Payment ID', value: '`' + paymentId + '`', inline: false }] : []),
           ],
           timestamp: new Date().toISOString(),
         }],
@@ -230,7 +226,7 @@ function listPreviews() {
 // Express app
 // ---------------------------------------------------------------------------
 const app = express();
-app.set('trust proxy', 1); // get real IP behind Railway / Cloudflare proxy
+app.set('trust proxy', 1);
 app.use(express.json());
 app.disable('x-powered-by');
 
@@ -265,7 +261,7 @@ app.get('/api/config', async (req, res) => {
   });
 });
 
-// Validate a discount code (used by the checkout page before charging).
+// Validate a discount code before charging.
 app.post('/api/validate-code', (req, res) => {
   const { code } = req.body || {};
   const codeUpper = (code || '').toUpperCase().trim();
@@ -287,7 +283,6 @@ app.post('/api/charge', async (req, res) => {
     const codeUpper = (discountCode || '').toUpperCase().trim();
     const fp = clientFingerprint(req);
 
-    // Validate discount code if supplied.
     if (codeUpper) {
       const disc = DISCOUNT_CODES[codeUpper];
       if (!disc) return res.status(400).json({ error: 'invalid_code', message: 'Discount code is not valid.' });
@@ -295,9 +290,9 @@ app.post('/api/charge', async (req, res) => {
     }
 
     const finalAmount = codeUpper ? applyDiscountCents(product.amount, codeUpper) : product.amount;
-
     const cfg = await loadConfig();
     const { sq, apiBase, embedReady } = squareCtx(cfg);
+
     if (!embedReady) return res.status(503).json({ error: 'card_unconfigured', message: 'Card payments are not live yet. Pay with crypto or DM the admin.' });
 
     const body = {
@@ -326,8 +321,24 @@ app.post('/api/charge', async (req, res) => {
     if (codeUpper && DISCOUNT_CODES[codeUpper]) markCodeUsed(codeUpper, fp);
 
     const payment = data && data.payment;
-    notifyDiscord(cfg.discordWebhook, { product: product.name, amountCents: finalAmount, paymentId: payment && payment.id, status: payment && payment.status, discountCode: codeUpper || null });
-    return res.json({ ok: true, paymentId: payment && payment.id, status: payment && payment.status, redirect: `/success?tier=${encodeURIComponent(tier)}` });
+    notifyDiscord(cfg.discordWebhook, {
+      product: product.name,
+      amountCents: finalAmount,
+      paymentId: payment && payment.id,
+      status: payment && payment.status,
+      discountCode: codeUpper || null,
+    });
+
+    // Return the tier's private channel link so the client can show it immediately.
+    const tierLink = (cfg.tierLinks && cfg.tierLinks[tier]) || null;
+
+    return res.json({
+      ok: true,
+      paymentId: payment && payment.id,
+      status: payment && payment.status,
+      tierLink,                                           // ← client passes this to showSuccess()
+      redirect: `/success?tier=${encodeURIComponent(tier)}`,
+    });
   } catch (err) {
     console.error('[charge] fatal', err);
     return res.status(500).json({ error: 'server_error', message: 'Something went wrong taking the payment.' });
@@ -352,7 +363,10 @@ app.post('/api/checkout', async (req, res) => {
     if (sq.version) headers['Square-Version'] = sq.version;
     const sqRes = await fetch(`${apiBase}/v2/online-checkout/payment-links`, { method: 'POST', headers, body: JSON.stringify(body) });
     const data = await sqRes.json().catch(() => ({}));
-    if (!sqRes.ok) { const detail = data && data.errors && data.errors[0] ? data.errors[0].detail : 'Square rejected the request.'; return res.status(502).json({ error: 'square_error', message: detail }); }
+    if (!sqRes.ok) {
+      const detail = data && data.errors && data.errors[0] ? data.errors[0].detail : 'Square rejected the request.';
+      return res.status(502).json({ error: 'square_error', message: detail });
+    }
     const url = data && data.payment_link && (data.payment_link.long_url || data.payment_link.url);
     if (!url) return res.status(502).json({ error: 'no_url', message: 'No checkout URL returned.' });
     return res.json({ url });
@@ -366,9 +380,13 @@ function isPaymentHost(req) {
   const host = (req.hostname || '').toLowerCase();
   return host === PAYMENT_HOST || host.endsWith('.cloud') || host.endsWith(PAYMENT_HOST);
 }
+
 app.get('/', (req, res, next) => { if (isPaymentHost(req)) return res.sendFile(path.join(__dirname, 'public', 'pay.html')); next(); });
 app.get(['/pay', '/basic', '/premium', '/exclusive'], (req, res) => { res.sendFile(path.join(__dirname, 'public', 'pay.html')); });
-app.get('/.well-known/apple-developer-merchantid-domain-association', (req, res) => { res.type('text/plain'); res.sendFile(path.join(__dirname, 'public', '.well-known', 'apple-developer-merchantid-domain-association')); });
+app.get('/.well-known/apple-developer-merchantid-domain-association', (req, res) => {
+  res.type('text/plain');
+  res.sendFile(path.join(__dirname, 'public', '.well-known', 'apple-developer-merchantid-domain-association'));
+});
 app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
 app.get('/success', (req, res) => { res.sendFile(path.join(__dirname, 'public', 'success.html')); });
 
@@ -376,7 +394,8 @@ app.listen(PORT, async () => {
   const cfg = await loadConfig();
   const { sq, embedReady } = squareCtx(cfg);
   console.log('\n  MONKEYGOD running');
-  console.log(`  Local:        ${PUBLIC_BASE_URL}`);
-  console.log(`  Square card:  ${embedReady ? `EMBEDDED ready (${sq.env})` : 'NOT live'}`);
-  console.log(`  Discount codes: ${Object.keys(DISCOUNT_CODES).join(', ')}\n`);
+  console.log(`  Local:          ${PUBLIC_BASE_URL}`);
+  console.log(`  Square card:    ${embedReady ? `EMBEDDED ready (${sq.env})` : 'NOT live'}`);
+  console.log(`  Discount codes: ${Object.keys(DISCOUNT_CODES).join(', ')}`);
+  console.log(`  Tier links:     basic=${cfg.tierLinks.basic ? '✓' : '✗'}  premium=${cfg.tierLinks.premium ? '✓' : '✗'}  exclusive=${cfg.tierLinks.exclusive ? '✓' : '✗'}\n`);
 });
