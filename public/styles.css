@@ -1001,3 +1001,4 @@ body {
   .steps-grid { grid-template-columns: 1fr; }
   .hero-h1 { font-size: 2.2rem; }
 }
+#card-container{background:#0f0f0f;border-radius:12px}
