@@ -10,22 +10,18 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css?v=12" />
+  <link rel="stylesheet" href="/styles.css?v=13" />
 </head>
 <body>
   <div class="mesh-bg" aria-hidden="true"></div>
-
   <main class="content-container pay-page">
-
     <a class="pay-back" href="/">← Back</a>
-
     <!-- ── Order summary ── -->
     <div class="pay-card" id="checkout-card">
       <div class="order-summary">
         <span class="order-tier" id="order-tier">Loading…</span>
         <span class="order-amount" id="order-amount">—</span>
       </div>
-
       <!-- ── Discount code input ── -->
       <div style="margin-bottom: 1.4rem;">
         <div style="font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-bright); margin-bottom: 10px; font-weight: 600;">
@@ -46,27 +42,21 @@
         </div>
         <div class="disc-status" id="disc-status"></div>
       </div>
-
       <!-- ── Wallet buttons (Apple Pay / Google Pay) ── -->
       <div id="wallet-container" class="wallet-container"></div>
       <div id="wallet-sep" class="wallet-sep" hidden>or pay by card</div>
-
       <!-- ── Card input ── -->
       <p class="pay-h">Card Details</p>
       <div id="card-container" class="card-container"></div>
       <p id="card-status" class="pay-note" style="text-align:center; margin-bottom: 0.9rem;"></p>
-
       <div id="pay-error" class="co-error" hidden></div>
-
       <button id="pay-btn" class="pay-btn pay-btn-card" disabled>
         <span id="pay-btn-text">Loading…</span>
       </button>
-
       <p class="co-fineprint" style="margin-top: 0.8rem;">
         🔒 Secured by Square &bull; One-time payment &bull; Instant access
       </p>
     </div>
-
     <!-- ── Success state ── -->
     <div class="resource-card" id="success-card" hidden>
       <div style="text-align:center; margin-bottom: 1.6rem;">
@@ -74,7 +64,6 @@
         <h3 style="font-size: 1.6rem; font-weight: 800; letter-spacing: -0.02em; margin: 0 0 0.5rem;">Payment Confirmed</h3>
         <p style="color: var(--dim); font-size: 1rem; margin: 0;">You're in. Tap the button below to join your private channel — access is lifetime.</p>
       </div>
-
       <!-- Big Telegram CTA box -->
       <a id="join-link" href="#" target="_blank" rel="noopener" style="
         display: flex;
@@ -101,16 +90,12 @@
         <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24" style="flex-shrink:0;color:#a855f7"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.19 13.6l-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.957.96z"/></svg>
         <span>Join Your Private Channel →</span>
       </a>
-
       <p class="co-fineprint" style="text-align:center; margin-top: 0;">
         Bookmark this page — your link is saved here. Having trouble? <a href="https://t.me/cynski" target="_blank" rel="noopener" style="color:var(--accent-bright); text-decoration:none; font-weight:700;">DM @cynski</a>
       </p>
     </div>
-
   </main>
-
   <div id="toast" class="toast" hidden></div>
-
-  <script src="/pay.js?v=12"></script>
+  <script src="/pay.js?v=13"></script>
 </body>
 </html>
