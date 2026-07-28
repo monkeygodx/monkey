@@ -8,12 +8,12 @@ const moneyShort = (cents) => {
 const TIER_ORDER = ['basic', 'premium', 'exclusive'];
 const TIER_LABEL = { basic: 'Basic', premium: 'Premium', exclusive: 'Exclusive' };
 
-let CONFIG = null;
-let card = null;
+let CONFIG       = null;
+let card         = null;
 let selectedTier = 'premium';
-let paid = false;
-let appliedCode = null;   // validated discount code string
-let appliedPct  = 0;      // discount percentage (e.g. 10)
+let paid         = false;
+let appliedCode  = null;
+let appliedPct   = 0;
 
 function toast(msg, ms) {
   const t = $('#toast');
@@ -58,7 +58,6 @@ function updatePriceDisplay() {
   const final = finalAmountCents();
   const amtEl = $('#order-amount');
   const btnEl = $('#pay-btn-text');
-
   if (appliedCode && final < base) {
     amtEl.innerHTML =
       `<span style="text-decoration:line-through;opacity:0.45;font-size:0.75em;">${moneyShort(base)}</span> ` +
@@ -69,15 +68,13 @@ function updatePriceDisplay() {
   if (btnEl) btnEl.textContent = `Pay ${moneyShort(final)}`;
 }
 
-// --- Discount code UI ---
+// ---- Discount code UI ----
 async function applyCode(code) {
   const statusEl = $('#disc-status');
   const inputEl  = $('#disc-input');
   if (!code) return;
-
   statusEl.textContent = 'Checking…';
   statusEl.className = 'disc-status checking';
-
   try {
     const res  = await fetch('/api/validate-code', {
       method: 'POST',
@@ -85,7 +82,6 @@ async function applyCode(code) {
       body: JSON.stringify({ code }),
     });
     const data = await res.json().catch(() => ({}));
-
     if (res.ok && data.valid) {
       appliedCode = code.toUpperCase();
       appliedPct  = data.pct;
@@ -110,26 +106,24 @@ function initDiscountUI() {
   const applyBtn = $('#disc-apply');
   const inputEl  = $('#disc-input');
   if (!applyBtn || !inputEl) return;
-
   applyBtn.addEventListener('click', () => applyCode(inputEl.value.trim()));
   inputEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') applyCode(inputEl.value.trim()); });
-
-  // Pre-fill from URL param and auto-apply
   const urlCode = codeFromUrl();
   if (urlCode) {
     inputEl.value = urlCode;
-    setTimeout(() => applyCode(urlCode), 600); // slight delay so config loads first
+    setTimeout(() => applyCode(urlCode), 600);
   }
 }
 
-// --- Square SDK ---
+// ---- Square SDK ----
 function loadSquareSdk(env) {
   return new Promise((resolve, reject) => {
     const src = env === 'production'
       ? 'https://web.squarecdn.com/v1/square.js'
       : 'https://sandbox.web.squarecdn.com/v1/square.js';
     const s = document.createElement('script');
-    s.src = src; s.onload = resolve;
+    s.src = src;
+    s.onload = resolve;
     s.onerror = () => reject(new Error('payment SDK failed to load'));
     document.head.appendChild(s);
   });
@@ -171,7 +165,6 @@ function showSuccess(link) {
     a.textContent = 'Message the admin to get added';
     a.href = (CONFIG && CONFIG.links && CONFIG.links.admin) || 'https://t.me/cynski';
   }
-  // Persist so reload still shows success
   try {
     localStorage.setItem('mg_access', JSON.stringify({
       tier: selectedTier,
@@ -186,7 +179,9 @@ function showSuccess(link) {
 
 async function tokenizeWallet(method, label) {
   let result;
-  try { result = await method.tokenize(); } catch (err) {
+  try {
+    result = await method.tokenize();
+  } catch (err) {
     showError(`${label} couldn't start${err && err.message ? ' — ' + err.message : '.'}`);
     return;
   }
@@ -204,50 +199,54 @@ async function initWallets(payments) {
     const pr = buildPaymentRequest(payments);
     const googlePay = await payments.googlePay(pr);
     const el = document.createElement('div');
-    el.id = 'gpay-btn'; el.className = 'wallet-btn';
+    el.id = 'gpay-btn';
+    el.className = 'wallet-btn';
     container.appendChild(el);
     await googlePay.attach('#gpay-btn', { buttonColor: 'white', buttonType: 'long', buttonSizeMode: 'fill' });
     el.addEventListener('click', async (e) => { e.preventDefault(); await tokenizeWallet(googlePay, 'Google Pay'); });
     any = true;
   } catch (e) { console.warn('[wallet] google pay unavailable', e && e.message); }
-
   try {
     const pr = buildPaymentRequest(payments);
     const applePay = await payments.applePay(pr);
     const btn = document.createElement('button');
-    btn.id = 'applepay-btn'; btn.className = 'apple-pay-button';
+    btn.id = 'applepay-btn';
+    btn.className = 'apple-pay-button';
     btn.setAttribute('aria-label', 'Pay with Apple Pay');
     container.appendChild(btn);
     btn.addEventListener('click', async (e) => { e.preventDefault(); await tokenizeWallet(applePay, 'Apple Pay'); });
     any = true;
   } catch (e) { console.warn('[wallet] apple pay unavailable', e && e.message); }
-
   if (any) $('#wallet-sep').hidden = false;
 }
 
 async function initCard(payments) {
   const style = {
-  input: {
-    color: '#ffffff',
-    fontSize: '16px',
-    backgroundColor: '#0f0f0f',
-    caretColor: '#a855f7',
-  },
-  'input::placeholder': { color: 'rgba(255,255,255,0.35)' },
-  '.input-container': {
-    borderColor: 'rgba(255,255,255,0.12)',
-    borderRadius: '12px',
-    borderWidth: '1px',
-  },
-  '.input-container.is-focus': { borderColor: '#a855f7' },
-  '.input-container.is-error': { borderColor: '#ef4444' },
-  '.message-text': { color: 'rgba(255,255,255,0.65)' },
-  '.message-text.is-error': { color: '#fca5a5' },
-  '.message-icon': { color: 'rgba(255,255,255,0.5)' },
-  '.message-icon.is-error': { color: '#fca5a5' },
-};
+    input: {
+      color: '#ffffff',
+      fontSize: '16px',
+      backgroundColor: '#0f0f0f',
+      caretColor: '#a855f7',
+    },
+    'input::placeholder': { color: 'rgba(255,255,255,0.35)' },
+    '.input-container': {
+      borderColor: 'rgba(255,255,255,0.12)',
+      borderRadius: '12px',
+      borderWidth: '1px',
+    },
+    '.input-container.is-focus': { borderColor: '#a855f7' },
+    '.input-container.is-error': { borderColor: '#ef4444' },
+    '.message-text': { color: 'rgba(255,255,255,0.65)' },
+    '.message-text.is-error': { color: '#fca5a5' },
+    '.message-icon': { color: 'rgba(255,255,255,0.5)' },
+    '.message-icon.is-error': { color: '#fca5a5' },
   };
-  try { card = await payments.card({ style }); } catch (e) { card = await payments.card(); }
+  try {
+    card = await payments.card({ style });
+  } catch (e) {
+    console.warn('[card] styled init failed, retrying unstyled', e);
+    card = await payments.card();
+  }
   await card.attach('#card-container');
   $('#card-status').hidden = true;
   $('#pay-btn').disabled = false;
@@ -295,7 +294,6 @@ async function initPayments() {
 }
 
 async function boot() {
-  // ── Restore success state from localStorage (survives reload) ──
   try {
     const saved = localStorage.getItem('mg_access');
     if (saved) {
@@ -303,12 +301,17 @@ async function boot() {
       if (link) {
         selectedTier = tier || 'basic';
         showSuccess(link);
-        return; // skip loading Square entirely
+        return;
       }
     }
   } catch (e) {}
 
-  try { CONFIG = await (await fetch('/api/config')).json(); } catch (e) { showError('Could not load checkout. Refresh the page.'); return; }
+  try {
+    CONFIG = await (await fetch('/api/config')).json();
+  } catch (e) {
+    showError('Could not load checkout. Refresh the page.');
+    return;
+  }
 
   selectedTier =
     tierFromUrl() ||
@@ -316,11 +319,11 @@ async function boot() {
     'basic';
 
   const p = CONFIG.products[selectedTier];
-  $('#order-tier').textContent = TIER_LABEL[selectedTier] || selectedTier;
-  $('#order-amount').textContent = p ? moneyShort(p.amount) : '—';
+  $('#order-tier').textContent    = TIER_LABEL[selectedTier] || selectedTier;
+  $('#order-amount').textContent  = p ? moneyShort(p.amount) : '—';
   $('#pay-btn-text').textContent  = p ? `Pay ${moneyShort(p.amount)}` : 'Pay';
-  $('#pay-btn').addEventListener('click', payWithCard);
 
+  $('#pay-btn').addEventListener('click', payWithCard);
   initDiscountUI();
   await initPayments();
 }
