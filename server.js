@@ -62,9 +62,9 @@ const PREVIEW_BASE_URL = (process.env.PREVIEW_BASE_URL || '').replace(/\/$/, '')
 // client). Amounts are in cents (USD).
 // ---------------------------------------------------------------------------
 const PRODUCTS = {
-  basic: { id: 'basic', name: 'MONKEYGOD — BASIC', amount: 1500 },
-  premium: { id: 'premium', name: 'MONKEYGOD — PREMIUM', amount: 2500 },
-  exclusive: { id: 'exclusive', name: 'MONKEYGOD — EXCLUSIVE', amount: 5000 },
+  basic: { id: 'basic', name: 'MONKEYGOD — BASIC', amount: 1999 },
+  premium: { id: 'premium', name: 'MONKEYGOD — PREMIUM', amount: 2999 },
+  exclusive: { id: 'exclusive', name: 'MONKEYGOD — EXCLUSIVE', amount: 4999 },
 };
 
 // ---------------------------------------------------------------------------
