@@ -1,5 +1,10 @@
 'use strict';
 
+/* MONKEYGOD — embedded checkout (Web Payments SDK).
+   Tier is pre-chosen on the previous page (?tier=). No tier picker here.
+   Flow: load config -> mount Apple Pay / Google Pay + card -> tokenize on pay ->
+   POST /api/charge -> redirect to /success?tier= (persistent, fetches fresh config). */
+
 const $ = (s) => document.querySelector(s);
 const moneyShort = (cents) => {
   const d = cents / 100;
@@ -8,12 +13,10 @@ const moneyShort = (cents) => {
 const TIER_ORDER = ['basic', 'premium', 'exclusive'];
 const TIER_LABEL = { basic: 'Basic', premium: 'Premium', exclusive: 'Exclusive' };
 
-let CONFIG       = null;
-let card         = null;
+let CONFIG = null;
+let card = null;
 let selectedTier = 'premium';
-let paid         = false;
-let appliedCode  = null;
-let appliedPct   = 0;
+let paid = false;
 
 function toast(msg, ms) {
   const t = $('#toast');
@@ -37,94 +40,21 @@ function tierFromUrl() {
   return t && TIER_ORDER.includes(t) ? t : null;
 }
 
-function codeFromUrl() {
-  const c = new URLSearchParams(location.search).get('code');
-  return c ? c.toUpperCase().trim() : null;
-}
-
-function baseAmountCents() {
-  const p = CONFIG && CONFIG.products[selectedTier];
+function amountCents() {
+  const p = CONFIG.products[selectedTier];
   return p ? p.amount : 0;
 }
 
-function finalAmountCents() {
-  const base = baseAmountCents();
-  if (!appliedCode || !appliedPct) return base;
-  return Math.round(base * (1 - appliedPct / 100));
-}
-
-function updatePriceDisplay() {
-  const base  = baseAmountCents();
-  const final = finalAmountCents();
-  const amtEl = $('#order-amount');
-  const btnEl = $('#pay-btn-text');
-  if (appliedCode && final < base) {
-    amtEl.innerHTML =
-      `<span style="text-decoration:line-through;opacity:0.45;font-size:0.75em;">${moneyShort(base)}</span> ` +
-      `<span style="color:var(--accent-bright)">${moneyShort(final)}</span>`;
-  } else {
-    amtEl.textContent = moneyShort(final);
-  }
-  if (btnEl) btnEl.textContent = `Pay ${moneyShort(final)}`;
-}
-
-// ---- Discount code UI ----
-async function applyCode(code) {
-  const statusEl = $('#disc-status');
-  const inputEl  = $('#disc-input');
-  if (!code) return;
-  statusEl.textContent = 'Checking…';
-  statusEl.className = 'disc-status checking';
-  try {
-    const res  = await fetch('/api/validate-code', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code }),
-    });
-    const data = await res.json().catch(() => ({}));
-    if (res.ok && data.valid) {
-      appliedCode = code.toUpperCase();
-      appliedPct  = data.pct;
-      statusEl.textContent = `✓ ${data.description} applied`;
-      statusEl.className = 'disc-status success';
-      if (inputEl) { inputEl.value = appliedCode; inputEl.disabled = true; }
-      const applyBtn = $('#disc-apply');
-      if (applyBtn) { applyBtn.textContent = 'Applied'; applyBtn.disabled = true; }
-      updatePriceDisplay();
-    } else {
-      appliedCode = null; appliedPct = 0;
-      statusEl.textContent = data.message || 'Invalid code.';
-      statusEl.className = 'disc-status error';
-    }
-  } catch (e) {
-    statusEl.textContent = 'Could not check code. Try again.';
-    statusEl.className = 'disc-status error';
-  }
-}
-
-function initDiscountUI() {
-  const applyBtn = $('#disc-apply');
-  const inputEl  = $('#disc-input');
-  if (!applyBtn || !inputEl) return;
-  applyBtn.addEventListener('click', () => applyCode(inputEl.value.trim()));
-  inputEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') applyCode(inputEl.value.trim()); });
-  const urlCode = codeFromUrl();
-  if (urlCode) {
-    inputEl.value = urlCode;
-    setTimeout(() => applyCode(urlCode), 600);
-  }
-}
-
-// ---- Square SDK ----
 function loadSquareSdk(env) {
   return new Promise((resolve, reject) => {
-    const src = env === 'production'
-      ? 'https://web.squarecdn.com/v1/square.js'
-      : 'https://sandbox.web.squarecdn.com/v1/square.js';
+    const src =
+      env === 'production'
+        ? 'https://web.squarecdn.com/v1/square.js'
+        : 'https://sandbox.web.squarecdn.com/v1/square.js';
     const s = document.createElement('script');
     s.src = src;
     s.onload = resolve;
-    s.onerror = () => reject(new Error('Square SDK failed to load — check network/CSP'));
+    s.onerror = () => reject(new Error('payment SDK failed to load'));
     document.head.appendChild(s);
   });
 }
@@ -133,65 +63,45 @@ function buildPaymentRequest(payments) {
   return payments.paymentRequest({
     countryCode: 'US',
     currencyCode: 'USD',
-    total: { amount: (finalAmountCents() / 100).toFixed(2), label: 'Total' },
+    total: { amount: (amountCents() / 100).toFixed(2), label: 'Total' },
   });
 }
 
-// ── Fix: pass data.tierLink so showSuccess shows the real channel link ──
+// Charge a tokenized source and redirect to the persistent success page.
 async function charge(sourceId, verificationToken) {
   showError('');
   const res = await fetch('/api/charge', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      tier: selectedTier,
-      sourceId,
-      buyerVerificationToken: verificationToken,
-      discountCode: appliedCode || undefined,
-    }),
+    body: JSON.stringify({ tier: selectedTier, sourceId, buyerVerificationToken: verificationToken }),
   });
   const data = await res.json().catch(() => ({}));
   if (res.ok && data.ok) {
-    showSuccess(data.tierLink || undefined); // ← pass tier link from server response
+    paid = true;
+    // Use the server's redirect URL so the buyer lands on success.html —
+    // persistent, refreshable, fetches tier link fresh from config each time.
+    window.location.href = data.redirect || ('/success?tier=' + encodeURIComponent(selectedTier));
     return true;
   }
   showError(data.message || 'Payment could not be completed. Try another card.');
   return false;
 }
 
-function showSuccess(link) {
-  paid = true;
-  const resolvedLink = link || (CONFIG && CONFIG.tierLinks && CONFIG.tierLinks[selectedTier]) || '';
-  const a = $('#join-link');
-  if (resolvedLink) {
-    a.href = resolvedLink;
-  } else {
-    a.textContent = 'Message the admin to get added';
-    a.href = (CONFIG && CONFIG.links && CONFIG.links.admin) || 'https://t.me/cynski';
-  }
-  try {
-    localStorage.setItem('mg_access', JSON.stringify({
-      tier: selectedTier,
-      link: resolvedLink,
-      ts: Date.now(),
-    }));
-  } catch (e) {}
-  $('#checkout-card').hidden = true;
-  $('#success-card').hidden = false;
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
+// ---- Wallets (Apple Pay / Google Pay) ----
 async function tokenizeWallet(method, label) {
   let result;
   try {
     result = await method.tokenize();
   } catch (err) {
-    showError(`${label} couldn't start${err && err.message ? ' — ' + err.message : '.'}`);
+    console.error('[wallet] tokenize threw', err);
+    showError(`${label} couldn't start${err && err.message ? ' — ' + err.message : '. Make sure a card is set up and pop-ups are allowed.'}`);
     return;
   }
   if (result.status === 'OK') {
     await charge(result.token, result.details && result.details.verificationToken);
-  } else if (result.status !== 'Cancel') {
+  } else if (result.status === 'Cancel') {
+    /* buyer closed the wallet sheet — not an error */
+  } else {
     showError((result.errors && result.errors[0] && result.errors[0].message) || `${label} was not completed.`);
   }
 }
@@ -199,6 +109,8 @@ async function tokenizeWallet(method, label) {
 async function initWallets(payments) {
   const container = $('#wallet-container');
   let any = false;
+
+  // Google Pay
   try {
     const pr = buildPaymentRequest(payments);
     const googlePay = await payments.googlePay(pr);
@@ -207,9 +119,16 @@ async function initWallets(payments) {
     el.className = 'wallet-btn';
     container.appendChild(el);
     await googlePay.attach('#gpay-btn', { buttonColor: 'white', buttonType: 'long', buttonSizeMode: 'fill' });
-    el.addEventListener('click', async (e) => { e.preventDefault(); await tokenizeWallet(googlePay, 'Google Pay'); });
+    el.addEventListener('click', async (e) => {
+      e.preventDefault();
+      await tokenizeWallet(googlePay, 'Google Pay');
+    });
     any = true;
-  } catch (e) { console.warn('[wallet] google pay unavailable', e && e.message); }
+  } catch (e) {
+    console.warn('[wallet] google pay unavailable', e && e.message);
+  }
+
+  // Apple Pay
   try {
     const pr = buildPaymentRequest(payments);
     const applePay = await payments.applePay(pr);
@@ -218,93 +137,37 @@ async function initWallets(payments) {
     btn.className = 'apple-pay-button';
     btn.setAttribute('aria-label', 'Pay with Apple Pay');
     container.appendChild(btn);
-    btn.addEventListener('click', async (e) => { e.preventDefault(); await tokenizeWallet(applePay, 'Apple Pay'); });
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      await tokenizeWallet(applePay, 'Apple Pay');
+    });
     any = true;
-  } catch (e) { console.warn('[wallet] apple pay unavailable', e && e.message); }
+  } catch (e) {
+    console.warn('[wallet] apple pay unavailable', e && e.message);
+  }
+
   if (any) $('#wallet-sep').hidden = false;
 }
 
+// ---- Card field ----
 async function initCard(payments) {
-  // White box, black text — Square's default iframe background is white,
-  // so we don't touch backgroundColor at all. Just set text color + purple border.
   const style = {
-    input: {
-      color: '#000000',
-      fontSize: '16px',
-    },
-    'input::placeholder': { color: '#9ca3af' },
-    '.input-container': {
-      borderColor: 'rgba(168,85,247,0.5)',
-      borderRadius: '12px',
-      borderWidth: '1.5px',
-    },
+    input: { color: '#ffffff', fontSize: '16px' },
+    'input::placeholder': { color: '#71717a' },
+    '.input-container': { borderColor: 'rgba(255,255,255,0.08)', borderRadius: '12px' },
     '.input-container.is-focus': { borderColor: '#a855f7' },
     '.input-container.is-error': { borderColor: '#ef4444' },
-    '.message-text': { color: '#374151' },
-    '.message-text.is-error': { color: '#ef4444' },
-    '.message-icon': { color: '#6b7280' },
-    '.message-icon.is-error': { color: '#ef4444' },
+    '.message-text.is-error': { color: '#fca5a5' },
   };
-
-  // Step 1: try with dark style
   try {
     card = await payments.card({ style });
   } catch (e) {
-    console.warn('[card] styled init failed:', e && e.message);
-    card = null;
+    console.warn('[card] styled init failed, retrying unstyled', e);
+    card = await payments.card();
   }
-
-  // Step 2: fall back to plain card (no style) if styled failed
-  if (!card) {
-    try {
-      card = await payments.card();
-    } catch (e) {
-      throw new Error('Card field could not be initialized: ' + (e && e.message));
-    }
-  }
-
   await card.attach('#card-container');
   $('#card-status').hidden = true;
   $('#pay-btn').disabled = false;
-}
-
-// ── Fix: split SDK init, wallet init, and card init into separate try/catch
-//    blocks so a wallet failure can't mask a card failure (and vice versa).
-async function initPayments() {
-  if (!CONFIG.squareEmbedReady || !CONFIG.squareAppId || !CONFIG.squareLocationId) {
-    $('#card-status').textContent = 'Checkout is being set up — please try again shortly.';
-    $('#pay-btn').disabled = true;
-    return;
-  }
-
-  // 1. Load SDK + create payments instance
-  let payments;
-  try {
-    await loadSquareSdk(CONFIG.squareEnv);
-    if (!window.Square) throw new Error('Square global not found after SDK load');
-    payments = window.Square.payments(CONFIG.squareAppId, CONFIG.squareLocationId);
-  } catch (err) {
-    console.error('[checkout] SDK init failed:', err);
-    $('#card-status').textContent = 'Checkout failed to load. Refresh the page or message the admin.';
-    $('#pay-btn').disabled = true;
-    return;
-  }
-
-  // 2. Wallets — non-fatal; failure here does not block card
-  try {
-    await initWallets(payments);
-  } catch (e) {
-    console.warn('[checkout] wallets init failed (non-fatal):', e && e.message);
-  }
-
-  // 3. Card field
-  try {
-    await initCard(payments);
-  } catch (err) {
-    console.error('[card] init failed:', err);
-    $('#card-status').textContent = 'Card form failed to load. Refresh the page or pay with crypto.';
-    $('#pay-btn').disabled = true;
-  }
 }
 
 async function payWithCard() {
@@ -325,24 +188,33 @@ async function payWithCard() {
     console.error('[pay] error', e);
     showError('Network error — please try again.');
   } finally {
-    if (!paid) { btn.disabled = false; $('#pay-btn-text').textContent = label; }
+    if (!paid) {
+      btn.disabled = false;
+      $('#pay-btn-text').textContent = label;
+    }
+  }
+}
+
+async function initPayments() {
+  if (!CONFIG.squareEmbedReady || !CONFIG.squareAppId || !CONFIG.squareLocationId) {
+    $('#card-status').textContent = 'Checkout is being set up — please try again shortly.';
+    $('#pay-btn').disabled = true;
+    return;
+  }
+  try {
+    await loadSquareSdk(CONFIG.squareEnv);
+    if (!window.Square) throw new Error('SDK unavailable');
+    const payments = window.Square.payments(CONFIG.squareAppId, CONFIG.squareLocationId);
+    await initWallets(payments);
+    await initCard(payments);
+  } catch (err) {
+    console.error('[checkout] init failed', err);
+    $('#card-status').textContent = 'Checkout failed to load. Refresh the page or message the admin.';
+    $('#pay-btn').disabled = true;
   }
 }
 
 async function boot() {
-  // Restore success state from localStorage (survives reload)
-  try {
-    const saved = localStorage.getItem('mg_access');
-    if (saved) {
-      const { tier, link } = JSON.parse(saved);
-      if (link) {
-        selectedTier = tier || 'basic';
-        showSuccess(link);
-        return;
-      }
-    }
-  } catch (e) {}
-
   try {
     CONFIG = await (await fetch('/api/config')).json();
   } catch (e) {
@@ -356,12 +228,12 @@ async function boot() {
     'basic';
 
   const p = CONFIG.products[selectedTier];
-  $('#order-tier').textContent   = TIER_LABEL[selectedTier] || selectedTier;
+  $('#order-tier').textContent = TIER_LABEL[selectedTier] || selectedTier;
   $('#order-amount').textContent = p ? moneyShort(p.amount) : '—';
   $('#pay-btn-text').textContent = p ? `Pay ${moneyShort(p.amount)}` : 'Pay';
 
   $('#pay-btn').addEventListener('click', payWithCard);
-  initDiscountUI();
+
   await initPayments();
 }
 
