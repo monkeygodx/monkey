@@ -48,13 +48,23 @@
   </main>
   <script>
     (function(){
-      var tier = new URLSearchParams(location.search).get('tier');
-      fetch('/api/config').then(function(r){return r.json();}).then(function(c){
-        var a = document.getElementById('join-link');
-        var link = c.tierLinks && tier && c.tierLinks[tier];
-        if (link) { a.href = link; }
-        else { a.textContent = 'Message the admin to get added'; a.href = (c.links && c.links.admin) || '#'; }
-      }).catch(function(){});
+      var token = new URLSearchParams(location.search).get('token');
+      var a = document.getElementById('join-link');
+      if (!token) {
+        a.textContent = 'Message the admin to get added';
+        a.href = 'https://t.me/cynski';
+        return;
+      }
+      fetch('/api/claim?token=' + encodeURIComponent(token))
+        .then(function(r){ return r.json(); })
+        .then(function(c){
+          if (c.link) { a.href = c.link; }
+          else { a.textContent = 'Message the admin to get added'; a.href = 'https://t.me/cynski'; }
+        })
+        .catch(function(){
+          a.textContent = 'Message the admin to get added';
+          a.href = 'https://t.me/cynski';
+        });
     })();
     (function(){
       var card = document.getElementById('resourceCard');
