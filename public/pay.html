@@ -13,8 +13,34 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/styles.css?v=13" />
+  <style>
+    .dispute-banner {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 999;
+      background: #1a1025;
+      color: #c4b5fd;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-align: center;
+      padding: 10px 16px;
+      line-height: 1.5;
+      border-bottom: 1px solid #3b1f6b;
+    }
+    .dispute-banner a {
+      color: #a78bfa;
+      text-decoration: underline;
+    }
+    body { padding-top: 48px; }
+  </style>
 </head>
 <body>
+  <div class="dispute-banner">
+    ⚠️ All sales are final. Chargebacks &amp; disputes will result in legal action. Need a refund? Contact
+    <a href="https://t.me/cynski" target="_blank" rel="noopener">@cynski on Telegram</a> before disputing.
+  </div>
+
   <div class="mesh-bg" aria-hidden="true"></div>
 
   <main class="content-container pay-page">
