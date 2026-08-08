@@ -190,39 +190,39 @@ body {
   position: relative;
   display: flex;
   flex-direction: column;
-  background: #161618;
-  border: 1px solid rgba(255,255,255,.1);
-  border-radius: 18px;
-  padding: 2rem 1.75rem 1.75rem;
+  background: #1c1c1c;
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 26px;
+  padding: 1.8rem 1.7rem 1.65rem;
   transition: border-color .25s, box-shadow .25s;
 }
-.tier-card:hover { border-color: rgba(255,255,255,.2); }
+.tier-card:hover { border-color: rgba(255,255,255,.18); }
 .tier-card.featured {
   background: #100d1c;
-  border-color: rgba(147,51,234,.65);
+  border-color: rgba(147,51,234,.6);
   box-shadow:
-    0 0 0 1px rgba(147,51,234,.15),
-    0 24px 64px -12px rgba(147,51,234,.55),
-    inset 0 0 80px -40px rgba(124,58,237,.1);
+    0 0 0 1px rgba(147,51,234,.12),
+    0 20px 60px -14px rgba(147,51,234,.6),
+    inset 0 0 60px -30px rgba(120,40,220,.1);
 }
 .tier-card.featured:hover {
-  border-color: rgba(147,51,234,.9);
+  border-color: rgba(147,51,234,.85);
   box-shadow:
-    0 0 0 1px rgba(147,51,234,.22),
-    0 30px 72px -10px rgba(147,51,234,.65),
-    inset 0 0 80px -40px rgba(124,58,237,.14);
+    0 0 0 1px rgba(147,51,234,.2),
+    0 28px 70px -10px rgba(147,51,234,.7),
+    inset 0 0 60px -30px rgba(120,40,220,.14);
 }
 
 /* badge */
 .tier-badge {
   position: absolute;
   top: -13px;
-  right: 20px;
-  background: var(--purple-grad);
+  right: 18px;
+  background: linear-gradient(135deg, #9333ea, #7c3aed);
   color: #fff;
-  font-size: .6rem;
+  font-size: .58rem;
   font-weight: 900;
-  letter-spacing: .12em;
+  letter-spacing: .13em;
   padding: 5px 14px;
   border-radius: 999px;
   white-space: nowrap;
@@ -231,12 +231,12 @@ body {
 
 /* name */
 .tier-name {
-  font-size: .78rem;
-  font-weight: 700;
-  letter-spacing: .1em;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: .06em;
   text-transform: uppercase;
-  color: rgba(255,255,255,.5);
-  margin-bottom: .5rem;
+  color: #fff;
+  margin-bottom: .55rem;
 }
 .tier-card.featured .tier-name { color: var(--purple); }
 
@@ -244,18 +244,21 @@ body {
 .tier-price-row {
   display: flex;
   align-items: baseline;
-  gap: .5rem;
-  margin-bottom: .55rem;
+  gap: .45rem;
+  margin-bottom: .45rem;
 }
 .tier-price {
-  font-size: 3.8rem;
+  font-size: 3.4rem;
   font-weight: 800;
-  color: #fff;
   line-height: 1;
-  letter-spacing: -.04em;
+  letter-spacing: -.03em;
+  background: linear-gradient(140deg, #b47cf8 0%, #8b2be2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 .tier-onetime {
-  font-size: .75rem;
+  font-size: .7rem;
   color: var(--muted);
   font-weight: 500;
 }
@@ -264,18 +267,18 @@ body {
 .tier-divider {
   height: 1px;
   background: rgba(255,255,255,.07);
-  margin: .7rem 0 1rem;
+  margin: .6rem 0 .85rem;
 }
-.tier-card.featured .tier-divider { background: rgba(147,51,234,.28); }
+.tier-card.featured .tier-divider { background: rgba(147,51,234,.25); }
 
 /* callout (featured only) */
 .tier-callout {
-  font-size: .62rem;
+  font-size: .6rem;
   font-weight: 800;
-  letter-spacing: .1em;
+  letter-spacing: .12em;
   color: var(--purple);
   text-transform: uppercase;
-  margin-bottom: .85rem;
+  margin-bottom: .75rem;
 }
 
 /* feature list */
@@ -283,28 +286,28 @@ body {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: .7rem;
+  gap: .55rem;
   flex: 1;
-  margin-bottom: 1.6rem;
+  margin-bottom: 1.4rem;
 }
 .tier-features li {
   display: flex;
   align-items: center;
   gap: .65rem;
-  font-size: .88rem;
+  font-size: .86rem;
   color: #e5e7eb;
-  line-height: 1.4;
+  line-height: 1.35;
   font-weight: 500;
 }
 .tier-features li.no { color: rgba(255,255,255,.22); font-weight: 400; }
 
 .check-icon {
-  width: 24px;
-  height: 24px;
+  width: 23px;
+  height: 23px;
   border-radius: 50%;
-  background: var(--purple);
+  background: linear-gradient(135deg, #9333ea, #7c3aed);
   color: #fff;
-  font-size: .62rem;
+  font-size: .56rem;
   font-weight: 900;
   display: flex;
   align-items: center;
@@ -323,33 +326,33 @@ body {
 .tier-btn {
   display: block;
   width: 100%;
-  padding: .95rem;
-  border-radius: 10px;
+  padding: .88rem 1rem;
+  border-radius: 12px;
   font-weight: 700;
   font-size: .88rem;
   cursor: pointer;
-  border: 1px solid rgba(255,255,255,.18);
+  border: 1.5px solid rgba(255,255,255,.2);
   font-family: inherit;
-  background: rgba(255,255,255,.05);
+  background: #202024;
   color: #fff;
   transition: all .2s;
   text-align: center;
   letter-spacing: .01em;
 }
-.tier-btn:hover { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.32); }
+.tier-btn:hover { background: #28282d; border-color: rgba(255,255,255,.36); }
 .tier-btn:disabled { opacity: .5; cursor: wait; }
 
 .tier-btn-featured {
-  background: var(--purple-grad);
+  background: linear-gradient(135deg, #9333ea, #7c3aed);
   border-color: transparent;
   color: #fff;
-  box-shadow: 0 6px 22px rgba(147,51,234,.5);
+  box-shadow: 0 6px 24px rgba(147,51,234,.55);
 }
 .tier-btn-featured:hover {
   filter: brightness(1.08);
   transform: translateY(-1px);
-  box-shadow: 0 10px 32px rgba(147,51,234,.65);
-  background: var(--purple-grad);
+  box-shadow: 0 10px 32px rgba(147,51,234,.7);
+  background: linear-gradient(135deg, #9333ea, #7c3aed);
   border-color: transparent;
   color: #fff;
 }
