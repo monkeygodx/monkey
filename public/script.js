@@ -4,33 +4,39 @@
 const TIER_DATA = {
   basic: {
     name: 'Basic',
-    tag: '',
+    tag: null,
+    desc: 'Entry-level access to get started.',
     features: [
-      { t: 'Access 1000+ Videos', in: true },
-      { t: 'Fresh Content', in: true },
-      { t: 'High Quality Videos', in: true },
-      { t: 'HD Audio (With Sound)', in: false },
+      { t: 'Access 1,000+ Videos' },
+      { t: 'Fresh Content' },
+      { t: 'High Quality Videos' },
+      { t: 'Lifetime Channel Access' },
     ],
   },
   premium: {
     name: 'Premium',
-    tag: '',
+    tag: 'MOST POPULAR',
+    popular: true,
+    desc: 'The tier most members choose.',
     features: [
-      { t: 'Access 5,000+ Videos', in: true },
-      { t: 'Exclusive Content & Early Access', in: true },
-      { t: 'Fresh Content & Updates', in: true },
-      { t: 'High Quality Videos', in: true },
+      { t: 'Access 5,000+ Videos' },
+      { t: 'Exclusive Content & Early Access' },
+      { t: 'Fresh Content & Updates' },
+      { t: 'Higher Quality Videos' },
+      { t: 'Lifetime Channel Access' },
     ],
   },
   exclusive: {
     name: 'Exclusive',
-    tag: '★ HIGHEST TIER',
-    featured: true,
+    tag: 'ALL ACCESS',
+    ultimate: true,
+    desc: 'Everything. Every category. No limits.',
     features: [
-      { t: 'Access 10,000+ Videos', in: true },
-      { t: 'Extra Omegle Wins Channel', in: true },
-      { t: 'High Quality Videos', in: true },
-      { t: 'Lifetime Access', in: true },
+      { t: 'Access 10,000+ Videos' },
+      { t: 'Extra Omegle Wins Channel' },
+      { t: 'Every Category Unlocked' },
+      { t: 'Highest Quality + Sound' },
+      { t: 'Lifetime Access' },
     ],
   },
 };
@@ -205,26 +211,39 @@ function renderTiers() {
     const d = TIER_DATA[key];
     if (!p || !d) continue;
     const card = document.createElement('div');
-    card.className = 'tier-card' + (d.featured ? ' featured' : '');
+    let cls = 'tier-card';
+    if (d.popular)  cls += ' popular';
+    if (d.ultimate) cls += ' ultimate';
+    card.className = cls;
     const price = moneyShort(p.amount);
-    const badge    = d.featured ? '<div class="tier-badge">Most Popular</div>' : '';
-    const callout  = d.featured ? '<div class="tier-callout">★ The tier most members go with</div>' : '';
-    const btnCls   = d.featured ? 'tier-btn tier-btn-featured' : 'tier-btn';
-    const btnLabel = d.featured ? `Unlock Everything — ${price} →` : `Get ${d.name} Access →`;
-    const footnote = d.featured ? 'Instant · no subscription · best value' : 'Instant · no subscription';
+    let badge = '';
+    if (d.tag) {
+      const badgeCls = d.ultimate ? 'tier-badge tier-badge-ultimate' : 'tier-badge tier-badge-popular';
+      badge = `<div class="${badgeCls}">${d.tag}</div>`;
+    }
+    const desc = d.desc ? `<p class="tier-desc">${d.desc}</p>` : '';
+    let btnCls = 'tier-btn';
+    if (d.popular)  btnCls += ' tier-btn-popular';
+    if (d.ultimate) btnCls += ' tier-btn-ultimate';
+    const btnLabel = d.ultimate
+      ? `Unlock Everything — ${price} →`
+      : d.popular
+        ? `Get ${d.name} — ${price} →`
+        : `Get ${d.name} Access →`;
+    const footnote = d.ultimate ? 'Instant · no subscription · best value' : 'Instant · no subscription';
     card.innerHTML = `
       ${badge}
       <div class="tier-name">${d.name}</div>
+      ${desc}
       <div class="tier-price-row">
         <span class="tier-price">${price}</span>
         <span class="tier-onetime">one-time</span>
       </div>
       <div class="tier-divider"></div>
-      ${callout}
       <ul class="tier-features">
         ${d.features.map((f) => `
-          <li class="${f.in ? '' : 'no'}">
-            <span class="check-icon">${f.in ? '✓' : '✕'}</span>${f.t}
+          <li>
+            <span class="check-icon">✓</span>${f.t}
           </li>`).join('')}
       </ul>
       <div class="tier-card-footer">
@@ -322,4 +341,18 @@ function animateMembers() {
   }, 4000);
 }
 
+/* ---------------- scroll reveal ---------------- */
+function initReveal() {
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.07 });
+  document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+}
+
 boot();
+initReveal();
