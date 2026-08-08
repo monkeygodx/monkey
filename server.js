@@ -1,5 +1,4 @@
 'use strict';
-
 /**
  * MONKEYGOD — landing + checkout server (hosted on Railway).
  *
@@ -15,12 +14,10 @@
  *   - Crypto -> wallet addresses shown on-page; customer DMs admin the TXID.
  * There is NO PayPal path anywhere by design.
  */
-
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const express = require('express');
-
 // ---------------------------------------------------------------------------
 // Tiny .env loader (avoids a dotenv dependency). Real env vars win over .env.
 // ---------------------------------------------------------------------------
@@ -44,19 +41,15 @@ const express = require('express');
     console.warn('[env] could not read .env:', e.message);
   }
 })();
-
 const PORT = parseInt(process.env.PORT || '4000', 10);
 const PUBLIC_BASE_URL = (process.env.PUBLIC_BASE_URL || `http://localhost:${PORT}`).replace(/\/$/, '');
-
 // Two-domain setup: main site (.fun) and the payment site (.cloud). Both are
 // served by THIS one app; requests are routed by hostname. The "Get" buttons on
 // the main site send the buyer to PAYMENT_SITE_URL to actually pay.
 const PAYMENT_HOST = (process.env.PAYMENT_HOST || 'monkeygod.cloud').toLowerCase();
 const PAYMENT_SITE_URL = (process.env.PAYMENT_SITE_URL || 'https://monkeygod.cloud').replace(/\/$/, '');
 const MAIN_SITE_URL = (process.env.MAIN_SITE_URL || 'https://monkeygod.fun').replace(/\/$/, '');
-
 const PREVIEW_BASE_URL = (process.env.PREVIEW_BASE_URL || '').replace(/\/$/, '');
-
 // ---------------------------------------------------------------------------
 // Product catalog — SERVER is the source of truth for prices (never trust the
 // client). Amounts are in cents (USD).
@@ -66,7 +59,6 @@ const PRODUCTS = {
   premium: { id: 'premium', name: 'MONKEYGOD — PREMIUM', amount: 2999 },
   exclusive: { id: 'exclusive', name: 'MONKEYGOD — EXCLUSIVE', amount: 4999 },
 };
-
 // ---------------------------------------------------------------------------
 // Cloudflare R2 (S3 API) — where the live config/secrets live.
 // ---------------------------------------------------------------------------
@@ -78,10 +70,8 @@ const R2_ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID || '';
 const R2_SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY || '';
 const R2_READY = Boolean(R2_ACCOUNT_ID && R2_ACCESS_KEY_ID && R2_SECRET_ACCESS_KEY);
 const CONFIG_TTL_MS = parseInt(process.env.CONFIG_TTL_MS || '30000', 10);
-
 const sha256hex = (s) => crypto.createHash('sha256').update(s).digest('hex');
 const hmac = (key, s) => crypto.createHmac('sha256', key).update(s).digest();
-
 // ---------------------------------------------------------------------------
 // Claim tokens — signed proof-of-payment so tier links are never exposed in
 // the public /api/config endpoint. A token is generated server-side after a
@@ -92,14 +82,12 @@ const CLAIM_SECRET = process.env.CLAIM_SECRET || (() => {
   console.warn('[claim] CLAIM_SECRET env var not set — using a random secret. Set CLAIM_SECRET in Railway so tokens survive restarts.');
   return crypto.randomBytes(32).toString('hex');
 })();
-
 function generateClaimToken(tier, paymentId) {
   const exp = Math.floor(Date.now() / 1000) + 30 * 24 * 3600; // 30 days
   const payload = `${tier}.${exp}.${paymentId || 'noid'}`;
   const sig = crypto.createHmac('sha256', CLAIM_SECRET).update(payload).digest('base64url');
   return Buffer.from(payload).toString('base64url') + '.' + sig;
 }
-
 function verifyClaimToken(token) {
   try {
     const dot = token.lastIndexOf('.');
@@ -121,7 +109,6 @@ function verifyClaimToken(token) {
     return null;
   }
 }
-
 // Minimal AWS SigV4 GET of one object from the R2 S3 endpoint (region "auto").
 // Returns the body text, or null if missing / not configured / on error.
 async function r2GetObject(key) {
@@ -146,7 +133,6 @@ async function r2GetObject(key) {
   const authorization =
     `AWS4-HMAC-SHA256 Credential=${R2_ACCESS_KEY_ID}/${scope}, ` +
     `SignedHeaders=${signedHeadersStr}, Signature=${signature}`;
-
   const res = await fetch(`https://${host}${canonicalUri}`, {
     headers: { Authorization: authorization, 'x-amz-content-sha256': payloadHash, 'x-amz-date': amzdate, host },
   });
@@ -157,13 +143,11 @@ async function r2GetObject(key) {
   }
   return res.text();
 }
-
 async function r2GetConfig() {
   const txt = await r2GetObject(R2_CONFIG_KEY);
   if (!txt) return null;
   try { return JSON.parse(txt); } catch (e) { console.warn('[r2] config.json is not valid JSON'); return null; }
 }
-
 // Emergency kill-switch: if data/override.html in the bucket is non-empty, that
 // HTML replaces every page on the live site. Empty/missing = normal site.
 let _ovHtml = null;
@@ -178,7 +162,6 @@ async function loadOverride() {
   _ovAt = Date.now();
   return _ovHtml;
 }
-
 // Defaults pulled from env vars (used locally / as fallback when R2 isn't set).
 function envDefaults() {
   return {
@@ -211,7 +194,6 @@ function envDefaults() {
     discordWebhook: process.env.DISCORD_WEBHOOK || '',
   };
 }
-
 // Merge the bucket config over the env defaults (bucket wins where it provides a
 // value). Cached for CONFIG_TTL_MS so we don't hit R2 on every request.
 let _cfgCache = null;
@@ -249,7 +231,6 @@ async function loadConfig() {
   _cfgAt = Date.now();
   return base;
 }
-
 // Derived Square helpers from a resolved config.
 function squareCtx(cfg) {
   const sq = cfg.square || {};
@@ -258,7 +239,6 @@ function squareCtx(cfg) {
   const embedReady = Boolean(ready && sq.appId);
   return { sq, apiBase, ready, embedReady };
 }
-
 // Fire-and-forget Discord notification on a successful payment.
 async function notifyDiscord(webhook, { product, amountCents, paymentId, status }) {
   if (!webhook) return;
@@ -287,7 +267,6 @@ async function notifyDiscord(webhook, { product, amountCents, paymentId, status 
     console.warn('[discord] notify failed', e.message);
   }
 }
-
 function listPreviews() {
   try {
     return fs
@@ -299,11 +278,9 @@ function listPreviews() {
     return [];
   }
 }
-
 const app = express();
 app.use(express.json());
 app.disable('x-powered-by');
-
 // Emergency override: when data/override.html in the bucket is non-empty, serve
 // it for every page route (APIs, assets and the Apple Pay file still work).
 const isPageRoute = (p) => p === '/' || !/\.[a-z0-9]+$/i.test(p);
@@ -316,7 +293,6 @@ app.use(async (req, res, next) => {
   } catch (e) { /* fall through to normal site */ }
   next();
 });
-
 // Public config the frontend needs to render (no secrets, no tier links).
 // tierLinks are intentionally omitted — buyers get them via /api/claim with a
 // valid signed token generated after a successful charge.
@@ -337,10 +313,7 @@ app.get('/api/config', async (req, res) => {
     mainSiteUrl: MAIN_SITE_URL,
   });
 });
-
 // Claim a tier link using a signed token generated at charge time.
-// Token encodes tier + expiry and is HMAC-signed with CLAIM_SECRET.
-// Valid for 30 days so buyers can bookmark the success page.
 app.get('/api/claim', async (req, res) => {
   const token = (req.query.token || '').trim();
   if (!token) return res.status(400).json({ error: 'Missing token.' });
@@ -351,7 +324,6 @@ app.get('/api/claim', async (req, res) => {
   if (!link) return res.status(404).json({ error: 'No link configured for this tier. Contact the admin.' });
   return res.json({ link, tier });
 });
-
 // EMBEDDED card charge: the browser tokenizes the card with the Web Payments SDK
 // and posts the one-time {sourceId} here; we charge it server-side.
 app.post('/api/charge', async (req, res) => {
@@ -360,7 +332,6 @@ app.post('/api/charge', async (req, res) => {
     const product = PRODUCTS[tier];
     if (!product) return res.status(400).json({ error: 'Unknown tier.' });
     if (!sourceId) return res.status(400).json({ error: 'Missing card token.' });
-
     const cfg = await loadConfig();
     const { sq, apiBase, embedReady } = squareCtx(cfg);
     if (!embedReady) {
@@ -369,7 +340,6 @@ app.post('/api/charge', async (req, res) => {
         message: 'Card payments are not live yet. Pay with crypto or DM the admin.',
       });
     }
-
     const body = {
       idempotency_key: crypto.randomUUID(),
       source_id: sourceId,
@@ -379,19 +349,15 @@ app.post('/api/charge', async (req, res) => {
       note: product.name,
     };
     if (buyerVerificationToken) body.verification_token = buyerVerificationToken;
-
     const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${sq.accessToken}` };
     if (sq.version) headers['Square-Version'] = sq.version;
-
     const sqRes = await fetch(`${apiBase}/v2/payments`, { method: 'POST', headers, body: JSON.stringify(body) });
     const data = await sqRes.json().catch(() => ({}));
-
     if (!sqRes.ok) {
       console.error('[square] charge error', sqRes.status, JSON.stringify(data));
       const detail = data && data.errors && data.errors[0] ? data.errors[0].detail : 'Card was declined.';
       return res.status(402).json({ error: 'card_declined', message: detail });
     }
-
     const payment = data && data.payment;
     notifyDiscord(cfg.discordWebhook, {
       product: product.name,
@@ -399,9 +365,6 @@ app.post('/api/charge', async (req, res) => {
       paymentId: payment && payment.id,
       status: payment && payment.status,
     });
-
-    // Generate a signed claim token so success.html can fetch the tier link
-    // without exposing it in a public config endpoint.
     const claimToken = generateClaimToken(tier, payment && payment.id);
     return res.json({
       ok: true,
@@ -414,14 +377,12 @@ app.post('/api/charge', async (req, res) => {
     return res.status(500).json({ error: 'server_error', message: 'Something went wrong taking the payment.' });
   }
 });
-
 // Create a Square hosted-checkout link for {tier} and return its URL.
 app.post('/api/checkout', async (req, res) => {
   try {
     const { tier } = req.body || {};
     const product = PRODUCTS[tier];
     if (!product) return res.status(400).json({ error: 'Unknown tier.' });
-
     const cfg = await loadConfig();
     const { sq, apiBase, ready } = squareCtx(cfg);
     if (!ready) {
@@ -430,7 +391,6 @@ app.post('/api/checkout', async (req, res) => {
         message: 'Card checkout is not live yet. Pay with crypto or DM the admin to complete your order.',
       });
     }
-
     const body = {
       idempotency_key: crypto.randomUUID(),
       order: {
@@ -442,23 +402,19 @@ app.post('/api/checkout', async (req, res) => {
         ask_for_shipping_address: false,
       },
     };
-
     const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${sq.accessToken}` };
     if (sq.version) headers['Square-Version'] = sq.version;
-
     const sqRes = await fetch(`${apiBase}/v2/online-checkout/payment-links`, {
       method: 'POST',
       headers,
       body: JSON.stringify(body),
     });
     const data = await sqRes.json().catch(() => ({}));
-
     if (!sqRes.ok) {
       console.error('[square] error', sqRes.status, JSON.stringify(data));
       const detail = data && data.errors && data.errors[0] ? data.errors[0].detail : 'Square rejected the request.';
       return res.status(502).json({ error: 'square_error', message: detail });
     }
-
     const url = data && data.payment_link && (data.payment_link.long_url || data.payment_link.url);
     if (!url) return res.status(502).json({ error: 'no_url', message: 'No checkout URL returned.' });
     return res.json({ url });
@@ -467,7 +423,6 @@ app.post('/api/checkout', async (req, res) => {
     return res.status(500).json({ error: 'server_error', message: 'Something went wrong creating the checkout.' });
   }
 });
-
 // Root routing by hostname.
 function isPaymentHost(req) {
   const host = (req.hostname || '').toLowerCase();
@@ -477,23 +432,19 @@ app.get('/', (req, res, next) => {
   if (isPaymentHost(req)) return res.sendFile(path.join(__dirname, 'public', 'pay.html'));
   next();
 });
-
 app.get(['/pay', '/basic', '/premium', '/exclusive'], (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'pay.html'));
 });
-
 app.get('/.well-known/apple-developer-merchantid-domain-association', (req, res) => {
   res.type('text/plain');
   res.sendFile(path.join(__dirname, 'public', '.well-known', 'apple-developer-merchantid-domain-association'));
 });
-
 app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
-
 app.get('/success', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'success.html'));
 });
-
-app.listen(PORT, async () => {
+// FIX: bind to 0.0.0.0 so Railway's proxy can reach the server on all interfaces.
+app.listen(PORT, '0.0.0.0', async () => {
   const cfg = await loadConfig();
   const { sq, embedReady } = squareCtx(cfg);
   console.log('');
