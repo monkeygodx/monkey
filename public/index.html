@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="dark only" />
   <title>MONKEYGOD | Exclusive Access Vault</title>
-  <meta name="description" content="Unlock the full MONKEYGOD vault. Stay unbanned, dominate the apps, and join the verified inner circle. Card &amp; crypto accepted." />
+  <meta name="description" content="Unlock the full MONKEYGOD vault. 10,000+ exclusive videos, lifetime access, instant delivery. Card &amp; crypto accepted." />
   <meta name="keywords" content="monkeygod, monkey app, omegle, ometv, no ban, unban system, vault" />
   <meta name="author" content="MONKEYGOD" />
   <meta property="og:site_name" content="MONKEYGOD" />
@@ -22,156 +22,260 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css?v=18" />
+  <link rel="stylesheet" href="/styles.css?v=19" />
 </head>
 <body>
-  <div class="mesh-bg" aria-hidden="true"></div>
 
-  <main class="content-container">
+  <!-- Background effects -->
+  <div class="site-bg" aria-hidden="true">
+    <div class="bg-grid"></div>
+    <div class="bg-glow-top"></div>
+    <div class="bg-glow-mid"></div>
+  </div>
 
-    <!-- hero -->
-    <h1 class="wordmark">MONKEYGOD</h1>
+  <!-- NAV -->
+  <header class="site-nav" id="site-nav">
+    <div class="nav-inner">
+      <a class="nav-logo" href="/">MONKEYGOD</a>
+      <nav class="nav-links" aria-label="Site navigation">
+        <a href="#tiers">Tiers</a>
+        <a href="#community">Community</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+      <a href="#tiers" class="nav-cta">Get Access →</a>
+    </div>
+  </header>
 
-    <!-- preview slider (hidden until videos are added to public/previews/) -->
-    <div class="preview-slider" id="preview-slider" hidden>
-      <div class="ps-inner">
-        <div class="ps-viewport">
-          <div class="ps-track" id="ps-track"></div>
-          <button class="ps-mute" id="ps-mute" aria-label="Toggle sound">🔇</button>
-        </div>
-        <button class="ps-arrow ps-prev" id="ps-prev" aria-label="Previous">‹</button>
-        <button class="ps-arrow ps-next" id="ps-next" aria-label="Next">›</button>
-        <div class="ps-dots" id="ps-dots"></div>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-eyebrow">
+        <span class="hero-pulse"></span>
+        PRIVATE VAULT · MEMBERS ONLY
+      </div>
+      <h1 class="hero-wordmark">MONKEYGOD</h1>
+      <p class="hero-headline">The Vault Is Open.</p>
+      <p class="hero-sub">10,000+ exclusive videos. One payment. Yours forever.</p>
+      <div class="hero-actions">
+        <a href="#tiers" class="hero-btn">Unlock Access →</a>
+        <a href="#how" class="hero-ghost">How It Works</a>
+      </div>
+      <div class="hero-trust">
+        <span>🔒 Secure Checkout</span>
+        <span class="hero-trust-sep">·</span>
+        <span>⚡ Instant Access</span>
+        <span class="hero-trust-sep">·</span>
+        <span>♾️ Lifetime</span>
       </div>
     </div>
+  </section>
 
-    <!-- tiers -->
-    <section class="section tier-section">
-      <div class="tier-inner">
-        <h2 class="section-title">Choose Your Tier</h2>
-        <p class="section-subtitle">One-time payment · lifetime access · instant delivery</p>
-        <div id="tier-grid" class="tier-grid"></div>
-        <div class="pay-methods">
-          SECURE PAYMENT VIA
-          <span class="chip">💳 Card</span>
-          <span class="chip">₿ Crypto</span>
+  <!-- PREVIEW SLIDER (hidden until videos added to config) -->
+  <div class="preview-slider" id="preview-slider" hidden>
+    <div class="ps-inner">
+      <div class="ps-viewport">
+        <div class="ps-track" id="ps-track"></div>
+        <button class="ps-mute" id="ps-mute" aria-label="Toggle sound">🔇</button>
+      </div>
+      <button class="ps-arrow ps-prev" id="ps-prev" aria-label="Previous">‹</button>
+      <button class="ps-arrow ps-next" id="ps-next" aria-label="Next">›</button>
+      <div class="ps-dots" id="ps-dots"></div>
+    </div>
+  </div>
+
+  <!-- PRICING — THE CENTERPIECE -->
+  <section class="tiers-section reveal" id="tiers">
+    <div class="section-inner">
+      <div class="tiers-header">
+        <div class="section-eyebrow">Pricing</div>
+        <h2 class="tiers-title">CHOOSE YOUR TIER</h2>
+        <p class="tiers-sub">One-time payment · lifetime access · instant delivery</p>
+      </div>
+      <div id="tier-grid" class="tier-grid"></div>
+      <div class="pay-methods">
+        SECURE PAYMENT VIA
+        <span class="chip">💳 Card</span>
+        <span class="chip">₿ Crypto</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRUST STRIP -->
+  <div class="trust-strip reveal">
+    <div class="trust-item"><span class="trust-icon">🔒</span>Secure Checkout</div>
+    <div class="trust-sep" aria-hidden="true"></div>
+    <div class="trust-item"><span class="trust-icon">⚡</span>Instant Delivery</div>
+    <div class="trust-sep" aria-hidden="true"></div>
+    <div class="trust-item"><span class="trust-icon">♾️</span>Lifetime Access</div>
+    <div class="trust-sep" aria-hidden="true"></div>
+    <div class="trust-item"><span class="trust-icon">💳</span>One-Time Payment</div>
+  </div>
+
+  <!-- WHY MONKEYGOD -->
+  <section class="page-section why-section reveal" id="why">
+    <div class="section-inner">
+      <div class="section-eyebrow">Why MONKEYGOD</div>
+      <h2 class="section-title">Built Different.</h2>
+      <div class="why-grid">
+        <div class="why-card">
+          <div class="why-icon">🎯</div>
+          <h3>Curated Content</h3>
+          <p>Hand-picked, high-quality videos across every category. No filler, no spam, no wasted time.</p>
+        </div>
+        <div class="why-card">
+          <div class="why-icon">⚡</div>
+          <h3>Instant Access</h3>
+          <p>Your private channel link is delivered the moment payment clears. No waiting, no delays.</p>
+        </div>
+        <div class="why-card">
+          <div class="why-icon">♾️</div>
+          <h3>Lifetime Ownership</h3>
+          <p>Pay once, own it forever. No monthly fees, no renewals, no surprise charges.</p>
+        </div>
+        <div class="why-card">
+          <div class="why-icon">📈</div>
+          <h3>Always Growing</h3>
+          <p>New content drops regularly. Your collection keeps growing without touching your wallet.</p>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- community -->
-    <section class="section">
-      <h2 class="section-title">Join The Community</h2>
-      <p class="section-subtitle">Free channel, live chatroom &amp; direct admin support</p>
-
-      <a id="btn-channel" class="community-link" href="#" target="_blank" rel="noopener">
-        <div class="community-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="22" y1="2" x2="11" y2="13"></line>
-            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-          </svg>
-        </div>
-        <div class="community-text">
-          <div class="community-title">Join Free Channel</div>
-          <div class="community-sub">Official previews, drops &amp; announcements</div>
-        </div>
-        <span class="community-arrow">→</span>
-      </a>
-
-      <a id="btn-chatroom" class="community-link" href="#" target="_blank" rel="noopener">
-        <div class="community-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-          </svg>
-        </div>
-        <div class="community-text">
-          <div class="community-title">Official Chatroom</div>
-          <div class="community-sub">Live community · talk to existing members</div>
-        </div>
-        <span class="community-arrow">→</span>
-      </a>
-
-      <a id="btn-admin" class="community-link" href="#" target="_blank" rel="noopener">
-        <div class="community-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-          </svg>
-        </div>
-        <div class="community-text">
-          <div class="community-title">Message Admin Directly</div>
-          <div class="community-sub">Questions, support &amp; manual orders</div>
-        </div>
-        <span class="community-arrow">→</span>
-      </a>
-    </section>
-
-    <!-- how it works -->
-    <section class="section">
+  <!-- HOW IT WORKS -->
+  <section class="page-section how-section reveal" id="how">
+    <div class="section-inner">
+      <div class="section-eyebrow">Process</div>
       <h2 class="section-title">How It Works</h2>
-      <p class="section-subtitle">From payment to access in seconds</p>
-      <div class="steps-grid">
-        <div class="step-card">
-          <span class="step-badge">1</span>
-          <div class="icon-wrapper icon-gold">💳</div>
-          <p class="step-text">Pick a tier &amp; pay with <b>card</b> or <b>crypto</b></p>
+      <p class="section-sub">From payment to access in under 60 seconds</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">01</div>
+          <div class="step-icon">💳</div>
+          <h3 class="step-title">Choose Your Tier</h3>
+          <p class="step-desc">Pick the access level that fits. Pay by card or crypto — both accepted.</p>
         </div>
-        <div class="step-card">
-          <span class="step-badge">2</span>
-          <div class="icon-wrapper icon-blue">🔗</div>
-          <p class="step-text">Your <b>private channel link</b> appears instantly</p>
+        <div class="step-arrow" aria-hidden="true">→</div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <div class="step-icon">🔗</div>
+          <h3 class="step-title">Complete Checkout</h3>
+          <p class="step-desc">Encrypted secure checkout. Charge confirmation and link delivered instantly.</p>
         </div>
-        <div class="step-card">
-          <span class="step-badge">3</span>
-          <div class="icon-wrapper icon-green">🚀</div>
-          <p class="step-text">Join your channel — <b>access forever</b></p>
+        <div class="step-arrow" aria-hidden="true">→</div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <div class="step-icon">🚀</div>
+          <h3 class="step-title">Lifetime Access</h3>
+          <p class="step-desc">Join your private channel. Access is yours forever — no renewals.</p>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- faq -->
-    <section class="section">
-      <h2 class="section-title">FAQ</h2>
+  <!-- COMMUNITY -->
+  <section class="page-section community-section reveal" id="community">
+    <div class="section-inner">
+      <div class="section-eyebrow">Community</div>
+      <h2 class="section-title">Join The Inner Circle</h2>
+      <p class="section-sub">Free previews, live chatroom &amp; direct admin support</p>
+
+      <div class="community-links">
+        <a id="btn-channel" class="community-card" href="#" target="_blank" rel="noopener">
+          <div class="community-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          </div>
+          <div class="community-text">
+            <div class="community-title">Free Preview Channel</div>
+            <div class="community-sub">Official previews, drops &amp; announcements</div>
+          </div>
+          <span class="community-arrow" aria-hidden="true">→</span>
+        </a>
+
+        <a id="btn-chatroom" class="community-card" href="#" target="_blank" rel="noopener">
+          <div class="community-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+          </div>
+          <div class="community-text">
+            <div class="community-title">Live Chatroom</div>
+            <div class="community-sub">Talk to existing members in real time</div>
+          </div>
+          <span class="community-arrow" aria-hidden="true">→</span>
+        </a>
+
+        <a id="btn-admin" class="community-card" href="#" target="_blank" rel="noopener">
+          <div class="community-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+          </div>
+          <div class="community-text">
+            <div class="community-title">Message Admin</div>
+            <div class="community-sub">Questions, support &amp; manual orders</div>
+          </div>
+          <span class="community-arrow" aria-hidden="true">→</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="page-section faq-section reveal" id="faq">
+    <div class="section-inner faq-inner">
+      <div class="section-eyebrow">FAQ</div>
+      <h2 class="section-title">Questions Answered</h2>
       <div class="faq">
         <div class="faq-item">
           <button class="faq-question">What payment methods do you accept? <span class="faq-chevron">▾</span></button>
-          <div class="faq-answer"><p>We accept <b>card</b> through a secure encrypted checkout, and <b>crypto</b> (BTC, ETH, USDT &amp; more). We do <b>not</b> use PayPal.</p></div>
+          <div class="faq-answer"><p>We accept <b>card</b> through a secure encrypted checkout, and <b>crypto</b> (BTC, ETH, USDT &amp; more). We do <b>not</b> accept PayPal.</p></div>
         </div>
         <div class="faq-item">
           <button class="faq-question">How long does it take to get access? <span class="faq-chevron">▾</span></button>
-          <div class="faq-answer"><p>Orders come nearly instantly. After you pay you will be given a link to your channel and will have access forever after that! DM <a href="https://t.me/cynski" target="_blank" rel="noopener">@cynski</a> if you have any problems.</p></div>
+          <div class="faq-answer"><p>Access is nearly instant. After payment you receive your private channel link immediately. DM <a href="https://t.me/cynski" target="_blank" rel="noopener">@cynski</a> if you run into any issues.</p></div>
         </div>
         <div class="faq-item">
           <button class="faq-question">What's the difference between tiers? <span class="faq-chevron">▾</span></button>
-          <div class="faq-answer"><p>Each tier unlocks more videos and features. <b>Exclusive</b> is the top tier — all Omegle wins on the internet, teen videos &amp; no ads.</p></div>
+          <div class="faq-answer"><p>Each tier unlocks more content. <b>Exclusive</b> is the top tier — all categories, highest quality, no limits. <b>Premium</b> is the most popular choice for members who want a serious upgrade from Basic.</p></div>
         </div>
         <div class="faq-item">
-          <button class="faq-question">Is it a one-time payment? <span class="faq-chevron">▾</span></button>
-          <div class="faq-answer"><p>Yes — every tier is a single one-time payment for lifetime access. No subscriptions, no recurring charges.</p></div>
+          <button class="faq-question">Is it truly a one-time payment? <span class="faq-chevron">▾</span></button>
+          <div class="faq-answer"><p>Yes — every tier is a single one-time payment for lifetime access. No subscriptions, no recurring charges, no renewals. Ever.</p></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">Can I upgrade my tier later? <span class="faq-chevron">▾</span></button>
+          <div class="faq-answer"><p>Yes. DM the admin directly to arrange an upgrade. The difference between tiers is straightforward.</p></div>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- CTA -->
-    <section class="cta-section">
-      <div class="cta-label">Don't Wait</div>
+  <!-- FINAL CTA -->
+  <section class="final-cta reveal">
+    <div class="final-cta-inner">
+      <div class="section-eyebrow">Get Started</div>
       <h2 class="cta-heading">10,000+ videos. One payment. Yours forever.</h2>
       <p class="cta-sub">Most members go straight to Exclusive — everything unlocked, no limits, no renewal.</p>
-      <button class="cta-btn" id="cta-exclusive-btn">Unlock Full Access →</button>
-      <button class="cta-compare" onclick="document.querySelector('.tier-section').scrollIntoView({behavior:'smooth'})">or compare all tiers ↑</button>
-    </section>
-
-    <!-- members -->
-    <div class="members">
-      <div class="member-dots"><span></span><span></span><span></span><span>+1k</span></div>
-      <span id="members-count">1,204 members online</span>
+      <button class="hero-btn" id="cta-exclusive-btn">Unlock Full Access →</button>
+      <a href="#tiers" class="cta-compare">or compare all tiers ↑</a>
     </div>
+  </section>
 
-    <footer class="site-footer">
-      &copy; 2026 MONKEYGOD &bull; SECURE NODES ACTIVE &bull; MONKEYGOD.FUN
-    </footer>
-  </main>
+  <!-- MEMBERS BAR -->
+  <div class="members">
+    <div class="member-dots"><span></span><span></span><span></span><span>+1k</span></div>
+    <span id="members-count">1,204 members online</span>
+  </div>
 
-  <!-- Crypto modal -->
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    &copy; 2026 MONKEYGOD &bull; SECURE NODES ACTIVE &bull; MONKEYGOD.FUN
+  </footer>
+
+  <!-- CRYPTO MODAL -->
   <div id="crypto-modal" class="modal-overlay" hidden>
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="cr-title">
       <button class="modal-close" data-close>✕</button>
@@ -185,6 +289,6 @@
 
   <div id="toast" class="toast" hidden></div>
 
-  <script src="/script.js?v=15"></script>
+  <script src="/script.js?v=16"></script>
 </body>
 </html>
