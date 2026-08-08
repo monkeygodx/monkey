@@ -8,8 +8,6 @@
   <meta name="description" content="Unlock the full MONKEYGOD vault. Stay unbanned, dominate the apps, and join the verified inner circle. Card &amp; crypto accepted." />
   <meta name="keywords" content="monkeygod, monkey app, omegle, ometv, no ban, unban system, vault" />
   <meta name="author" content="MONKEYGOD" />
-
-  <!-- Open Graph -->
   <meta property="og:site_name" content="MONKEYGOD" />
   <meta property="og:title" content="MONKEYGOD | Exclusive Access Vault" />
   <meta property="og:description" content="Unlock the full vault. Stay unbanned. Join the verified inner circle." />
@@ -20,37 +18,25 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="MONKEYGOD | Exclusive Access Vault" />
   <meta name="twitter:image" content="/assets/og-image.svg" />
-
   <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css?v=12" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css?v=11" />
 </head>
 <body>
   <div class="mesh-bg" aria-hidden="true"></div>
 
   <main class="content-container">
 
-    <!-- ── Hero ── -->
-    <div style="text-align:center; margin-bottom: 20px;">
-      <div class="live-badge">
-        <span class="live-dot"></span>
-        MonkeyGod · Live Now
-      </div>
-    </div>
+    <!-- hero -->
+    <h1 class="wordmark">MONKEYGOD</h1>
 
-    <h1 class="hero-h1">
-      Video Vault<br>
-      <span class="grad">monkeygod </span>
-    </h1>
-    <p class="hero-sub">MonkeyGod — one-time payment, lifetime access. Unlock the vault and stay ahead.</p>
-
-    <!-- preview slider (coverflow) -->
+    <!-- preview slider (hidden until videos are added to public/previews/) -->
     <div class="preview-slider" id="preview-slider" hidden>
       <div class="ps-inner">
         <div class="ps-viewport">
-          <div class="ps-track" id="ps-track"><!-- slides injected --></div>
+          <div class="ps-track" id="ps-track"></div>
           <button class="ps-mute" id="ps-mute" aria-label="Toggle sound">🔇</button>
         </div>
         <button class="ps-arrow ps-prev" id="ps-prev" aria-label="Previous">‹</button>
@@ -59,60 +45,69 @@
       </div>
     </div>
 
-    <!-- ── Tiers ── -->
+    <!-- tiers -->
     <section class="section tier-section">
       <div class="tier-inner">
-        <div class="eyebrow">Pricing</div>
         <h2 class="section-title">Choose Your Tier</h2>
         <p class="section-subtitle">One-time payment · lifetime access · instant delivery</p>
-        <div id="tier-grid" class="tier-grid"><!-- injected by script.js --></div>
+        <div id="tier-grid" class="tier-grid"></div>
         <div class="pay-methods">
-          Accepted: <span class="chip">💳 Card</span> <span class="chip">₿ Crypto</span>
+          SECURE PAYMENT VIA
+          <span class="chip">💳 Card</span>
+          <span class="chip">₿ Crypto</span>
         </div>
       </div>
     </section>
 
-    <!-- ── Community ── -->
+    <!-- community -->
     <section class="section">
-      <div class="eyebrow">Community</div>
       <h2 class="section-title">Join The Community</h2>
       <p class="section-subtitle">Free channel, live chatroom &amp; direct admin support</p>
 
-      <div class="comm-stack">
-        <a id="btn-channel" class="comm-link" href="#" target="_blank" rel="noopener">
-          <span class="comm-num">01</span>
-          <span class="comm-divider"></span>
-          <span class="comm-text">
-            <span class="comm-title">Join Free Channel</span>
-            <span class="comm-sub">Official link · previews &amp; drops</span>
-          </span>
-          <span class="comm-arrow">→</span>
-        </a>
-        <a id="btn-chatroom" class="comm-link" href="#" target="_blank" rel="noopener">
-          <span class="comm-num">02</span>
-          <span class="comm-divider"></span>
-          <span class="comm-text">
-            <span class="comm-title">Official Chatroom</span>
-            <span class="comm-sub">Active now · talk to members</span>
-          </span>
-          <span class="comm-arrow">→</span>
-        </a>
-        <a id="btn-admin" class="comm-link" href="#" target="_blank" rel="noopener">
-          <span class="comm-num">03</span>
-          <span class="comm-divider"></span>
-          <span class="comm-text">
-            <span class="comm-title">Contact Admin</span>
-            <span class="comm-sub">Support &amp; manual orders</span>
-          </span>
-          <span class="comm-arrow">→</span>
-        </a>
-      </div>
+      <a id="btn-channel" class="community-link" href="#" target="_blank" rel="noopener">
+        <div class="community-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </div>
+        <div class="community-text">
+          <div class="community-title">Join Free Channel</div>
+          <div class="community-sub">Official previews, drops &amp; announcements</div>
+        </div>
+        <span class="community-arrow">→</span>
+      </a>
+
+      <a id="btn-chatroom" class="community-link" href="#" target="_blank" rel="noopener">
+        <div class="community-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
+        </div>
+        <div class="community-text">
+          <div class="community-title">Official Chatroom</div>
+          <div class="community-sub">Live community · talk to existing members</div>
+        </div>
+        <span class="community-arrow">→</span>
+      </a>
+
+      <a id="btn-admin" class="community-link" href="#" target="_blank" rel="noopener">
+        <div class="community-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+        </div>
+        <div class="community-text">
+          <div class="community-title">Message Admin Directly</div>
+          <div class="community-sub">Questions, support &amp; manual orders</div>
+        </div>
+        <span class="community-arrow">→</span>
+      </a>
     </section>
 
-    <!-- ── How It Works ── -->
+    <!-- how it works -->
     <section class="section">
-      <div class="eyebrow">How It Works</div>
-      <h2 class="section-title">Simple. Instant. Lifetime.</h2>
+      <h2 class="section-title">How It Works</h2>
       <p class="section-subtitle">From payment to access in seconds</p>
       <div class="steps-grid">
         <div class="step-card">
@@ -133,10 +128,9 @@
       </div>
     </section>
 
-    <!-- ── FAQ ── -->
+    <!-- faq -->
     <section class="section">
-      <div class="eyebrow">FAQ</div>
-      <h2 class="section-title">Questions</h2>
+      <h2 class="section-title">FAQ</h2>
       <div class="faq">
         <div class="faq-item">
           <button class="faq-question">What payment methods do you accept? <span class="faq-chevron">▾</span></button>
@@ -144,7 +138,7 @@
         </div>
         <div class="faq-item">
           <button class="faq-question">How long does it take to get access? <span class="faq-chevron">▾</span></button>
-          <div class="faq-answer"><p>Orders come nearly instantly. After you pay you will be given a link to your channel and will have access forever. DM <a href="https://t.me/cynski" target="_blank" rel="noopener">@cynski</a> if you have any problems.</p></div>
+          <div class="faq-answer"><p>Orders come nearly instantly. After you pay you will be given a link to your channel and will have access forever after that! DM <a href="https://t.me/cynski" target="_blank" rel="noopener">@cynski</a> if you have any problems.</p></div>
         </div>
         <div class="faq-item">
           <button class="faq-question">What's the difference between tiers? <span class="faq-chevron">▾</span></button>
@@ -155,6 +149,15 @@
           <div class="faq-answer"><p>Yes — every tier is a single one-time payment for lifetime access. No subscriptions, no recurring charges.</p></div>
         </div>
       </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+      <div class="cta-label">Don't Wait</div>
+      <h2 class="cta-heading">10,000+ videos. One payment. Yours forever.</h2>
+      <p class="cta-sub">Most members go straight to Exclusive — everything unlocked, no limits, no renewal.</p>
+      <button class="cta-btn" id="cta-exclusive-btn">Unlock Full Access →</button>
+      <button class="cta-compare" onclick="document.querySelector('.tier-section').scrollIntoView({behavior:'smooth'})">or compare all tiers ↑</button>
     </section>
 
     <!-- members -->
@@ -168,13 +171,13 @@
     </footer>
   </main>
 
-  <!-- ── Crypto modal ── -->
+  <!-- Crypto modal -->
   <div id="crypto-modal" class="modal-overlay" hidden>
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="cr-title">
       <button class="modal-close" data-close>✕</button>
       <h3 id="cr-title" class="modal-title">Pay with Crypto</h3>
       <p class="modal-sub">Send <b id="cr-amount">—</b> for <b id="cr-product">—</b> to any address below.</p>
-      <div id="crypto-list" class="crypto-list"><!-- injected --></div>
+      <div id="crypto-list" class="crypto-list"></div>
       <a id="cr-admin" class="pay-btn pay-btn-card" href="#" target="_blank" rel="noopener">📨 Message Admin</a>
       <p class="co-fineprint">Double-check the network before sending. Wrong-network transfers can't be recovered.</p>
     </div>
@@ -182,82 +185,6 @@
 
   <div id="toast" class="toast" hidden></div>
 
-  <!-- ── Discount popup ── -->
-  <div id="discount-overlay" class="disc-overlay" hidden>
-    <div class="disc-modal" role="dialog" aria-modal="true" aria-label="Exclusive offer">
-      <button class="disc-close" id="disc-close" aria-label="Close">✕</button>
-      <div class="disc-badge">LIMITED OFFER</div>
-      <h2 class="disc-heading">Get <span class="disc-pct">10% off</span> your order</h2>
-      <p class="disc-sub">Join our free Telegram community and unlock your discount code instantly.</p>
-      <a class="disc-tg-btn" href="https://t.me/+Q2cSul0OxOs1ODhh" target="_blank" rel="noopener" id="disc-join">
-        <svg class="disc-tg-icon" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.19 13.6l-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.957.96z"/></svg>
-        Join Telegram — Get Code
-      </a>
-      <div class="disc-code-row" id="disc-code-row" hidden>
-        <span class="disc-code-label">Your code</span>
-        <button class="disc-code-pill" id="disc-copy" title="Click to copy">FUN</button>
-        <span class="disc-code-note">10% off · use at checkout</span>
-      </div>
-      <button class="disc-skip" id="disc-skip">No thanks</button>
-    </div>
-  </div>
-
-  <script src="/script.js?v=13"></script>
-  <script>
-    (function () {
-      var SEEN_KEY = 'mg_disc_seen';
-      var CODE_KEY = 'mg_code';
-      var CODE     = 'FUN';
-
-      var overlay  = document.getElementById('discount-overlay');
-      var closeBtn = document.getElementById('disc-close');
-      var skipBtn  = document.getElementById('disc-skip');
-      var copyBtn  = document.getElementById('disc-copy');
-      var joinBtn  = document.getElementById('disc-join');
-      var codeRow  = document.getElementById('disc-code-row');
-      var discSub  = overlay.querySelector('.disc-sub');
-
-      function dismiss() {
-        overlay.classList.add('disc-out');
-        setTimeout(function () { overlay.hidden = true; }, 350);
-        try { localStorage.setItem(SEEN_KEY, '1'); } catch(e) {}
-      }
-
-      // Reveal the code row — called when user clicks the Telegram join button.
-      function revealCode() {
-        try { localStorage.setItem(CODE_KEY, CODE); } catch(e) {}
-        codeRow.hidden = false;
-        if (discSub) discSub.textContent = 'Code unlocked! Use it at checkout for 10% off.';
-      }
-
-      joinBtn.addEventListener('click', function () {
-        // Reveal immediately on click (they opened Telegram).
-        setTimeout(revealCode, 300);
-      });
-
-      copyBtn.addEventListener('click', function () {
-        navigator.clipboard.writeText(CODE).then(function () {
-          copyBtn.textContent = 'COPIED ✓';
-          setTimeout(function () { copyBtn.textContent = CODE; }, 2000);
-        }).catch(function () { copyBtn.select && copyBtn.select(); });
-      });
-
-      closeBtn.addEventListener('click', dismiss);
-      skipBtn.addEventListener('click', dismiss);
-      overlay.addEventListener('click', function(e) { if (e.target === overlay) dismiss(); });
-
-      // If they already have the code stored, show the code row immediately in the popup.
-      var hasCode = false;
-      try { hasCode = !!localStorage.getItem(CODE_KEY); } catch(e) {}
-      if (hasCode) codeRow.hidden = false;
-
-      // Show popup after 1.8s on first visit only.
-      var seen = false;
-      try { seen = !!localStorage.getItem(SEEN_KEY); } catch(e) {}
-      if (!seen) {
-        setTimeout(function () { overlay.hidden = false; }, 1800);
-      }
-    })();
-  </script>
+  <script src="/script.js?v=11"></script>
 </body>
 </html>
