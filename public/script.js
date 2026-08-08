@@ -68,6 +68,7 @@ async function boot() {
   wireCryptoModal();
   wireFaq();
   animateMembers();
+  wireCtaBtn();
 }
 
 /* ---------------- preview slider (coverflow) ---------------- */
@@ -184,18 +185,43 @@ function renderTiers() {
     if (!p || !d) continue;
     const card = document.createElement('div');
     card.className = 'tier-card' + (d.featured ? ' featured' : '');
-    const tag = d.tag ? `<span class="tier-tag${d.featured ? ' gold' : ''}">${d.tag}</span>` : '';
+    const price = moneyShort(p.amount);
+    const badge    = d.featured ? '<div class="tier-badge">Most Popular</div>' : '';
+    const callout  = d.featured ? '<div class="tier-callout">★ The tier most members go with</div>' : '';
+    const btnCls   = d.featured ? 'tier-btn tier-btn-featured' : 'tier-btn';
+    const btnLabel = d.featured ? `Unlock Everything — ${price} →` : `Get ${d.name} Access →`;
+    const footnote = d.featured ? 'Instant · no subscription · best value' : 'Instant · no subscription';
     card.innerHTML = `
-      ${tag}
+      ${badge}
       <div class="tier-name">${d.name}</div>
-      <div class="tier-price">${moneyShort(p.amount)}<small>one-time</small></div>
-      <ul class="tier-features">${d.features.map((f) => `<li class="${f.in ? '' : 'no'}">${f.t}</li>`).join('')}</ul>
-      <button class="tier-btn" data-tier="${key}">Get ${d.name} — ${moneyShort(p.amount)}</button>
-      <button class="tier-crypto" data-crypto="${key}">or pay with crypto</button>`;
+      <div class="tier-price-row">
+        <span class="tier-price">${price}</span>
+        <span class="tier-onetime">one-time</span>
+      </div>
+      <div class="tier-divider"></div>
+      ${callout}
+      <ul class="tier-features">
+        ${d.features.map((f) => `
+          <li class="${f.in ? '' : 'no'}">
+            <span class="check-icon">${f.in ? '✓' : '✕'}</span>${f.t}
+          </li>`).join('')}
+      </ul>
+      <div class="tier-card-footer">
+        <button class="${btnCls}" data-tier="${key}">${btnLabel}</button>
+        <div class="tier-footnote">${footnote}</div>
+        <button class="tier-crypto" data-crypto="${key}">or pay with crypto</button>
+      </div>`;
     grid.appendChild(card);
   }
   grid.querySelectorAll('.tier-btn').forEach((b) => b.addEventListener('click', () => buy(b.dataset.tier, b)));
   grid.querySelectorAll('.tier-crypto').forEach((b) => b.addEventListener('click', () => openCrypto(b.dataset.crypto)));
+}
+
+/* Wire the bottom CTA button to the exclusive tier. */
+function wireCtaBtn() {
+  const btn = $('#cta-exclusive-btn');
+  if (!btn) return;
+  btn.addEventListener('click', () => buy('exclusive', btn));
 }
 
 function buy(tier, btn) {
