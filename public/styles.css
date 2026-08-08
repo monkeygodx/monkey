@@ -222,12 +222,12 @@ body {
 
 /* name */
 .tier-name {
-  font-size: .78rem;
+  font-size: 1rem;
   font-weight: 800;
-  letter-spacing: .1em;
+  letter-spacing: .08em;
   text-transform: uppercase;
-  color: rgba(255,255,255,.55);
-  margin-bottom: .45rem;
+  color: #fff;
+  margin-bottom: .5rem;
 }
 .tier-card.featured .tier-name { color: var(--purple); }
 
@@ -235,18 +235,18 @@ body {
 .tier-price-row {
   display: flex;
   align-items: baseline;
-  gap: .45rem;
+  gap: .5rem;
   margin-bottom: .6rem;
 }
 .tier-price {
-  font-size: 2.6rem;
+  font-size: 3.6rem;
   font-weight: 800;
   color: #fff;
   line-height: 1;
-  letter-spacing: -.03em;
+  letter-spacing: -.04em;
 }
 .tier-onetime {
-  font-size: .73rem;
+  font-size: .75rem;
   color: var(--muted);
   font-weight: 500;
 }
@@ -288,12 +288,12 @@ body {
 .tier-features li.no { color: rgba(255,255,255,.25); }
 
 .check-icon {
-  width: 19px;
-  height: 19px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background: var(--purple);
   color: #fff;
-  font-size: .5rem;
+  font-size: .62rem;
   font-weight: 900;
   display: flex;
   align-items: center;
@@ -312,20 +312,20 @@ body {
 .tier-btn {
   display: block;
   width: 100%;
-  padding: .85rem;
+  padding: .88rem;
   border-radius: 10px;
   font-weight: 700;
-  font-size: .84rem;
+  font-size: .86rem;
   cursor: pointer;
-  border: 1px solid rgba(255,255,255,.14);
+  border: 1px solid rgba(255,255,255,.16);
   font-family: inherit;
-  background: transparent;
-  color: rgba(255,255,255,.8);
+  background: #1c1c1c;
+  color: #fff;
   transition: all .2s;
   text-align: center;
   letter-spacing: .01em;
 }
-.tier-btn:hover { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.28); color: #fff; }
+.tier-btn:hover { background: #252525; border-color: rgba(255,255,255,.28); }
 .tier-btn:disabled { opacity: .5; cursor: wait; }
 
 .tier-btn-featured {
