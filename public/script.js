@@ -85,13 +85,13 @@ function buildSlider(urls) {
   track.innerHTML = '';
   dots.innerHTML = '';
 
-  /* No real videos yet — show 3 blurred placeholder slides */
+  /* No real videos yet — show 3 clean placeholder slides */
   if (!urls.length) {
+    slider.classList.add('placeholder-mode');
     const PLACEHOLDERS = 3;
     for (let i = 0; i < PLACEHOLDERS; i++) {
       const slide = document.createElement('div');
       slide.className = 'ps-slide ps-placeholder' + (i === 1 ? ' active' : '');
-      slide.innerHTML = `<div class="ps-ph-inner"><span class="ps-ph-icon">🔒</span><p class="ps-ph-text">Previews coming soon</p></div>`;
       track.appendChild(slide);
       const dot = document.createElement('button');
       dot.className = 'ps-dot' + (i === 1 ? ' active' : '');
