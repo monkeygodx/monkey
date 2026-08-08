@@ -1,5 +1,6 @@
 'use strict';
 
+/* Display data per product (server stays the source of truth for prices). */
 const TIER_DATA = {
   basic: {
     name: 'Basic',
@@ -50,11 +51,6 @@ function toast(msg, ms) {
   toast._t = setTimeout(() => (t.hidden = true), ms || 3200);
 }
 
-// Returns the stored discount code (set when user clicks Telegram join in popup).
-function storedCode() {
-  try { return localStorage.getItem('mg_code') || ''; } catch (e) { return ''; }
-}
-
 async function boot() {
   try {
     CONFIG = await (await fetch('/api/config')).json();
@@ -67,15 +63,18 @@ async function boot() {
   $('#btn-admin').href = CONFIG.links.admin;
   $('#cr-admin').href = CONFIG.links.admin;
 
-  buildSlider(CONFIG.previews || []);
+  buildSlider([]); // previews disabled — drop .mp4/.webm into public/previews/ to re-enable
   renderTiers();
   wireCryptoModal();
   wireFaq();
   animateMembers();
 }
 
-/* ---------------- preview slider ---------------- */
-let slideEls = [], videos = [], slideIdx = 0, slideMuted = true;
+/* ---------------- preview slider (coverflow) ---------------- */
+let slideEls = [];
+let videos = [];
+let slideIdx = 0;
+let slideMuted = true;
 
 function buildSlider(urls) {
   if (!urls.length) return;
@@ -85,26 +84,40 @@ function buildSlider(urls) {
   slider.hidden = false;
   track.innerHTML = '';
   dots.innerHTML = '';
+
   urls.forEach((u, i) => {
     const slide = document.createElement('div');
     slide.className = 'ps-slide';
     const v = document.createElement('video');
-    v.src = u; v.muted = true; v.loop = true; v.playsInline = true;
-    v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', '');
+    v.src = u;
+    v.muted = true;
+    v.loop = true;
+    v.playsInline = true;
+    v.setAttribute('playsinline', '');
+    v.setAttribute('webkit-playsinline', '');
     v.preload = i === 0 ? 'auto' : 'metadata';
     slide.appendChild(v);
     track.appendChild(slide);
-    slide.addEventListener('click', () => { ensureUnmute(); if (i === slideIdx) v.play().catch(() => {}); else goSlide(i); });
+    slide.addEventListener('click', () => {
+      ensureUnmute();
+      if (i === slideIdx) v.play().catch(() => {});
+      else goSlide(i);
+    });
+
     const dot = document.createElement('button');
     dot.className = 'ps-dot' + (i === 0 ? ' active' : '');
     dot.addEventListener('click', () => { ensureUnmute(); goSlide(i); });
     dots.appendChild(dot);
   });
+
   slideEls = [...track.querySelectorAll('.ps-slide')];
   videos = [...track.querySelectorAll('video')];
+
   $('#ps-prev').addEventListener('click', () => { ensureUnmute(); goSlide(slideIdx - 1); });
   $('#ps-next').addEventListener('click', () => { ensureUnmute(); goSlide(slideIdx + 1); });
   $('#ps-mute').addEventListener('click', toggleMute);
+
+  // swipe
   let sx = null;
   const vp = slider.querySelector('.ps-viewport');
   vp.addEventListener('touchstart', (e) => (sx = e.touches[0].clientX), { passive: true });
@@ -114,6 +127,7 @@ function buildSlider(urls) {
     if (Math.abs(dx) > 40) { ensureUnmute(); goSlide(dx < 0 ? slideIdx + 1 : slideIdx - 1); }
     sx = null;
   });
+
   window.addEventListener('resize', centerActive);
   goSlide(0);
   if (videos[0]) videos[0].addEventListener('loadeddata', centerActive, { once: true });
@@ -135,7 +149,8 @@ function goSlide(n) {
   $('#ps-dots').querySelectorAll('.ps-dot').forEach((d, i) => d.classList.toggle('active', i === slideIdx));
   videos.forEach((v, i) => {
     if (Math.abs(i - slideIdx) <= 1) v.preload = 'auto';
-    if (i === slideIdx) { v.muted = slideMuted; v.play().catch(() => {}); } else v.pause();
+    if (i === slideIdx) { v.muted = slideMuted; v.play().catch(() => {}); }
+    else v.pause();
   });
   centerActive();
 }
@@ -150,8 +165,13 @@ function ensureUnmute() {
 }
 
 function toggleMute() {
-  if (slideMuted) { ensureUnmute(); }
-  else { slideMuted = true; videos.forEach((v) => (v.muted = true)); $('#ps-mute').textContent = '🔇'; }
+  if (slideMuted) {
+    ensureUnmute();
+  } else {
+    slideMuted = true;
+    videos.forEach((v) => (v.muted = true));
+    $('#ps-mute').textContent = '🔇';
+  }
 }
 
 /* ---------------- tiers ---------------- */
@@ -178,16 +198,13 @@ function renderTiers() {
   grid.querySelectorAll('.tier-crypto').forEach((b) => b.addEventListener('click', () => openCrypto(b.dataset.crypto)));
 }
 
-/* Redirect to payment site, appending discount code if user has one. */
 function buy(tier, btn) {
   if (!CONFIG.products[tier]) return;
   if (btn) { btn.disabled = true; btn.innerHTML = 'Loading…'; }
   const base = CONFIG.paymentSiteUrl;
-  const code = storedCode();
-  const codeParam = code ? `?code=${encodeURIComponent(code)}` : '';
   window.location.href = base
-    ? `${base.replace(/\/$/, '')}/${encodeURIComponent(tier)}${codeParam}`
-    : `/pay?tier=${encodeURIComponent(tier)}${code ? '&code=' + encodeURIComponent(code) : ''}`;
+    ? `${base.replace(/\/$/, '')}/${encodeURIComponent(tier)}`
+    : `/pay?tier=${encodeURIComponent(tier)}`;
 }
 
 /* ---------------- crypto modal ---------------- */
@@ -196,10 +213,12 @@ function openCrypto(tier) {
   if (!p) return;
   $('#cr-amount').textContent = moneyShort(p.amount);
   $('#cr-product').textContent = p.name;
+
   const list = $('#crypto-list');
   list.innerHTML = '';
   if (!CONFIG.crypto.length) {
-    list.innerHTML = '<div class="crypto-empty">Wallet addresses aren\'t published yet.<br>Tap "DM Admin" below and they\'ll send you the current address.</div>';
+    list.innerHTML =
+      '<div class="crypto-empty">Wallet addresses aren\'t published yet.<br>Tap "DM Admin" below and they\'ll send you the current address.</div>';
   } else {
     for (const c of CONFIG.crypto) {
       const row = document.createElement('div');
@@ -222,6 +241,7 @@ function openCrypto(tier) {
   show('#crypto-modal');
 }
 
+/* ---------------- modal plumbing ---------------- */
 function show(sel) { $(sel).hidden = false; document.body.style.overflow = 'hidden'; }
 function hide(sel) { $(sel).hidden = true; document.body.style.overflow = ''; }
 
@@ -232,6 +252,7 @@ function wireCryptoModal() {
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') hide('#crypto-modal'); });
 }
 
+/* ---------------- faq ---------------- */
 function wireFaq() {
   document.querySelectorAll('.faq-item').forEach((item) => {
     const q = item.querySelector('.faq-question');
@@ -243,6 +264,7 @@ function wireFaq() {
   });
 }
 
+/* ---------------- members counter (cosmetic) ---------------- */
 function animateMembers() {
   const el = $('#members-count');
   let n = 1204;
