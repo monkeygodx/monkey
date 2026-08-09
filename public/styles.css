@@ -36,6 +36,7 @@ a { color: inherit; text-decoration: none; }
 button { font-family: inherit; cursor: pointer; border: none; background: none; }
 ul { list-style: none; }
 img, svg { display: block; }
+[hidden] { display: none !important; }
 
 /* ── Background effects ─────────────────────────────── */
 .site-bg {
