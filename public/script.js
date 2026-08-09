@@ -90,12 +90,21 @@ function buildSlider(urls) {
   track.innerHTML = '';
   dots.innerHTML = '';
 
-  /* No real videos — show a single square placeholder box, no carousel */
+  /* No real videos — show a single square placeholder with arrows + mute */
   if (!urls.length) {
     slider.classList.add('placeholder-mode');
     const ph = document.createElement('div');
     ph.className = 'ps-solo-placeholder';
+    // Move mute button inside the placeholder so it appears (top-right via CSS)
+    const muteBtn = document.getElementById('ps-mute');
+    if (muteBtn) {
+      ph.appendChild(muteBtn);
+      muteBtn.addEventListener('click', toggleMute);
+    }
     slider.querySelector('.ps-inner').appendChild(ph);
+    // Wire arrows — decorative in placeholder mode (no slides to advance)
+    document.getElementById('ps-prev').addEventListener('click', () => {});
+    document.getElementById('ps-next').addEventListener('click', () => {});
     return;
   }
 
@@ -202,34 +211,30 @@ function renderTiers() {
     if (d.ultimate) cls += ' ultimate';
     card.className = cls;
     const price = moneyShort(p.amount);
-    let badge = '';
-    if (d.tag) {
-      const badgeCls = d.ultimate ? 'tier-badge tier-badge-ultimate' : 'tier-badge tier-badge-popular';
-      badge = `<div class="${badgeCls}">${d.tag}</div>`;
-    }
+    let topLabel = '';
+    if (d.popular)  topLabel = '<div class="tier-popular-label">Most popular</div>';
+    if (d.ultimate) topLabel = '<div class="tier-ultimate-label">All access</div>';
     const desc = d.desc ? `<p class="tier-desc">${d.desc}</p>` : '';
     let btnCls = 'tier-btn';
     if (d.popular)  btnCls += ' tier-btn-popular';
     if (d.ultimate) btnCls += ' tier-btn-ultimate';
-    const btnLabel = d.ultimate
-      ? `Unlock Everything — ${price} →`
-      : d.popular
-        ? `Get ${d.name} — ${price} →`
-        : `Get ${d.name} Access →`;
-    const footnote = d.ultimate ? 'Instant · no subscription · best value' : 'Instant · no subscription';
+    const btnLabel = d.popular
+      ? `Get ${d.name} — ${price} →`
+      : `Get ${d.name} Access`;
+    const footnote = 'One-time · instant · no subscription';
     card.innerHTML = `
-      ${badge}
-      <div class="tier-name">${d.name}</div>
-      ${desc}
+      ${topLabel}
+      <div class="tier-name">${d.name.toUpperCase()}</div>
       <div class="tier-price-row">
         <span class="tier-price">${price}</span>
         <span class="tier-onetime">one-time</span>
       </div>
+      ${desc}
       <div class="tier-divider"></div>
       <ul class="tier-features">
         ${d.features.map((f) => `
           <li>
-            <span class="check-icon">✓</span>${f.t}
+            <span class="check-icon"></span>${f.t}
           </li>`).join('')}
       </ul>
       <div class="tier-card-footer">
