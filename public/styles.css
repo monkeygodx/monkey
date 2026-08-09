@@ -1,5 +1,5 @@
 /* ===================================================
-   MONKEYGOD — Premium Site CSS  v19
+   MONKEYGOD — Premium Site CSS  v23
    =================================================== */
 
 /* ── Variables ──────────────────────────────────────── */
@@ -181,7 +181,7 @@ img, svg { display: block; }
 .hero {
   position: relative;
   z-index: 1;
-  padding: 148px 1.5rem 80px;
+  padding: 100px 1.5rem 55px;
   text-align: center;
 }
 .hero-inner {
@@ -216,7 +216,7 @@ img, svg { display: block; }
   50%       { opacity: .7; box-shadow: 0 0 0 7px rgba(168,85,247,0); }
 }
 .hero-wordmark {
-  font-size: clamp(3.8rem, 12vw, 8rem);
+  font-size: clamp(2.6rem, 7.5vw, 5rem);
   font-weight: 900;
   letter-spacing: -.04em;
   line-height: .92;
@@ -358,18 +358,19 @@ img, svg { display: block; }
   inset: 0;
   background: radial-gradient(ellipse at 50% 50%, rgba(147,51,234,.14) 0%, transparent 65%);
 }
-.placeholder-mode .ps-mute { display: none; }
-
-/* Single square placeholder — hides the carousel entirely */
+/* Single square placeholder — hides the carousel shell, shows arrows + mute */
 .placeholder-mode .ps-viewport,
-.placeholder-mode .ps-prev,
-.placeholder-mode .ps-next,
 .placeholder-mode .ps-dots { display: none; }
 
-.ps-solo-placeholder {
-  width: min(520px, 80vw);
-  aspect-ratio: 1 / 1;
+/* Constrain ps-inner to placeholder width so arrows sit flush alongside the box */
+.placeholder-mode .ps-inner {
+  max-width: min(400px, 68vw);
   margin: 0 auto;
+}
+
+.ps-solo-placeholder {
+  width: 100%;
+  aspect-ratio: 1 / 1;
   border-radius: 18px;
   background: linear-gradient(160deg, #1a1025 0%, #0d0915 100%);
   border: 1px solid rgba(147,51,234,.18);
@@ -381,6 +382,12 @@ img, svg { display: block; }
   position: absolute;
   inset: 0;
   background: radial-gradient(ellipse at 50% 50%, rgba(147,51,234,.16) 0%, transparent 65%);
+}
+/* Mute button inside placeholder — top-right corner */
+.ps-solo-placeholder .ps-mute {
+  top: 12px;
+  right: 12px;
+  bottom: auto;
 }
 .ps-mute {
   position: absolute;
@@ -786,11 +793,13 @@ img, svg { display: block; }
   z-index: 1;
   padding: 80px 0;
 }
-/* Center all section eyebrows, titles, and subtitles */
+/* Center all section eyebrows, titles, and subtitles — text AND element */
 .page-section .section-eyebrow,
 .page-section .section-title,
 .page-section .section-sub {
   text-align: center;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* ── WHY SECTION ────────────────────────────────────── */
