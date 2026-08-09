@@ -22,7 +22,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css?v=24" />
+  <link rel="stylesheet" href="/styles.css?v=26" />
 </head>
 <body>
 
@@ -284,6 +284,20 @@
     </div>
   </footer>
 
+  <!-- WELCOME POPUP -->
+  <div id="welcome-popup" class="welcome-overlay" hidden>
+    <div class="welcome-card" role="dialog" aria-modal="true">
+      <button class="welcome-close" id="welcome-close" aria-label="Close">✕</button>
+      <div class="welcome-tag">🎁 EXCLUSIVE OFFER</div>
+      <h2 class="welcome-title">Get 10% Off Your First Order</h2>
+      <p class="welcome-sub">Join the free MONKEYGOD Telegram channel and DM us after — we'll send you a 10% discount on any tier.</p>
+      <a class="welcome-btn" href="https://t.me/+Q2cSul0OxOs1ODhh" target="_blank" rel="noopener" id="welcome-join">
+        Join Free Channel →
+      </a>
+      <button class="welcome-skip" id="welcome-skip">No thanks, I'll pay full price</button>
+    </div>
+  </div>
+
   <!-- CRYPTO MODAL -->
   <div id="crypto-modal" class="modal-overlay" hidden>
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="cr-title">
@@ -308,6 +322,29 @@
   <div id="toast" class="toast" hidden></div>
 
   <script src="/script.js?v=19"></script>
+  <script>
+  /* ── Welcome popup — shows once per browser session ── */
+  (function () {
+    if (sessionStorage.getItem('mg_popup_seen')) return;
+    const popup = document.getElementById('welcome-popup');
+    const close = () => {
+      popup.classList.remove('welcome-visible');
+      setTimeout(() => { popup.hidden = true; }, 280);
+      sessionStorage.setItem('mg_popup_seen', '1');
+      document.body.style.overflow = '';
+    };
+    setTimeout(() => {
+      popup.hidden = false;
+      requestAnimationFrame(() => popup.classList.add('welcome-visible'));
+      document.body.style.overflow = 'hidden';
+    }, 1800);
+    document.getElementById('welcome-close').addEventListener('click', close);
+    document.getElementById('welcome-skip').addEventListener('click', close);
+    document.getElementById('welcome-join').addEventListener('click', close);
+    popup.addEventListener('click', e => { if (e.target === popup) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && !popup.hidden) close(); });
+  })();
+  </script>
   <script>
   /* ── Legal policy modals ── */
   (function () {
