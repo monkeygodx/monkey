@@ -1,5 +1,5 @@
 /* ===================================================
-   MONKEYGOD — Premium Site CSS  v23
+   MONKEYGOD — Premium Site CSS  v24
    =================================================== */
 
 /* ── Variables ──────────────────────────────────────── */
@@ -1081,6 +1081,75 @@ img, svg { display: block; }
   font-family: ui-monospace, monospace;
   border-top: 1px solid var(--border);
 }
+.footer-legal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: .25rem .1rem;
+  margin-top: .9rem;
+}
+.legal-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: .56rem;
+  font-family: ui-monospace, monospace;
+  color: var(--text-dim);
+  letter-spacing: .08em;
+  padding: .2rem .35rem;
+  border-radius: 4px;
+  transition: color .18s, background .18s;
+  text-transform: uppercase;
+}
+.legal-btn:hover {
+  color: var(--purple-mid);
+  background: rgba(147,51,234,.08);
+}
+.footer-sep {
+  font-size: .5rem;
+  color: rgba(255,255,255,.15);
+  padding: 0 .1rem;
+}
+
+/* ── POLICY MODAL ───────────────────────────────────── */
+.policy-modal {
+  max-width: 600px;
+  max-height: 80vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.policy-body {
+  overflow-y: auto;
+  flex: 1;
+  padding-right: .5rem;
+  font-size: .82rem;
+  color: var(--text-muted);
+  line-height: 1.7;
+  margin-top: .75rem;
+}
+.policy-body h4 {
+  font-size: .82rem;
+  font-weight: 800;
+  color: var(--text);
+  margin: 1.25rem 0 .4rem;
+  letter-spacing: .01em;
+}
+.policy-body h4:first-child { margin-top: 0; }
+.policy-body p { margin-bottom: .7rem; }
+.policy-body ul {
+  padding-left: 1.25rem;
+  margin-bottom: .7rem;
+}
+.policy-body ul li { margin-bottom: .3rem; }
+.policy-body a { color: var(--purple-mid); text-decoration: none; }
+.policy-body a:hover { text-decoration: underline; }
+.policy-body em { color: var(--text-dim); font-style: normal; font-size: .75rem; }
+.policy-body strong { color: var(--text); font-weight: 700; }
+.policy-body::-webkit-scrollbar { width: 4px; }
+.policy-body::-webkit-scrollbar-track { background: transparent; }
+.policy-body::-webkit-scrollbar-thumb { background: rgba(147,51,234,.3); border-radius: 2px; }
 
 /* ── CRYPTO MODAL ───────────────────────────────────── */
 .modal-overlay {
