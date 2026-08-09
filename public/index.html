@@ -22,7 +22,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css?v=26" />
+  <link rel="stylesheet" href="/styles.css?v=28" />
 </head>
 <body>
 
@@ -49,23 +49,38 @@
   <!-- HERO -->
   <section class="hero">
     <div class="hero-inner">
-      <div class="hero-eyebrow">
+      <div class="hero-eyebrow-pill">
         <span class="hero-pulse"></span>
-        PRIVATE VAULT · MEMBERS ONLY
+        NEW · EXCLUSIVE VAULT · MEMBERS ONLY
       </div>
-      <h1 class="hero-wordmark">MONKEYGOD</h1>
-      <p class="hero-headline">The Vault Is Open.</p>
-      <p class="hero-sub">10,000+ exclusive videos. One payment. Yours forever.</p>
+      <h1 class="hero-headline">
+        The Vault<br>Is <em class="hero-em">Open.</em>
+      </h1>
+      <p class="hero-sub">10,000+ exclusive videos. One payment. Yours forever. No subscriptions, no renewals — instant lifetime access.</p>
       <div class="hero-actions">
         <a href="#tiers" class="hero-btn">Unlock Access →</a>
-        <a href="#how" class="hero-ghost">How It Works</a>
+        <a href="#how" class="hero-ghost">See How It Works</a>
       </div>
-      <div class="hero-trust">
-        <span>🔒 Secure Checkout</span>
-        <span class="hero-trust-sep">·</span>
-        <span>⚡ Instant Access</span>
-        <span class="hero-trust-sep">·</span>
-        <span>♾️ Lifetime</span>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <span class="hero-stat-num">10,000+</span>
+          <span class="hero-stat-label">Exclusive Videos</span>
+        </div>
+        <div class="hero-stat-div"></div>
+        <div class="hero-stat">
+          <span class="hero-stat-num">3</span>
+          <span class="hero-stat-label">Access Tiers</span>
+        </div>
+        <div class="hero-stat-div"></div>
+        <div class="hero-stat">
+          <span class="hero-stat-num">1×</span>
+          <span class="hero-stat-label">Lifetime Payment</span>
+        </div>
+        <div class="hero-stat-div"></div>
+        <div class="hero-stat">
+          <span class="hero-stat-num">⚡</span>
+          <span class="hero-stat-label">Instant Delivery</span>
+        </div>
       </div>
     </div>
   </section>
@@ -288,9 +303,16 @@
   <div id="welcome-popup" class="welcome-overlay" hidden>
     <div class="welcome-card" role="dialog" aria-modal="true">
       <button class="welcome-close" id="welcome-close" aria-label="Close">✕</button>
-      <div class="welcome-tag">🎁 EXCLUSIVE OFFER</div>
-      <h2 class="welcome-title">Get 10% Off Your First Order</h2>
-      <p class="welcome-sub">Join the free MONKEYGOD Telegram channel and DM us after — we'll send you a 10% discount on any tier.</p>
+      <div class="welcome-tag">🎁 MEMBERS OFFER</div>
+      <h2 class="welcome-title">Get 10% Off Any Tier</h2>
+      <p class="welcome-sub">Join the free MONKEYGOD Telegram, then use this code at checkout:</p>
+      <div class="welcome-code-chip">
+        <div class="welcome-code-inner">
+          <span class="welcome-code-label">DISCOUNT CODE</span>
+          <span class="welcome-code-val">NEW</span>
+        </div>
+        <button class="welcome-code-copy" id="welcome-copy" aria-label="Copy discount code">Copy</button>
+      </div>
       <a class="welcome-btn" href="https://t.me/+Q2cSul0OxOs1ODhh" target="_blank" rel="noopener" id="welcome-join">
         Join Free Channel →
       </a>
@@ -321,7 +343,7 @@
 
   <div id="toast" class="toast" hidden></div>
 
-  <script src="/script.js?v=19"></script>
+  <script src="/script.js?v=20"></script>
   <script>
   /* ── Welcome popup — shows once per browser session ── */
   (function () {
@@ -343,6 +365,11 @@
     document.getElementById('welcome-join').addEventListener('click', close);
     popup.addEventListener('click', e => { if (e.target === popup) close(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && !popup.hidden) close(); });
+    document.getElementById('welcome-copy').addEventListener('click', async function () {
+      try { await navigator.clipboard.writeText('NEW'); } catch {}
+      this.textContent = 'Copied ✓';
+      setTimeout(() => { if (this) this.textContent = 'Copy'; }, 2000);
+    });
   })();
   </script>
   <script>
