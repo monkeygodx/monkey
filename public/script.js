@@ -71,7 +71,6 @@ async function boot() {
 
   buildSlider(CONFIG.previews || []);
   renderTiers();
-  wireCryptoModal();
   wireFaq();
   animateMembers();
   wireCtaBtn();
@@ -356,3 +355,4 @@ function initReveal() {
 
 boot();
 initReveal();
+wireCryptoModal(); /* wire close buttons immediately — does not need config */
