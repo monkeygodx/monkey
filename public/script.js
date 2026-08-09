@@ -234,7 +234,7 @@ function renderTiers() {
       <ul class="tier-features">
         ${d.features.map((f) => `
           <li>
-            <span class="check-icon"></span>${f.t}
+            <span class="check-icon">✓</span>${f.t}
           </li>`).join('')}
       </ul>
       <div class="tier-card-footer">
