@@ -458,3 +458,7 @@ app.listen(PORT, '0.0.0.0', async () => {
   console.log(`  Claim tokens: ${CLAIM_SECRET.length > 10 ? 'CLAIM_SECRET set ✓' : 'WARNING — CLAIM_SECRET not set, tokens won\'t survive restarts'}`);
   console.log('');
 });
+
+app.get('/.well-known/apple-developer-merchantid-domain-association', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', '.well-known', 'apple-developer-merchantid-domain-association'));
+});
