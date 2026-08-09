@@ -328,7 +328,7 @@ app.get('/api/claim', async (req, res) => {
 // and posts the one-time {sourceId} here; we charge it server-side.
 app.post('/api/charge', async (req, res) => {
   try {
-    const { tier, sourceId, buyerVerificationToken } = req.body || {};
+    const { tier, sourceId, buyerVerificationToken, promoCode } = req.body || {};
     const product = PRODUCTS[tier];
     if (!product) return res.status(400).json({ error: 'Unknown tier.' });
     if (!sourceId) return res.status(400).json({ error: 'Missing card token.' });
@@ -340,13 +340,22 @@ app.post('/api/charge', async (req, res) => {
         message: 'Card payments are not live yet. Pay with crypto or DM the admin.',
       });
     }
+    // Promo code — 'NEW' gives 10% off
+    const VALID_PROMOS = { 'NEW': 0.10 };
+    const discountRate = promoCode && VALID_PROMOS[(promoCode + '').trim().toUpperCase()];
+    const chargeAmount = discountRate
+      ? Math.round(product.amount * (1 - discountRate))
+      : product.amount;
+    const chargeNote = discountRate
+      ? `${product.name} [${promoCode.toUpperCase()} -${Math.round(discountRate * 100)}%]`
+      : product.name;
     const body = {
       idempotency_key: crypto.randomUUID(),
       source_id: sourceId,
       location_id: sq.locationId,
-      amount_money: { amount: product.amount, currency: 'USD' },
+      amount_money: { amount: chargeAmount, currency: 'USD' },
       autocomplete: true,
-      note: product.name,
+      note: chargeNote,
     };
     if (buyerVerificationToken) body.verification_token = buyerVerificationToken;
     const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${sq.accessToken}` };
@@ -361,16 +370,16 @@ app.post('/api/charge', async (req, res) => {
     const payment = data && data.payment;
     notifyDiscord(cfg.discordWebhook, {
       product: product.name,
-      amountCents: product.amount,
+      amountCents: chargeAmount,
+      promoCode: promoCode || null,
       paymentId: payment && payment.id,
       status: payment && payment.status,
     });
-    const claimToken = generateClaimToken(tier, payment && payment.id);
     return res.json({
       ok: true,
       paymentId: payment && payment.id,
       status: payment && payment.status,
-      redirect: `/success?token=${encodeURIComponent(claimToken)}`,
+      redirect: `/success?tier=${encodeURIComponent(tier)}`,
     });
   } catch (err) {
     console.error('[charge] fatal', err);
@@ -457,8 +466,4 @@ app.listen(PORT, '0.0.0.0', async () => {
   console.log(`  Crypto coins: ${cfg.crypto.length ? cfg.crypto.map((c) => c.coin).join(', ') : 'none set'}`);
   console.log(`  Claim tokens: ${CLAIM_SECRET.length > 10 ? 'CLAIM_SECRET set ✓' : 'WARNING — CLAIM_SECRET not set, tokens won\'t survive restarts'}`);
   console.log('');
-});
-
-app.get('/.well-known/apple-developer-merchantid-domain-association', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', '.well-known', 'apple-developer-merchantid-domain-association'));
 });
