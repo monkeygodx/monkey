@@ -22,7 +22,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css?v=23" />
+  <link rel="stylesheet" href="/styles.css?v=24" />
 </head>
 <body>
 
@@ -273,6 +273,15 @@
   <!-- FOOTER -->
   <footer class="site-footer">
     &copy; 2026 MONKEYGOD &bull; SECURE NODES ACTIVE &bull; MONKEYGOD.FUN
+    <div class="footer-legal">
+      <button class="legal-btn" data-policy="age">Age Disclaimer</button>
+      <span class="footer-sep">·</span>
+      <button class="legal-btn" data-policy="privacy">Privacy Policy</button>
+      <span class="footer-sep">·</span>
+      <button class="legal-btn" data-policy="refund">Refund Policy</button>
+      <span class="footer-sep">·</span>
+      <button class="legal-btn" data-policy="terms">Terms of Service</button>
+    </div>
   </footer>
 
   <!-- CRYPTO MODAL -->
@@ -287,8 +296,143 @@
     </div>
   </div>
 
+  <!-- POLICY MODAL -->
+  <div id="policy-modal" class="modal-overlay" hidden>
+    <div class="modal policy-modal" role="dialog" aria-modal="true" aria-labelledby="policy-title">
+      <button class="modal-close" id="policy-close">✕</button>
+      <h3 id="policy-title" class="modal-title"></h3>
+      <div id="policy-body" class="policy-body"></div>
+    </div>
+  </div>
+
   <div id="toast" class="toast" hidden></div>
 
   <script src="/script.js?v=19"></script>
+  <script>
+  /* ── Legal policy modals ── */
+  (function () {
+    const POLICIES = {
+      age: {
+        title: 'Age Disclaimer',
+        html: `
+          <p><strong>This website contains adult content intended for individuals 18 years of age or older.</strong></p>
+          <p>By accessing MONKEYGOD and any content hosted on this platform, you confirm and represent that:</p>
+          <ul>
+            <li>You are at least 18 years of age, or the age of majority in your jurisdiction, whichever is greater.</li>
+            <li>Viewing adult content is legal in your jurisdiction.</li>
+            <li>You are accessing this content of your own free will and are not doing so on behalf of a minor.</li>
+            <li>You understand this site contains explicit adult material and you consent to viewing it.</li>
+          </ul>
+          <p>If you are under 18 years of age, or if adult content is illegal in your jurisdiction, you must exit this site immediately.</p>
+          <p><strong>Parental Controls:</strong> Parents and guardians are advised to use parental control software to prevent minors from accessing adult content online. Resources such as <a href="https://www.cybertipline.org" target="_blank" rel="noopener">CyberTipline</a> are available to report illegal content involving minors.</p>
+          <p>All models, performers, and individuals depicted in content distributed through this platform are 18 years of age or older at the time of production. Age verification records are maintained in compliance with applicable law.</p>
+        `
+      },
+      privacy: {
+        title: 'Privacy Policy',
+        html: `
+          <p><em>Last updated: January 2026</em></p>
+          <h4>Information We Collect</h4>
+          <p>We collect only the minimum information necessary to operate this service:</p>
+          <ul>
+            <li><strong>Payment information</strong> — processed securely by Square. We never store, see, or have access to your card number or CVV. Square's privacy policy governs payment data.</li>
+            <li><strong>Contact information</strong> — if you voluntarily message admin, your Telegram username may be retained to fulfil your order.</li>
+            <li><strong>Technical data</strong> — IP address and browser type, logged automatically for security and fraud prevention.</li>
+          </ul>
+          <h4>How We Use Your Information</h4>
+          <ul>
+            <li>To process and fulfil your order</li>
+            <li>To contact you regarding your purchase</li>
+            <li>To prevent fraud and abuse</li>
+          </ul>
+          <h4>Data Sharing</h4>
+          <p>We do not sell, rent, or share your personal information with third parties except as required to process payments (Square) or as required by law.</p>
+          <h4>Data Retention</h4>
+          <p>Transaction records are retained for a minimum of 7 years as required by financial regulations. Technical logs are purged after 90 days.</p>
+          <h4>Your Rights</h4>
+          <p>Depending on your jurisdiction, you may have the right to access, correct, or delete your personal data. To submit a data request, contact admin via Telegram.</p>
+          <h4>Cookies</h4>
+          <p>This site uses only essential session cookies required for checkout functionality. No tracking or advertising cookies are used.</p>
+          <h4>Contact</h4>
+          <p>For privacy-related enquiries, contact us via Telegram: @cynski</p>
+        `
+      },
+      refund: {
+        title: 'Refund Policy',
+        html: `
+          <p><em>Last updated: January 2026</em></p>
+          <h4>All Sales Are Final</h4>
+          <p>Due to the nature of digital content, all purchases are final and non-refundable once access has been delivered. By completing checkout, you acknowledge that you waive any right to a refund once your private channel link has been provided.</p>
+          <h4>Non-Delivery</h4>
+          <p>If you completed payment but did not receive access within 24 hours, contact admin via Telegram (@cynski) with proof of payment. We will fulfil your order promptly or, at our sole discretion, issue a refund.</p>
+          <h4>Duplicate Charges</h4>
+          <p>If you were charged more than once for the same order, contact admin immediately with both transaction receipts. Duplicate charges will be fully refunded.</p>
+          <h4>Chargebacks</h4>
+          <p>Filing a chargeback without first contacting us may result in permanent termination of your access and a ban from future purchases. We cooperate fully with payment processors on dispute investigations and will provide evidence of delivery.</p>
+          <h4>Contact</h4>
+          <p>All refund enquiries: Telegram @cynski. Please include your payment confirmation number.</p>
+        `
+      },
+      terms: {
+        title: 'Terms of Service',
+        html: `
+          <p><em>Last updated: January 2026</em></p>
+          <h4>1. Eligibility</h4>
+          <p>You must be at least 18 years of age to access or purchase from this platform. By using this site you represent that you meet this requirement. Access by minors is strictly prohibited.</p>
+          <h4>2. License</h4>
+          <p>Upon purchase, you receive a personal, non-exclusive, non-transferable license to access the content in your purchased tier for personal, non-commercial use only. One license per individual. Sharing account access is prohibited.</p>
+          <h4>3. Prohibited Conduct</h4>
+          <p>You agree not to:</p>
+          <ul>
+            <li>Redistribute, re-upload, resell, or share any content from this platform</li>
+            <li>Share your private channel link with any third party</li>
+            <li>Screenshot, record, or otherwise copy content for distribution</li>
+            <li>Use content for any commercial purpose</li>
+            <li>Attempt to circumvent any access controls</li>
+            <li>Use this platform for any unlawful purpose</li>
+          </ul>
+          <h4>4. DMCA &amp; Content Removal</h4>
+          <p>We respect intellectual property rights and comply fully with the Digital Millennium Copyright Act (DMCA) and all applicable content removal laws. If you believe any content hosted or distributed through this platform infringes your copyright or violates any law, submit a takedown notice to:</p>
+          <p><strong>DMCA Agent:</strong> Telegram @cynski<br>
+          Include: (a) identification of the copyrighted work, (b) identification of the infringing material and its location, (c) your contact information, (d) a statement of good faith belief, (e) a statement of accuracy under penalty of perjury.</p>
+          <p><strong>We will remove any reported content promptly upon receipt of a valid notice.</strong> We do not protect infringing content and maintain a repeat-infringer termination policy.</p>
+          <h4>5. Termination</h4>
+          <p>We reserve the right to revoke access without refund for violation of these terms, including redistribution of content or chargebacks filed in bad faith.</p>
+          <h4>6. Disclaimer</h4>
+          <p>Content is provided "as is." We make no warranties regarding uninterrupted access. We are not liable for any damages arising from use of this platform beyond the amount paid for access.</p>
+          <h4>7. Governing Law</h4>
+          <p>These terms are governed by applicable law. Disputes shall be resolved through binding arbitration or the courts of the applicable jurisdiction.</p>
+          <h4>8. Changes</h4>
+          <p>We may update these terms at any time. Continued use of the platform after changes constitutes acceptance of the revised terms.</p>
+        `
+      }
+    };
+
+    const overlay = document.getElementById('policy-modal');
+    const titleEl = document.getElementById('policy-title');
+    const bodyEl  = document.getElementById('policy-body');
+    const closeBtn = document.getElementById('policy-close');
+
+    function openPolicy(key) {
+      const p = POLICIES[key];
+      if (!p) return;
+      titleEl.textContent = p.title;
+      bodyEl.innerHTML = p.html;
+      overlay.hidden = false;
+      document.body.style.overflow = 'hidden';
+    }
+    function closePolicy() {
+      overlay.hidden = true;
+      document.body.style.overflow = '';
+    }
+
+    document.querySelectorAll('.legal-btn').forEach(btn =>
+      btn.addEventListener('click', () => openPolicy(btn.dataset.policy))
+    );
+    closeBtn.addEventListener('click', closePolicy);
+    overlay.addEventListener('click', e => { if (e.target === overlay) closePolicy(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && !overlay.hidden) closePolicy(); });
+  })();
+  </script>
 </body>
 </html>
