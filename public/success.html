@@ -179,15 +179,15 @@
 
       <div class="success-step">
         <div class="success-step-num">1</div>
-        <div class="success-step-text"><b>Check your link above.</b> If you have a claim link, tap "Join Your Channel" to get instant access.</div>
+        <div class="success-step-text"><b>Tap your channel link above.</b> It takes you straight to your private Telegram channel — join instantly.</div>
       </div>
       <div class="success-step">
         <div class="success-step-num">2</div>
-        <div class="success-step-text"><b>No link yet?</b> DM the admin with your payment confirmation and you'll get access within minutes.</div>
+        <div class="success-step-text"><b>Link not working?</b> DM admin with your payment confirmation and you'll get access within minutes.</div>
       </div>
       <div class="success-step">
         <div class="success-step-num">3</div>
-        <div class="success-step-text"><b>Lifetime access.</b> Once you're in the channel, you're in permanently — no renewals.</div>
+        <div class="success-step-text"><b>Lifetime access.</b> Once you're in the channel, you're in permanently — no renewals, no expiry.</div>
       </div>
 
       <a class="success-admin-cta" id="admin-link" href="https://t.me/cynski" target="_blank" rel="noopener">📨 DM Admin for Access</a>
@@ -199,30 +199,33 @@
     'use strict';
     const $ = s => document.querySelector(s);
 
+    const TIER_LINKS = {
+      basic:     'https://t.me/+35ng-80wUYk4ODYx',
+      premium:   'https://t.me/+rfiUbOIL5FVlM2Mx',
+      exclusive: 'https://t.me/+JXqqH4jHuRI5ZTEx',
+    };
+
+    const TIER_LABELS = {
+      basic: 'Basic', premium: 'Premium', exclusive: 'Exclusive',
+    };
+
     async function init() {
       const params = new URLSearchParams(window.location.search);
-      const token = params.get('token');
+      const tier = (params.get('tier') || '').toLowerCase();
+      const link = TIER_LINKS[tier];
 
-      // Try to load config for the admin link
+      // Load admin link from config
       try {
         const cfg = await fetch('/api/config').then(r => r.json());
-        if (cfg && cfg.links && cfg.links.admin) {
-          $('#admin-link').href = cfg.links.admin;
-        }
+        if (cfg?.links?.admin) $('#admin-link').href = cfg.links.admin;
       } catch (e) { /* keep default */ }
 
-      // If a claim token is present, try to redeem it for the channel link
-      if (token) {
-        try {
-          const res = await fetch(`/api/claim?token=${encodeURIComponent(token)}`);
-          const data = await res.json();
-          if (res.ok && data.link) {
-            const linkSection = $('#link-section');
-            $('#link-url').textContent = data.link;
-            $('#link-btn').href = data.link;
-            linkSection.style.display = 'block';
-          }
-        } catch (e) { /* no link — admin DM flow */ }
+      // Show the channel link if we know the tier
+      if (link) {
+        $('#link-url').textContent = link;
+        $('#link-btn').href = link;
+        $('#link-btn').textContent = `🚀 Join ${TIER_LABELS[tier] || ''} Channel →`;
+        $('#link-section').style.display = 'block';
       }
     }
 
