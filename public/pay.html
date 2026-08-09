@@ -4,49 +4,403 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="dark only" />
-  <meta name="robots" content="noindex" />
-  <title>Checkout — MONKEYGOD</title>
-  <meta name="description" content="Secure checkout for MONKEYGOD vault access." />
+  <title>MONKEYGOD — Checkout</title>
   <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css?v=13" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css?v=23" />
+  <style>
+    .pay-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 1.5rem 3rem;
+      position: relative;
+      z-index: 1;
+    }
+    .pay-card {
+      background: #141418;
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: 22px;
+      padding: 2.5rem 2rem;
+      max-width: 460px;
+      width: 100%;
+      box-shadow: 0 0 90px -20px rgba(147,51,234,.5);
+    }
+    .pay-back {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      font-size: .75rem;
+      color: var(--text-dim);
+      font-weight: 600;
+      margin-bottom: 2rem;
+      transition: color .2s;
+      text-decoration: none;
+    }
+    .pay-back:hover { color: var(--purple-mid); }
+    .pay-tier-name {
+      font-size: .62rem;
+      font-weight: 900;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--purple-light);
+      font-family: ui-monospace, monospace;
+      margin-bottom: .5rem;
+    }
+    .pay-title {
+      font-size: 1.5rem;
+      font-weight: 900;
+      letter-spacing: -.03em;
+      color: var(--text);
+      margin-bottom: .25rem;
+    }
+    .pay-price {
+      font-size: 2.8rem;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -.04em;
+      background: linear-gradient(140deg, #d4a8ff 0%, #8b2be2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: .3rem;
+    }
+    .pay-onetime {
+      font-size: .6rem;
+      color: var(--text-dim);
+      font-weight: 700;
+      font-family: ui-monospace, monospace;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+    .pay-divider {
+      height: 1px;
+      background: rgba(255,255,255,.07);
+      margin: 1.25rem 0 1.25rem;
+    }
+    .pay-methods-label {
+      font-size: .55rem;
+      font-weight: 900;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      font-family: ui-monospace, monospace;
+      margin-bottom: .9rem;
+    }
+    .pay-error-box {
+      background: rgba(220,38,38,.1);
+      border: 1px solid rgba(220,38,38,.28);
+      border-radius: 10px;
+      padding: .85rem 1rem;
+      font-size: .8rem;
+      color: #fca5a5;
+      margin-bottom: .9rem;
+      line-height: 1.55;
+      display: none;
+    }
+    .pay-info-box {
+      background: rgba(147,51,234,.07);
+      border: 1px solid rgba(147,51,234,.22);
+      border-radius: 10px;
+      padding: .85rem 1rem;
+      font-size: .8rem;
+      color: var(--text-muted);
+      margin-bottom: .9rem;
+      line-height: 1.55;
+    }
+    .btn-primary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 52px;
+      background: linear-gradient(135deg, var(--purple), var(--purple-dark));
+      color: #fff;
+      font-family: var(--font);
+      font-size: .9rem;
+      font-weight: 700;
+      border-radius: var(--radius-btn);
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 8px 28px rgba(147,51,234,.55);
+      transition: filter .22s, transform .22s, box-shadow .22s;
+      margin-bottom: .75rem;
+      letter-spacing: .01em;
+      text-decoration: none;
+    }
+    .btn-primary:hover:not(:disabled) {
+      filter: brightness(1.1);
+      transform: translateY(-2px);
+      box-shadow: 0 14px 40px rgba(147,51,234,.72);
+    }
+    .btn-primary:disabled { opacity: .5; cursor: wait; transform: none; }
+    .btn-secondary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 48px;
+      background: rgba(255,255,255,.045);
+      color: var(--text-muted);
+      font-family: var(--font);
+      font-size: .86rem;
+      font-weight: 600;
+      border-radius: var(--radius-btn);
+      border: 1px solid rgba(255,255,255,.1);
+      cursor: pointer;
+      transition: background .2s, border-color .2s, color .2s;
+      margin-bottom: .75rem;
+      text-decoration: none;
+    }
+    .btn-secondary:hover {
+      background: rgba(255,255,255,.09);
+      border-color: rgba(255,255,255,.2);
+      color: var(--text);
+    }
+    .btn-admin {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 48px;
+      background: rgba(147,51,234,.07);
+      color: var(--purple-mid);
+      font-family: var(--font);
+      font-size: .86rem;
+      font-weight: 600;
+      border-radius: var(--radius-btn);
+      border: 1px solid rgba(147,51,234,.22);
+      cursor: pointer;
+      transition: background .2s, border-color .2s;
+      text-decoration: none;
+    }
+    .btn-admin:hover {
+      background: rgba(147,51,234,.14);
+      border-color: rgba(147,51,234,.42);
+    }
+    .pay-secure {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .4rem;
+      font-size: .6rem;
+      color: var(--text-dim);
+      font-weight: 600;
+      letter-spacing: .04em;
+      margin-top: 1.25rem;
+    }
+    .pay-loading-screen {
+      text-align: center;
+      padding: 3rem 0;
+      color: var(--text-dim);
+      font-size: .88rem;
+    }
+    /* Crypto modal overrides for pay page */
+    .modal-sub b { color: var(--text); }
+  </style>
 </head>
 <body>
-  <div class="mesh-bg" aria-hidden="true"></div>
 
-  <main class="content-container pay-page">
-    <h1 class="wordmark" style="font-size:clamp(2rem,9vw,3rem)">MONKEYGOD</h1>
-    <div class="status-badge"><span class="status-dot"></span> SECURE CHECKOUT</div>
+  <div class="site-bg" aria-hidden="true">
+    <div class="bg-grid"></div>
+    <div class="bg-glow-top"></div>
+  </div>
 
-    <div class="pay-card" id="checkout-card">
-      <div class="order-summary">
-        <span class="order-tier" id="order-tier">—</span>
-        <span class="order-amount" id="order-amount">—</span>
-      </div>
-
-      <div id="wallet-container" class="wallet-container"></div>
-      <div id="wallet-sep" class="wallet-sep" hidden><span>or pay with card</span></div>
-
-      <div id="card-status" class="pay-note">Loading secure checkout…</div>
-      <div id="card-container" class="card-container"></div>
-
-      <div id="pay-error" class="co-error" hidden></div>
-
-      <button id="pay-btn" class="pay-btn pay-btn-card" disabled>
-        <span id="pay-btn-text">Pay</span>
-      </button>
-
-      <p class="co-fineprint">
-        Encrypted checkout. Your card details never touch our servers.
-      </p>
+  <header class="site-nav">
+    <div class="nav-inner">
+      <a class="nav-logo" href="/">MONKEYGOD</a>
+      <a href="/" class="nav-cta">← Plans</a>
     </div>
+  </header>
 
-    <footer class="site-footer">&copy; 2026 MONKEYGOD &bull; SECURE NODES ACTIVE</footer>
+  <main class="pay-page">
+    <div class="pay-card" id="pay-card">
+      <div class="pay-loading-screen">Loading…</div>
+    </div>
   </main>
 
   <div id="toast" class="toast" hidden></div>
-  <script src="/pay.js?v=13"></script>
+
+  <!-- Crypto modal -->
+  <div id="crypto-modal" class="modal-overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="cr-title">
+      <button class="modal-close" data-close>✕</button>
+      <h3 id="cr-title" class="modal-title">Pay with Crypto</h3>
+      <p class="modal-sub">Send <b id="cr-amount">—</b> for <b id="cr-product">—</b> to an address below. DM admin your TXID after sending.</p>
+      <div id="crypto-list" class="crypto-list"></div>
+      <a id="cr-admin" class="pay-btn pay-btn-card" href="#" target="_blank" rel="noopener">📨 Message Admin</a>
+      <p class="co-fineprint">Double-check the network before sending. Wrong-network transfers can't be recovered.</p>
+    </div>
+  </div>
+
+  <script>
+    'use strict';
+    const $ = s => document.querySelector(s);
+    let CONFIG = null;
+
+    function toast(msg, ms) {
+      const t = $('#toast');
+      t.textContent = msg;
+      t.hidden = false;
+      clearTimeout(toast._t);
+      toast._t = setTimeout(() => (t.hidden = true), ms || 3200);
+    }
+
+    function money(cents) {
+      const d = cents / 100;
+      return '$' + (Number.isInteger(d) ? d : d.toFixed(2));
+    }
+
+    // Read tier from URL path (/exclusive, /premium, /basic) or ?tier= param
+    function getTier() {
+      const seg = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
+      if (['basic', 'premium', 'exclusive'].includes(seg)) return seg;
+      const t = (new URLSearchParams(window.location.search).get('tier') || '').toLowerCase();
+      return ['basic', 'premium', 'exclusive'].includes(t) ? t : null;
+    }
+
+    const TIER_UI = {
+      basic:     { label: 'Basic',     features: ['1,000+ Videos', 'Fresh Content', 'High Quality Videos', 'Lifetime Access'] },
+      premium:   { label: 'Premium',   features: ['5,000+ Videos', 'Exclusive Content & Early Access', 'Fresh Content & Updates', 'Higher Quality Videos', 'Lifetime Access'] },
+      exclusive: { label: 'Exclusive', features: ['10,000+ Videos', 'Extra Omegle Wins Channel', 'Every Category Unlocked', 'Highest Quality + Sound', 'Lifetime Access'] },
+    };
+
+    async function init() {
+      const tier = getTier();
+      if (!tier) { renderMsg('No tier selected.', 'Go back and choose a plan.', '/'); return; }
+
+      try { CONFIG = await (await fetch('/api/config')).json(); }
+      catch (e) { renderMsg('Connection error.', 'Could not load checkout. Please refresh.', null); return; }
+
+      const product = CONFIG.products && CONFIG.products[tier];
+      if (!product) { renderMsg('Unknown tier.', null, '/'); return; }
+
+      const td = TIER_UI[tier];
+      const price = money(product.amount);
+
+      const cardEl = document.createElement('div');
+      cardEl.innerHTML = `
+        <a class="pay-back" href="/">← Back to plans</a>
+        <div class="pay-tier-name">${td.label}</div>
+        <div class="pay-title">Complete Your Order</div>
+        <div class="pay-price">${price}</div>
+        <div class="pay-onetime">One-time · Lifetime access · Instant delivery</div>
+        <ul class="tier-features" style="margin-bottom:0">
+          ${td.features.map(f => `<li><span class="check-icon">✓</span>${f}</li>`).join('')}
+        </ul>
+        <div class="pay-divider"></div>
+        <div class="pay-methods-label">Payment Method</div>
+        <div id="pay-error" class="pay-error-box"></div>
+        ${!CONFIG.squareReady
+          ? `<div class="pay-info-box">Card payments aren't live yet — pay with crypto or DM admin to arrange your order.</div>`
+          : `<button class="btn-primary" id="btn-card">💳 Pay with Card — ${price}</button>`
+        }
+        <button class="btn-secondary" id="btn-crypto">₿ Pay with Crypto</button>
+        <a class="btn-admin" id="btn-admin" href="${CONFIG.links && CONFIG.links.admin ? CONFIG.links.admin : '#'}" target="_blank" rel="noopener">📨 Message Admin</a>
+        <div class="pay-secure">🔒 Secure · One-time · No subscription · No renewals</div>
+      `;
+
+      const card = $('#pay-card');
+      card.innerHTML = '';
+      card.appendChild(cardEl);
+
+      // Card checkout → POST /api/checkout → redirect to Square
+      const btnCard = $('#btn-card');
+      if (btnCard) {
+        btnCard.addEventListener('click', async () => {
+          btnCard.disabled = true;
+          btnCard.textContent = 'Creating checkout…';
+          const errEl = $('#pay-error');
+          errEl.style.display = 'none';
+          try {
+            const res = await fetch('/api/checkout', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ tier }),
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok || !data.url) {
+              const msg = (data && data.message) || 'Checkout failed. Try crypto or DM admin.';
+              errEl.textContent = msg;
+              errEl.style.display = 'block';
+              btnCard.disabled = false;
+              btnCard.textContent = `💳 Pay with Card — ${price}`;
+              return;
+            }
+            window.location.href = data.url;
+          } catch (e) {
+            $('#pay-error').textContent = 'Network error. Try again or pay with crypto.';
+            $('#pay-error').style.display = 'block';
+            btnCard.disabled = false;
+            btnCard.textContent = `💳 Pay with Card — ${price}`;
+          }
+        });
+      }
+
+      $('#btn-crypto').addEventListener('click', () => openCrypto(tier, product));
+
+      wireCryptoModal();
+    }
+
+    function renderMsg(title, body, backHref) {
+      $('#pay-card').innerHTML = `
+        <div style="text-align:center;padding:2rem 0">
+          <div style="font-size:1.6rem;margin-bottom:1rem">⚠️</div>
+          <p style="font-weight:800;color:var(--text);margin-bottom:.5rem">${title}</p>
+          ${body ? `<p style="font-size:.82rem;color:var(--text-muted);line-height:1.6;margin-bottom:1.25rem">${body}</p>` : ''}
+          ${backHref ? `<a class="btn-primary" href="${backHref}" style="max-width:180px;margin:0 auto">← Go Back</a>` : ''}
+        </div>`;
+    }
+
+    function openCrypto(tier, product) {
+      $('#cr-amount').textContent = money(product.amount);
+      $('#cr-product').textContent = product.name;
+      if (CONFIG.links && CONFIG.links.admin) $('#cr-admin').href = CONFIG.links.admin;
+
+      const list = $('#crypto-list');
+      list.innerHTML = '';
+      if (!CONFIG.crypto || !CONFIG.crypto.length) {
+        list.innerHTML = '<div class="crypto-empty">No addresses published yet.<br>Tap "Message Admin" below and they\'ll send you the current wallet address.</div>';
+      } else {
+        for (const c of CONFIG.crypto) {
+          const row = document.createElement('div');
+          row.className = 'crypto-row';
+          row.innerHTML = `
+            <div class="crypto-row-top">
+              <div class="crypto-coin">${c.coin}<small>${c.label}</small></div>
+              <button class="crypto-copy" data-addr="${c.address}">Copy</button>
+            </div>
+            <div class="crypto-addr">${c.address}</div>`;
+          list.appendChild(row);
+        }
+        list.querySelectorAll('.crypto-copy').forEach(b =>
+          b.addEventListener('click', async () => {
+            try { await navigator.clipboard.writeText(b.dataset.addr); toast('Address copied ✓'); }
+            catch { toast('Copy failed — select manually'); }
+          })
+        );
+      }
+      $('#crypto-modal').hidden = false;
+      document.body.style.overflow = 'hidden';
+    }
+
+    function wireCryptoModal() {
+      document.querySelectorAll('[data-close]').forEach(b =>
+        b.addEventListener('click', () => { $('#crypto-modal').hidden = true; document.body.style.overflow = ''; })
+      );
+      $('#crypto-modal').addEventListener('click', e => {
+        if (e.target === $('#crypto-modal')) { $('#crypto-modal').hidden = true; document.body.style.overflow = ''; }
+      });
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') { $('#crypto-modal').hidden = true; document.body.style.overflow = ''; }
+      });
+    }
+
+    init();
+  </script>
 </body>
 </html>
