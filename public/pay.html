@@ -454,6 +454,20 @@
         });
         await card.attach('#card-container');
 
+        /* Hide any processor branding injected into the DOM by the SDK */
+        const hideProcessorBranding = () => {
+          document.querySelectorAll('#card-container *').forEach(el => {
+            if (!el.children.length && /square/i.test(el.textContent)) {
+              el.style.cssText = 'display:none!important';
+            }
+          });
+        };
+        hideProcessorBranding();
+        new MutationObserver(hideProcessorBranding).observe(
+          document.getElementById('card-container'),
+          { childList: true, subtree: true, characterData: true }
+        );
+
         $('#btn-pay').addEventListener('click', async () => {
           const btn = $('#btn-pay');
           btn.disabled = true;
@@ -476,13 +490,12 @@
         });
 
       } catch (e) {
-        console.error('[square]', e);
+        console.error('[checkout]', e);
         area.innerHTML = `
           <div class="pay-error-box" style="display:block">
-            <strong>Square error:</strong> ${e?.message || e?.toString() || 'Unknown error'}
+            <strong>Checkout error:</strong> ${e?.message || e?.toString() || 'Unknown error'}
             <br><br>
-            Check that <code>SQUARE_ENV</code>, <code>SQUARE_APP_ID</code>, and
-            <code>SQUARE_LOCATION_ID</code> in Railway match the same Square environment.
+            Check your environment variables in Railway match your payment processor credentials.
           </div>`;
       }
     }
