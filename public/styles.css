@@ -666,20 +666,20 @@ img, svg { display: block; }
   line-height: 1.35;
 }
 .check-icon {
-  width: 17px; height: 17px;
+  width: 20px; height: 20px;
   border-radius: 50%;
-  border: 1.5px solid rgba(147,51,234,.45);
-  background: rgba(147,51,234,.07);
+  background: linear-gradient(135deg, var(--purple), var(--purple-dark));
+  color: #fff;
+  font-size: .5rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
-  display: block;
-}
-.tier-card.popular .check-icon {
-  border-color: rgba(147,51,234,.65);
-  background: rgba(147,51,234,.1);
 }
 .tier-card.ultimate .check-icon {
-  border-color: var(--purple-light);
-  background: rgba(192,132,252,.1);
+  background: linear-gradient(135deg, var(--purple-mid), var(--purple));
+  box-shadow: 0 0 8px rgba(147,51,234,.45);
 }
 
 /* ── CARD BUTTONS ───────────────────────────────────── */
