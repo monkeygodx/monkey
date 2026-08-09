@@ -69,7 +69,7 @@ async function boot() {
   $('#btn-admin').href = CONFIG.links.admin;
   $('#cr-admin').href = CONFIG.links.admin;
 
-  buildSlider(CONFIG.previews || []);
+  buildSlider([]); /* placeholder mode — swap to CONFIG.previews when real videos are ready */
   renderTiers();
   wireFaq();
   animateMembers();
@@ -90,25 +90,12 @@ function buildSlider(urls) {
   track.innerHTML = '';
   dots.innerHTML = '';
 
-  /* No real videos yet — show 3 clean placeholder slides */
+  /* No real videos — show a single square placeholder box, no carousel */
   if (!urls.length) {
     slider.classList.add('placeholder-mode');
-    const PLACEHOLDERS = 3;
-    for (let i = 0; i < PLACEHOLDERS; i++) {
-      const slide = document.createElement('div');
-      slide.className = 'ps-slide ps-placeholder' + (i === 1 ? ' active' : '');
-      track.appendChild(slide);
-      const dot = document.createElement('button');
-      dot.className = 'ps-dot' + (i === 1 ? ' active' : '');
-      dot.addEventListener('click', () => goSlide(i));
-      dots.appendChild(dot);
-    }
-    slideEls = [...track.querySelectorAll('.ps-slide')];
-    $('#ps-prev').addEventListener('click', () => goSlide(slideIdx - 1));
-    $('#ps-next').addEventListener('click', () => goSlide(slideIdx + 1));
-    slideIdx = 1;
-    window.addEventListener('resize', centerActive);
-    setTimeout(centerActive, 60);
+    const ph = document.createElement('div');
+    ph.className = 'ps-solo-placeholder';
+    slider.querySelector('.ps-inner').appendChild(ph);
     return;
   }
 
