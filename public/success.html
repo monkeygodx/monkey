@@ -4,75 +4,229 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="dark only" />
-  <meta name="robots" content="noindex" />
-  <title>Payment Received — MONKEYGOD</title>
+  <title>MONKEYGOD — Access Confirmed</title>
   <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800;900&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css?v=13" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css?v=23" />
+  <style>
+    .success-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 1.5rem 3rem;
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+    .success-card {
+      background: #141418;
+      border: 1px solid rgba(147,51,234,.35);
+      border-radius: 22px;
+      padding: 3rem 2rem;
+      max-width: 460px;
+      width: 100%;
+      box-shadow:
+        0 0 90px -20px rgba(147,51,234,.55),
+        inset 0 1px 0 rgba(255,255,255,.06);
+    }
+    .success-icon {
+      font-size: 3rem;
+      margin-bottom: 1.25rem;
+      display: block;
+    }
+    .success-title {
+      font-size: 1.8rem;
+      font-weight: 900;
+      letter-spacing: -.03em;
+      background: linear-gradient(130deg, #ffffff 0%, #e0b4ff 38%, #9333ea 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: .5rem;
+    }
+    .success-sub {
+      font-size: .88rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+      max-width: 340px;
+      margin: 0 auto 2rem;
+    }
+    .success-divider {
+      height: 1px;
+      background: rgba(147,51,234,.2);
+      margin: 1.75rem 0;
+    }
+    .success-step {
+      display: flex;
+      align-items: flex-start;
+      gap: .9rem;
+      text-align: left;
+      margin-bottom: 1rem;
+    }
+    .success-step-num {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple), var(--purple-dark));
+      color: #fff;
+      font-size: .6rem;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .success-step-text {
+      font-size: .82rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+    .success-step-text b { color: var(--text); }
+    .success-link-section {
+      margin-top: 1.5rem;
+      padding: 1.25rem;
+      background: rgba(147,51,234,.07);
+      border: 1px solid rgba(147,51,234,.22);
+      border-radius: 14px;
+      text-align: left;
+      display: none; /* shown by JS if claim token present */
+    }
+    .success-link-label {
+      font-size: .58rem;
+      font-weight: 900;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--purple-light);
+      font-family: ui-monospace, monospace;
+      margin-bottom: .6rem;
+    }
+    .success-link-url {
+      font-size: .8rem;
+      color: var(--text);
+      word-break: break-all;
+      margin-bottom: .75rem;
+    }
+    .btn-channel {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 48px;
+      background: linear-gradient(135deg, var(--purple), var(--purple-dark));
+      color: #fff;
+      font-family: var(--font);
+      font-size: .88rem;
+      font-weight: 700;
+      border-radius: var(--radius-btn);
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 6px 22px rgba(147,51,234,.5);
+      text-decoration: none;
+      transition: filter .2s, transform .2s;
+    }
+    .btn-channel:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    .success-admin-cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 48px;
+      background: rgba(255,255,255,.04);
+      color: var(--text-muted);
+      font-family: var(--font);
+      font-size: .86rem;
+      font-weight: 600;
+      border-radius: var(--radius-btn);
+      border: 1px solid rgba(255,255,255,.1);
+      text-decoration: none;
+      transition: background .2s, color .2s;
+      margin-top: .75rem;
+    }
+    .success-admin-cta:hover { background: rgba(255,255,255,.08); color: var(--text); }
+  </style>
 </head>
 <body>
-  <div class="mesh-bg" aria-hidden="true"></div>
-  <main class="content-container">
-    <div class="status-badge"><span class="status-dot"></span> PAYMENT CONFIRMED</div>
-    <div class="crest" aria-hidden="true">
-      <svg viewBox="0 0 240 240" width="120" height="120">
-        <defs>
-          <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#e9d5ff"/><stop offset="0.45" stop-color="#a855f7"/><stop offset="1" stop-color="#7c3aed"/>
-          </linearGradient>
-          <radialGradient id="d" cx="50%" cy="38%" r="65%"><stop offset="0" stop-color="#1c1c1c"/><stop offset="1" stop-color="#090909"/></radialGradient>
-        </defs>
-        <circle cx="120" cy="120" r="104" fill="url(#d)" stroke="url(#g)" stroke-width="3"/>
-        <path d="M78 130 l26 26 l58 -64" fill="none" stroke="url(#g)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
+
+  <div class="site-bg" aria-hidden="true">
+    <div class="bg-grid"></div>
+    <div class="bg-glow-top"></div>
+  </div>
+
+  <header class="site-nav">
+    <div class="nav-inner">
+      <a class="nav-logo" href="/">MONKEYGOD</a>
     </div>
-    <h1 class="wordmark" style="font-size:clamp(2rem,9vw,3rem)">Payment Received</h1>
-    <p class="tagline">You're in. Tap below to open your private channel.</p>
-    <section class="section" style="margin-top:2rem">
-      <a id="join-link" class="pay-btn pay-btn-card" href="#" target="_blank" rel="noopener" style="margin-top:1rem">Join your channel →</a>
-      <p class="co-fineprint">Save this link — it's your access. Having trouble? Message the admin.</p>
-    </section>
+  </header>
 
-    <section class="resource-card" id="resourceCard">
-      <h3>Want Your Own Wins?</h3>
-      <p>
-        If you'd like to learn how to get your own wins, or learn more about the MONKEYGOD system,
-        <a href="https://monkeygod.fun" target="_blank" rel="noopener">see here</a>.
-      </p>
-      <a class="pay-btn pay-btn-card" href="https://monkeygod.fun" target="_blank" rel="noopener">Visit MonkeyGod.us</a>
-    </section>
+  <main class="success-page">
+    <div class="success-card" id="success-card">
 
-    <footer class="site-footer">&copy; 2026 MONKEYGOD &bull; SECURE NODES ACTIVE</footer>
+      <span class="success-icon">✅</span>
+      <h1 class="success-title">Payment Confirmed</h1>
+      <p class="success-sub">Your order went through. Your private channel link is on the way — check below or DM admin if you don't see it.</p>
+
+      <!-- Claim link section — shown if a valid ?token= is present -->
+      <div class="success-link-section" id="link-section">
+        <div class="success-link-label">Your Private Channel Link</div>
+        <div class="success-link-url" id="link-url"></div>
+        <a class="btn-channel" id="link-btn" href="#" target="_blank" rel="noopener">🚀 Join Your Channel →</a>
+      </div>
+
+      <div class="success-divider"></div>
+
+      <div class="success-step">
+        <div class="success-step-num">1</div>
+        <div class="success-step-text"><b>Check your link above.</b> If you have a claim link, tap "Join Your Channel" to get instant access.</div>
+      </div>
+      <div class="success-step">
+        <div class="success-step-num">2</div>
+        <div class="success-step-text"><b>No link yet?</b> DM the admin with your payment confirmation and you'll get access within minutes.</div>
+      </div>
+      <div class="success-step">
+        <div class="success-step-num">3</div>
+        <div class="success-step-text"><b>Lifetime access.</b> Once you're in the channel, you're in permanently — no renewals.</div>
+      </div>
+
+      <a class="success-admin-cta" id="admin-link" href="https://t.me/cynski" target="_blank" rel="noopener">📨 DM Admin for Access</a>
+
+    </div>
   </main>
+
   <script>
-    (function(){
-      var token = new URLSearchParams(location.search).get('token');
-      var a = document.getElementById('join-link');
-      if (!token) {
-        a.textContent = 'Message the admin to get added';
-        a.href = 'https://t.me/cynski';
-        return;
+    'use strict';
+    const $ = s => document.querySelector(s);
+
+    async function init() {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('token');
+
+      // Try to load config for the admin link
+      try {
+        const cfg = await fetch('/api/config').then(r => r.json());
+        if (cfg && cfg.links && cfg.links.admin) {
+          $('#admin-link').href = cfg.links.admin;
+        }
+      } catch (e) { /* keep default */ }
+
+      // If a claim token is present, try to redeem it for the channel link
+      if (token) {
+        try {
+          const res = await fetch(`/api/claim?token=${encodeURIComponent(token)}`);
+          const data = await res.json();
+          if (res.ok && data.link) {
+            const linkSection = $('#link-section');
+            $('#link-url').textContent = data.link;
+            $('#link-btn').href = data.link;
+            linkSection.style.display = 'block';
+          }
+        } catch (e) { /* no link — admin DM flow */ }
       }
-      fetch('/api/claim?token=' + encodeURIComponent(token))
-        .then(function(r){ return r.json(); })
-        .then(function(c){
-          if (c.link) { a.href = c.link; }
-          else { a.textContent = 'Message the admin to get added'; a.href = 'https://t.me/'; }
-        })
-        .catch(function(){
-          a.textContent = 'Message the admin to get added';
-          a.href = 'https://t.me/cynski';
-        });
-    })();
-    (function(){
-      var card = document.getElementById('resourceCard');
-      var obs = new IntersectionObserver(function(entries){
-        entries.forEach(function(e){ if (e.isIntersecting) { card.classList.add('visible'); obs.unobserve(e.target); } });
-      }, { threshold: 0.15 });
-      obs.observe(card);
-    })();
+    }
+
+    init();
   </script>
 </body>
 </html>
