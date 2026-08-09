@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css?v=26" />
+  <link rel="stylesheet" href="/styles.css?v=28" />
   <style>
     .pay-page {
       min-height: 100vh;
@@ -245,6 +245,78 @@
       color: var(--text-dim);
       font-size: .84rem;
     }
+    /* Promo code */
+    .pay-promo { margin-bottom: 1rem; }
+    .pay-promo-row {
+      display: flex;
+      gap: .5rem;
+    }
+    .pay-promo-input {
+      flex: 1;
+      height: 42px;
+      padding: 0 .85rem;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 9px;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: .82rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .pay-promo-input::placeholder { text-transform: none; font-weight: 400; letter-spacing: 0; color: var(--text-dim); }
+    .pay-promo-input:focus { border-color: rgba(147,51,234,.5); }
+    .pay-promo-input:disabled { opacity: .55; cursor: not-allowed; }
+    .pay-promo-btn {
+      height: 42px;
+      padding: 0 1rem;
+      background: rgba(147,51,234,.12);
+      border: 1px solid rgba(147,51,234,.3);
+      border-radius: 9px;
+      color: var(--purple-light);
+      font-family: var(--font);
+      font-size: .78rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .18s;
+      flex-shrink: 0;
+    }
+    .pay-promo-btn:hover { background: rgba(147,51,234,.22); }
+    .pay-promo-msg {
+      font-size: .72rem;
+      font-weight: 600;
+      margin-top: .4rem;
+      min-height: 1em;
+    }
+    .pay-promo-success { color: #86efac; }
+    .pay-promo-invalid { color: #fca5a5; }
+    /* Discount price display */
+    .pay-price-wrap { display: flex; align-items: baseline; gap: .65rem; flex-wrap: wrap; margin-bottom: .3rem; }
+    .pay-price-original {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      text-decoration: line-through;
+      line-height: 1;
+    }
+    .pay-discount-badge {
+      display: inline-flex;
+      align-items: center;
+      height: 22px;
+      padding: 0 .6rem;
+      background: rgba(134,239,172,.12);
+      border: 1px solid rgba(134,239,172,.3);
+      border-radius: 6px;
+      font-size: .55rem;
+      font-weight: 900;
+      letter-spacing: .1em;
+      color: #86efac;
+      font-family: ui-monospace, monospace;
+    }
   </style>
 </head>
 <body>
@@ -286,6 +358,9 @@
     const $ = s => document.querySelector(s);
     let CONFIG = null;
     let currentProduct = null;
+    const VALID_PROMOS = { 'NEW': 0.10 };
+    let appliedPromo = null;
+    let discountedAmount = null;
 
     function toast(msg, ms) {
       const t = $('#toast');
@@ -348,11 +423,22 @@
         <a class="pay-back" href="/">← Back to plans</a>
         <div class="pay-tier-name">${td.label}</div>
         <div class="pay-title">Complete Your Order</div>
-        <div class="pay-price">${price}</div>
+        <div class="pay-price-wrap">
+          <span class="pay-price" id="pay-price-display">${price}</span>
+          <span class="pay-price-original" id="pay-price-original" style="display:none"></span>
+          <span class="pay-discount-badge" id="pay-discount-badge" style="display:none">10% OFF</span>
+        </div>
         <div class="pay-onetime">One-time · Lifetime access · Instant delivery</div>
-        <ul class="tier-features" style="margin-bottom:0">
-          ${td.features.map(f => `<li><span class="check-icon">✓</span>${f}</li>`).join('')}
+        <ul class="tier-features" style="margin-bottom:1rem">
+          ${td.features.map(f => `<li><span class="check-icon"></span>${f}</li>`).join('')}
         </ul>
+        <div class="pay-promo">
+          <div class="pay-promo-row">
+            <input class="pay-promo-input" id="promo-input" type="text" placeholder="Promo code" maxlength="20" autocomplete="off" />
+            <button class="pay-promo-btn" id="promo-apply">Apply</button>
+          </div>
+          <div class="pay-promo-msg" id="promo-msg"></div>
+        </div>
         <div class="pay-divider"></div>
         <div class="pay-methods-label">Payment Method</div>
         <div id="pay-error" class="pay-error-box"></div>
@@ -367,6 +453,45 @@
 
       $('#btn-crypto').addEventListener('click', () => openCrypto(tier, product));
       wireCryptoModal();
+
+      // Promo code
+      const promoInput = $('#promo-input');
+      const promoApply = $('#promo-apply');
+      const promoMsg   = $('#promo-msg');
+
+      function applyPromo() {
+        const code = (promoInput.value || '').trim().toUpperCase();
+        if (!code) return;
+        const rate = VALID_PROMOS[code];
+        if (!rate) {
+          promoMsg.textContent = 'Invalid promo code.';
+          promoMsg.className = 'pay-promo-msg pay-promo-invalid';
+          return;
+        }
+        if (appliedPromo) {
+          promoMsg.textContent = 'Code already applied.';
+          promoMsg.className = 'pay-promo-msg pay-promo-invalid';
+          return;
+        }
+        appliedPromo = code;
+        discountedAmount = Math.round(product.amount * (1 - rate));
+        const newPrice = money(discountedAmount);
+        // Update price display
+        $('#pay-price-original').textContent = price;
+        $('#pay-price-original').style.display = 'inline';
+        $('#pay-price-display').textContent = newPrice;
+        $('#pay-discount-badge').style.display = 'inline-flex';
+        // Update pay button if already rendered
+        const btnPay = $('#btn-pay');
+        if (btnPay && !btnPay.disabled) btnPay.innerHTML = `💳 Pay ${newPrice}`;
+        promoMsg.textContent = `✓ Code "${code}" applied — ${Math.round(rate * 100)}% off!`;
+        promoMsg.className = 'pay-promo-msg pay-promo-success';
+        promoInput.disabled = true;
+        promoApply.disabled = true;
+      }
+
+      promoApply.addEventListener('click', applyPromo);
+      promoInput.addEventListener('keydown', e => { if (e.key === 'Enter') applyPromo(); });
 
       if (CONFIG.squareEmbedReady) {
         await initSquare(tier, product, price);
@@ -398,7 +523,7 @@
           <button id="apple-pay-button" lang="en" aria-label="Pay with Apple Pay"></button>
           <div id="wallet-sep"></div>
           <div id="card-container"></div>
-          <button class="btn-pay" id="btn-pay">💳 Pay ${price}</button>
+          <button class="btn-pay" id="btn-pay">💳 Pay ${appliedPromo ? money(discountedAmount) : price}</button>
         `;
 
         /* Google Pay disabled — Square merchant account not yet verified for Google Pay.
@@ -501,24 +626,27 @@
     }
 
     async function submit(tier, token, price) {
+      const activePrice = appliedPromo ? money(discountedAmount) : price;
       try {
+        const body = { tier, sourceId: token };
+        if (appliedPromo) body.promoCode = appliedPromo;
         const res = await fetch('/api/charge', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tier, sourceId: token }),
+          body: JSON.stringify(body),
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) {
           showErr(data.message || 'Payment declined. Try a different card or pay with crypto.');
           const btn = $('#btn-pay');
-          if (btn) { btn.disabled = false; btn.innerHTML = `💳 Pay ${price}`; }
+          if (btn) { btn.disabled = false; btn.innerHTML = `💳 Pay ${activePrice}`; }
           return;
         }
         window.location.href = data.redirect || `/success?tier=${encodeURIComponent(tier)}`;
       } catch {
         showErr('Network error. Please try again.');
         const btn = $('#btn-pay');
-        if (btn) { btn.disabled = false; btn.innerHTML = `💳 Pay ${price}`; }
+        if (btn) { btn.disabled = false; btn.innerHTML = `💳 Pay ${activePrice}`; }
       }
     }
 
