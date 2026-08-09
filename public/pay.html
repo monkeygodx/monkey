@@ -464,8 +464,17 @@
 
       } catch (e) {
         console.error('[square]', e);
-        $('#payment-area').innerHTML =
-          `<div class="pay-error-box" style="display:block">Card checkout failed to load — use crypto or DM admin.</div>`;
+        // Show the real Square error so it's debuggable
+        const sqMsg = e?.message || e?.toString() || 'Unknown error';
+        $('#payment-area').innerHTML = `
+          <div class="pay-error-box" style="display:block">
+            <strong>Square error:</strong> ${sqMsg}
+            <br><br>
+            Check that <code>SQUARE_ENV</code>, <code>SQUARE_APP_ID</code>, and
+            <code>SQUARE_LOCATION_ID</code> in Railway match the same Square
+            environment (sandbox IDs start with <code>sandbox-sq0idb-</code>,
+            production IDs start with <code>sq0idp-</code>).
+          </div>`;
       }
     }
 
