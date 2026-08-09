@@ -359,6 +359,29 @@ img, svg { display: block; }
   background: radial-gradient(ellipse at 50% 50%, rgba(147,51,234,.14) 0%, transparent 65%);
 }
 .placeholder-mode .ps-mute { display: none; }
+
+/* Single square placeholder — hides the carousel entirely */
+.placeholder-mode .ps-viewport,
+.placeholder-mode .ps-prev,
+.placeholder-mode .ps-next,
+.placeholder-mode .ps-dots { display: none; }
+
+.ps-solo-placeholder {
+  width: min(520px, 80vw);
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+  border-radius: 18px;
+  background: linear-gradient(160deg, #1a1025 0%, #0d0915 100%);
+  border: 1px solid rgba(147,51,234,.18);
+  position: relative;
+  overflow: hidden;
+}
+.ps-solo-placeholder::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 50%, rgba(147,51,234,.16) 0%, transparent 65%);
+}
 .ps-mute {
   position: absolute;
   bottom: 1rem;
@@ -762,6 +785,12 @@ img, svg { display: block; }
   position: relative;
   z-index: 1;
   padding: 80px 0;
+}
+/* Center all section eyebrows, titles, and subtitles */
+.page-section .section-eyebrow,
+.page-section .section-title,
+.page-section .section-sub {
+  text-align: center;
 }
 
 /* ── WHY SECTION ────────────────────────────────────── */
