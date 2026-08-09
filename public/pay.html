@@ -14,7 +14,7 @@
     .pay-page {
       min-height: 100vh;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
       padding: 80px 1.5rem 3rem;
       position: relative;
@@ -25,9 +25,10 @@
       border: 1px solid rgba(255,255,255,.09);
       border-radius: 22px;
       padding: 2.5rem 2rem;
-      max-width: 460px;
+      max-width: 480px;
       width: 100%;
       box-shadow: 0 0 90px -20px rgba(147,51,234,.5);
+      margin-top: 1rem;
     }
     .pay-back {
       display: inline-flex;
@@ -80,7 +81,7 @@
     .pay-divider {
       height: 1px;
       background: rgba(255,255,255,.07);
-      margin: 1.25rem 0 1.25rem;
+      margin: 1.25rem 0;
     }
     .pay-methods-label {
       font-size: .55rem;
@@ -91,28 +92,43 @@
       font-family: ui-monospace, monospace;
       margin-bottom: .9rem;
     }
-    .pay-error-box {
-      background: rgba(220,38,38,.1);
-      border: 1px solid rgba(220,38,38,.28);
+
+    /* ── Square card iframe container ── */
+    #card-container {
+      min-height: 88px;
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.1);
       border-radius: 10px;
-      padding: .85rem 1rem;
-      font-size: .8rem;
-      color: #fca5a5;
-      margin-bottom: .9rem;
-      line-height: 1.55;
-      display: none;
+      padding: .5rem .75rem;
+      margin-bottom: 1rem;
+      transition: border-color .2s;
     }
-    .pay-info-box {
-      background: rgba(147,51,234,.07);
-      border: 1px solid rgba(147,51,234,.22);
-      border-radius: 10px;
-      padding: .85rem 1rem;
-      font-size: .8rem;
-      color: var(--text-muted);
-      margin-bottom: .9rem;
-      line-height: 1.55;
+    #card-container:focus-within { border-color: rgba(147,51,234,.55); }
+
+    /* ── Wallet buttons ── */
+    #google-pay-container,
+    #apple-pay-container { margin-bottom: .75rem; }
+
+    .wallet-divider {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      margin-bottom: 1rem;
+      color: var(--text-dim);
+      font-size: .68rem;
+      font-weight: 600;
+      letter-spacing: .06em;
     }
-    .btn-primary {
+    .wallet-divider::before,
+    .wallet-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,.08);
+    }
+
+    /* ── Buttons ── */
+    .btn-pay {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -121,7 +137,7 @@
       background: linear-gradient(135deg, var(--purple), var(--purple-dark));
       color: #fff;
       font-family: var(--font);
-      font-size: .9rem;
+      font-size: .92rem;
       font-weight: 700;
       border-radius: var(--radius-btn);
       border: none;
@@ -132,19 +148,19 @@
       letter-spacing: .01em;
       text-decoration: none;
     }
-    .btn-primary:hover:not(:disabled) {
+    .btn-pay:hover:not(:disabled) {
       filter: brightness(1.1);
       transform: translateY(-2px);
       box-shadow: 0 14px 40px rgba(147,51,234,.72);
     }
-    .btn-primary:disabled { opacity: .5; cursor: wait; transform: none; }
+    .btn-pay:disabled { opacity: .5; cursor: wait; transform: none; filter: none; }
     .btn-secondary {
       display: flex;
       align-items: center;
       justify-content: center;
       width: 100%;
       height: 48px;
-      background: rgba(255,255,255,.045);
+      background: rgba(255,255,255,.04);
       color: var(--text-muted);
       font-family: var(--font);
       font-size: .86rem;
@@ -154,7 +170,6 @@
       cursor: pointer;
       transition: background .2s, border-color .2s, color .2s;
       margin-bottom: .75rem;
-      text-decoration: none;
     }
     .btn-secondary:hover {
       background: rgba(255,255,255,.09);
@@ -178,10 +193,31 @@
       transition: background .2s, border-color .2s;
       text-decoration: none;
     }
-    .btn-admin:hover {
-      background: rgba(147,51,234,.14);
-      border-color: rgba(147,51,234,.42);
+    .btn-admin:hover { background: rgba(147,51,234,.14); border-color: rgba(147,51,234,.42); }
+
+    /* ── Error / info boxes ── */
+    .pay-error-box {
+      background: rgba(220,38,38,.1);
+      border: 1px solid rgba(220,38,38,.28);
+      border-radius: 10px;
+      padding: .85rem 1rem;
+      font-size: .8rem;
+      color: #fca5a5;
+      margin-bottom: .9rem;
+      line-height: 1.55;
+      display: none;
     }
+    .pay-info-box {
+      background: rgba(147,51,234,.07);
+      border: 1px solid rgba(147,51,234,.22);
+      border-radius: 10px;
+      padding: .85rem 1rem;
+      font-size: .8rem;
+      color: var(--text-muted);
+      margin-bottom: .9rem;
+      line-height: 1.55;
+    }
+
     .pay-secure {
       display: flex;
       align-items: center;
@@ -193,14 +229,12 @@
       letter-spacing: .04em;
       margin-top: 1.25rem;
     }
-    .pay-loading-screen {
+    .pay-loading-msg {
       text-align: center;
-      padding: 3rem 0;
+      padding: 2rem 0 1rem;
       color: var(--text-dim);
-      font-size: .88rem;
+      font-size: .84rem;
     }
-    /* Crypto modal overrides for pay page */
-    .modal-sub b { color: var(--text); }
   </style>
 </head>
 <body>
@@ -219,7 +253,7 @@
 
   <main class="pay-page">
     <div class="pay-card" id="pay-card">
-      <div class="pay-loading-screen">Loading…</div>
+      <div class="pay-loading-msg">Loading checkout…</div>
     </div>
   </main>
 
@@ -241,7 +275,9 @@
     'use strict';
     const $ = s => document.querySelector(s);
     let CONFIG = null;
+    let currentProduct = null;
 
+    /* ── Utilities ── */
     function toast(msg, ms) {
       const t = $('#toast');
       t.textContent = msg;
@@ -249,18 +285,33 @@
       clearTimeout(toast._t);
       toast._t = setTimeout(() => (t.hidden = true), ms || 3200);
     }
-
     function money(cents) {
       const d = cents / 100;
       return '$' + (Number.isInteger(d) ? d : d.toFixed(2));
     }
-
-    // Read tier from URL path (/exclusive, /premium, /basic) or ?tier= param
     function getTier() {
       const seg = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
       if (['basic', 'premium', 'exclusive'].includes(seg)) return seg;
       const t = (new URLSearchParams(window.location.search).get('tier') || '').toLowerCase();
       return ['basic', 'premium', 'exclusive'].includes(t) ? t : null;
+    }
+    function loadScript(src) {
+      return new Promise((res, rej) => {
+        if (document.querySelector(`script[src="${src}"]`)) { res(); return; }
+        const s = document.createElement('script');
+        s.src = src;
+        s.onload = res;
+        s.onerror = () => rej(new Error('Failed to load SDK'));
+        document.head.appendChild(s);
+      });
+    }
+    function showErr(msg) {
+      const el = $('#pay-error');
+      if (!el) return;
+      if (!msg) { el.style.display = 'none'; return; }
+      el.textContent = msg;
+      el.style.display = 'block';
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
     const TIER_UI = {
@@ -269,21 +320,23 @@
       exclusive: { label: 'Exclusive', features: ['10,000+ Videos', 'Extra Omegle Wins Channel', 'Every Category Unlocked', 'Highest Quality + Sound', 'Lifetime Access'] },
     };
 
+    /* ── Main init ── */
     async function init() {
       const tier = getTier();
-      if (!tier) { renderMsg('No tier selected.', 'Go back and choose a plan.', '/'); return; }
+      if (!tier) { renderMsg('No tier selected.', 'Go back and pick a plan.', '/'); return; }
 
       try { CONFIG = await (await fetch('/api/config')).json(); }
-      catch (e) { renderMsg('Connection error.', 'Could not load checkout. Please refresh.', null); return; }
+      catch { renderMsg('Connection error.', 'Could not load checkout. Please refresh.', null); return; }
 
-      const product = CONFIG.products && CONFIG.products[tier];
+      const product = CONFIG.products?.[tier];
       if (!product) { renderMsg('Unknown tier.', null, '/'); return; }
+      currentProduct = product;
 
       const td = TIER_UI[tier];
       const price = money(product.amount);
+      const adminHref = CONFIG.links?.admin || '#';
 
-      const cardEl = document.createElement('div');
-      cardEl.innerHTML = `
+      $('#pay-card').innerHTML = `
         <a class="pay-back" href="/">← Back to plans</a>
         <div class="pay-tier-name">${td.label}</div>
         <div class="pay-title">Complete Your Order</div>
@@ -295,75 +348,158 @@
         <div class="pay-divider"></div>
         <div class="pay-methods-label">Payment Method</div>
         <div id="pay-error" class="pay-error-box"></div>
-        ${!CONFIG.squareReady
-          ? `<div class="pay-info-box">Card payments aren't live yet — pay with crypto or DM admin to arrange your order.</div>`
-          : `<button class="btn-primary" id="btn-card">💳 Pay with Card — ${price}</button>`
-        }
+        <div id="payment-area"></div>
+        <div class="pay-divider" style="margin:.9rem 0"></div>
         <button class="btn-secondary" id="btn-crypto">₿ Pay with Crypto</button>
-        <a class="btn-admin" id="btn-admin" href="${CONFIG.links && CONFIG.links.admin ? CONFIG.links.admin : '#'}" target="_blank" rel="noopener">📨 Message Admin</a>
-        <div class="pay-secure">🔒 Secure · One-time · No subscription · No renewals</div>
+        <a class="btn-admin" href="${adminHref}" target="_blank" rel="noopener">📨 Message Admin</a>
+        <div class="pay-secure">🔒 Encrypted checkout · One-time charge · No subscription</div>
       `;
 
-      const card = $('#pay-card');
-      card.innerHTML = '';
-      card.appendChild(cardEl);
+      $('#btn-crypto').addEventListener('click', () => openCrypto(tier, product));
+      wireCryptoModal();
 
-      // Card checkout → POST /api/checkout → redirect to Square
-      const btnCard = $('#btn-card');
-      if (btnCard) {
-        btnCard.addEventListener('click', async () => {
-          btnCard.disabled = true;
-          btnCard.textContent = 'Creating checkout…';
-          const errEl = $('#pay-error');
-          errEl.style.display = 'none';
+      if (CONFIG.squareEmbedReady) {
+        await initSquare(tier, product, price);
+      } else {
+        $('#payment-area').innerHTML =
+          `<div class="pay-info-box">Card payments aren't live yet — use crypto or DM admin to arrange your order.</div>`;
+      }
+    }
+
+    /* ── Square Web Payments SDK ── */
+    async function initSquare(tier, product, price) {
+      const area = $('#payment-area');
+      area.innerHTML = `<div class="pay-loading-msg">Setting up secure checkout…</div>`;
+
+      try {
+        const sdkUrl = CONFIG.squareEnv === 'production'
+          ? 'https://web.squarecdn.com/v1/square.js'
+          : 'https://sandbox.web.squarecdn.com/v1/square.js';
+        await loadScript(sdkUrl);
+
+        const payments = Square.payments(CONFIG.squareAppId, CONFIG.squareLocationId);
+
+        const payReq = payments.paymentRequest({
+          countryCode: 'US',
+          currencyCode: 'USD',
+          total: { amount: (product.amount / 100).toFixed(2), label: product.name },
+        });
+
+        /* DOM skeleton for payment methods */
+        area.innerHTML = `
+          <div id="google-pay-container"></div>
+          <div id="apple-pay-container"></div>
+          <div id="wallet-sep"></div>
+          <div id="card-container"></div>
+          <button class="btn-pay" id="btn-pay">💳 Pay ${price}</button>
+        `;
+
+        let hasWallet = false;
+
+        /* Google Pay */
+        try {
+          const gp = await payments.googlePay(payReq);
+          await gp.attach('#google-pay-container');
+          gp.addEventListener('ontokenization', ({ detail: { tokenResult } }) => {
+            if (tokenResult.status === 'OK') return submit(tier, tokenResult.token, price);
+            showErr(tokenResult.errors?.[0]?.message || 'Google Pay failed — try card.');
+          });
+          hasWallet = true;
+        } catch { /* not available */ }
+
+        /* Apple Pay */
+        try {
+          const ap = await payments.applePay(payReq);
+          await ap.attach('#apple-pay-container');
+          ap.addEventListener('ontokenization', ({ detail: { tokenResult } }) => {
+            if (tokenResult.status === 'OK') return submit(tier, tokenResult.token, price);
+            showErr(tokenResult.errors?.[0]?.message || 'Apple Pay failed — try card.');
+          });
+          hasWallet = true;
+        } catch { /* not available */ }
+
+        if (hasWallet) {
+          $('#wallet-sep').innerHTML = `<div class="wallet-divider">or pay by card</div>`;
+        }
+
+        /* Card form */
+        const card = await payments.card({
+          style: {
+            '.input-container': { borderColor: 'rgba(255,255,255,.1)', borderRadius: '8px' },
+            '.input-container.is-focus': { borderColor: 'rgba(147,51,234,.6)' },
+            '.input-container.is-error': { borderColor: 'rgba(220,38,38,.55)' },
+            input: {
+              backgroundColor: 'transparent',
+              color: '#f2f0f7',
+              fontFamily: '"Plus Jakarta Sans", system-ui, sans-serif',
+              fontSize: '14px',
+            },
+            'input::placeholder': { color: 'rgba(156,163,175,.5)' },
+            '.message-text': { color: '#9ca3af' },
+            '.message-icon': { color: '#9ca3af' },
+          },
+        });
+        await card.attach('#card-container');
+
+        $('#btn-pay').addEventListener('click', async () => {
+          const btn = $('#btn-pay');
+          btn.disabled = true;
+          btn.textContent = 'Processing…';
+          showErr(null);
           try {
-            const res = await fetch('/api/checkout', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ tier }),
-            });
-            const data = await res.json().catch(() => ({}));
-            if (!res.ok || !data.url) {
-              const msg = (data && data.message) || 'Checkout failed. Try crypto or DM admin.';
-              errEl.textContent = msg;
-              errEl.style.display = 'block';
-              btnCard.disabled = false;
-              btnCard.textContent = `💳 Pay with Card — ${price}`;
+            const result = await card.tokenize();
+            if (result.status !== 'OK') {
+              showErr(result.errors?.[0]?.message || 'Check your card details and try again.');
+              btn.disabled = false;
+              btn.textContent = `💳 Pay ${price}`;
               return;
             }
-            window.location.href = data.url;
-          } catch (e) {
-            $('#pay-error').textContent = 'Network error. Try again or pay with crypto.';
-            $('#pay-error').style.display = 'block';
-            btnCard.disabled = false;
-            btnCard.textContent = `💳 Pay with Card — ${price}`;
+            await submit(tier, result.token, price);
+          } catch {
+            showErr('Something went wrong. Please try again.');
+            btn.disabled = false;
+            btn.textContent = `💳 Pay ${price}`;
           }
         });
+
+      } catch (e) {
+        console.error('[square]', e);
+        $('#payment-area').innerHTML =
+          `<div class="pay-error-box" style="display:block">Card checkout failed to load — use crypto or DM admin.</div>`;
       }
-
-      $('#btn-crypto').addEventListener('click', () => openCrypto(tier, product));
-
-      wireCryptoModal();
     }
 
-    function renderMsg(title, body, backHref) {
-      $('#pay-card').innerHTML = `
-        <div style="text-align:center;padding:2rem 0">
-          <div style="font-size:1.6rem;margin-bottom:1rem">⚠️</div>
-          <p style="font-weight:800;color:var(--text);margin-bottom:.5rem">${title}</p>
-          ${body ? `<p style="font-size:.82rem;color:var(--text-muted);line-height:1.6;margin-bottom:1.25rem">${body}</p>` : ''}
-          ${backHref ? `<a class="btn-primary" href="${backHref}" style="max-width:180px;margin:0 auto">← Go Back</a>` : ''}
-        </div>`;
+    /* ── Charge ── */
+    async function submit(tier, token, price) {
+      try {
+        const res = await fetch('/api/charge', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tier, sourceId: token }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          showErr(data.message || 'Payment declined. Try a different card or pay with crypto.');
+          const btn = $('#btn-pay');
+          if (btn) { btn.disabled = false; btn.textContent = `💳 Pay ${price}`; }
+          return;
+        }
+        window.location.href = data.redirect || '/success';
+      } catch {
+        showErr('Network error. Please try again.');
+        const btn = $('#btn-pay');
+        if (btn) { btn.disabled = false; btn.textContent = `💳 Pay ${price}`; }
+      }
     }
 
+    /* ── Crypto modal ── */
     function openCrypto(tier, product) {
       $('#cr-amount').textContent = money(product.amount);
       $('#cr-product').textContent = product.name;
-      if (CONFIG.links && CONFIG.links.admin) $('#cr-admin').href = CONFIG.links.admin;
-
+      if (CONFIG.links?.admin) $('#cr-admin').href = CONFIG.links.admin;
       const list = $('#crypto-list');
       list.innerHTML = '';
-      if (!CONFIG.crypto || !CONFIG.crypto.length) {
+      if (!CONFIG.crypto?.length) {
         list.innerHTML = '<div class="crypto-empty">No addresses published yet.<br>Tap "Message Admin" below and they\'ll send you the current wallet address.</div>';
       } else {
         for (const c of CONFIG.crypto) {
@@ -387,7 +523,6 @@
       $('#crypto-modal').hidden = false;
       document.body.style.overflow = 'hidden';
     }
-
     function wireCryptoModal() {
       document.querySelectorAll('[data-close]').forEach(b =>
         b.addEventListener('click', () => { $('#crypto-modal').hidden = true; document.body.style.overflow = ''; })
@@ -398,6 +533,16 @@
       document.addEventListener('keydown', e => {
         if (e.key === 'Escape') { $('#crypto-modal').hidden = true; document.body.style.overflow = ''; }
       });
+    }
+
+    function renderMsg(title, body, href) {
+      $('#pay-card').innerHTML = `
+        <div style="text-align:center;padding:2rem 0">
+          <div style="font-size:1.6rem;margin-bottom:1rem">⚠️</div>
+          <p style="font-weight:800;color:var(--text);margin-bottom:.5rem">${title}</p>
+          ${body ? `<p style="font-size:.82rem;color:var(--text-muted);line-height:1.6;margin-bottom:1.25rem">${body}</p>` : ''}
+          ${href ? `<a class="btn-pay" href="${href}" style="max-width:200px;margin:0 auto;text-decoration:none">← Go Back</a>` : ''}
+        </div>`;
     }
 
     init();
