@@ -146,6 +146,19 @@ function buildSlider(urls) {
   slideEls = [...track.querySelectorAll('.ps-slide')];
   videos = [...track.querySelectorAll('video')];
 
+  /* Force square slides via JS — bypasses all flex/CSS sizing issues */
+  function sizeSlides() {
+    const vp = slider.querySelector('.ps-viewport');
+    if (!vp || !slideEls.length) return;
+    const sz = Math.min(Math.round(vp.offsetWidth * 0.66), 500);
+    slideEls.forEach(el => {
+      el.style.width  = sz + 'px';
+      el.style.height = sz + 'px';
+      el.style.flex   = 'none';
+    });
+    centerActive();
+  }
+
   $('#ps-prev').addEventListener('click', () => { ensureUnmute(); goSlide(slideIdx - 1); });
   $('#ps-next').addEventListener('click', () => { ensureUnmute(); goSlide(slideIdx + 1); });
   $('#ps-mute').addEventListener('click', toggleMute);
@@ -161,10 +174,11 @@ function buildSlider(urls) {
     sx = null;
   });
 
-  window.addEventListener('resize', centerActive);
+  window.addEventListener('resize', sizeSlides);
+  sizeSlides();
   goSlide(0);
-  if (videos[0]) videos[0].addEventListener('loadeddata', centerActive, { once: true });
-  setTimeout(centerActive, 60);
+  if (videos[0]) videos[0].addEventListener('loadeddata', sizeSlides, { once: true });
+  setTimeout(sizeSlides, 100);
 }
 
 function centerActive() {
