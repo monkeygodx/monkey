@@ -77,6 +77,9 @@ async function boot() {
     '/assets/preview5.mp4',
     '/assets/preview6.mp4',
     '/assets/preview7.mp4',
+    '/assets/preview8.mp4',
+    '/assets/preview9.mp4',
+    '/assets/preview10.mp4',
   ]);
   renderTiers();
   wireFaq();
