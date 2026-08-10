@@ -69,19 +69,15 @@ async function boot() {
   $('#btn-admin').href = CONFIG.links.admin;
   $('#cr-admin').href = CONFIG.links.admin;
 
-  const previews = CONFIG.previews && CONFIG.previews.length
-    ? CONFIG.previews
-    : [
-        '/assets/preview1.mp4',
-        '/assets/preview2.mp4',
-        '/assets/preview3.mp4',
-        '/assets/preview4.mp4',
-        '/assets/preview5.mp4',
-        '/assets/preview6.mp4',
-        '/assets/preview7.mp4',
-      ];
-
-  buildSlider(previews);
+  buildSlider([
+    '/assets/preview1.mp4',
+    '/assets/preview2.mp4',
+    '/assets/preview3.mp4',
+    '/assets/preview4.mp4',
+    '/assets/preview5.mp4',
+    '/assets/preview6.mp4',
+    '/assets/preview7.mp4',
+  ]);
   renderTiers();
   wireFaq();
   animateMembers();
