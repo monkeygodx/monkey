@@ -84,139 +84,160 @@ async function boot() {
   wireCtaBtn();
 }
 
-/* ---------------- preview slider (coverflow) ---------------- */
-let slideEls = [];
-let videos = [];
-let slideIdx = 0;
+/* ---------------- preview slider (clean square, one-at-a-time) ---------------- */
+let slideIdx   = 0;
 let slideMuted = true;
+let mgxVideos  = [];
+let mgxDots    = [];
+
+/* Inject CSS once — nukes old coverflow styles, installs the square layout */
+(function injectSliderCSS() {
+  if (document.getElementById('mgx-css')) return;
+  document.head.insertAdjacentHTML('beforeend', `<style id="mgx-css">
+/* kill old coverflow elements */
+.ps-viewport,.ps-track,.ps-slide,.ps-mute{display:none!important}
+.ps-inner{padding:0!important}
+/* wrap keeps arrows outside the square */
+.mgx-wrap{position:relative;max-width:480px;margin:0 auto;padding:0 48px;box-sizing:border-box}
+/* THE square — aspect-ratio works because this is a plain block, not a flex child */
+.mgx-stage{aspect-ratio:1/1;position:relative;overflow:hidden;border-radius:18px;background:#070707;width:100%}
+.mgx-stage video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .35s ease;pointer-events:none}
+.mgx-stage video.mgx-active{opacity:1;pointer-events:auto}
+/* mute lives inside the square, bottom-right corner */
+.mgx-mute{position:absolute;bottom:12px;right:12px;z-index:10;background:rgba(0,0,0,.55);border:none;border-radius:50%;width:36px;height:36px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);color:#fff;line-height:1}
+/* arrows flank the stage */
+.ps-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:10;background:rgba(0,0,0,.5);border:none;border-radius:50%;width:38px;height:38px;font-size:22px;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);transition:background .2s}
+.ps-arrow:hover{background:rgba(80,0,180,.7)}
+.ps-prev{left:4px}.ps-next{right:4px}
+/* dots sit directly below the wrap */
+.ps-dots{display:flex;gap:6px;justify-content:center;margin-top:10px}
+.ps-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.25);border:none;cursor:pointer;padding:0;transition:all .25s}
+.ps-dot.active{background:linear-gradient(90deg,#c084fc,#a855f7);width:22px;border-radius:4px}
+@media(max-width:520px){.mgx-wrap{padding:0 40px}}
+</style>`);
+})();
 
 function buildSlider(urls) {
-  const slider = $('#preview-slider');
-  const track = $('#ps-track');
-  const dots = $('#ps-dots');
+  const slider = document.getElementById('preview-slider');
+  const inner  = slider.querySelector('.ps-inner');
   slider.hidden = false;
-  track.innerHTML = '';
-  dots.innerHTML = '';
 
-  /* No real videos — show a single square placeholder with arrows + mute */
-  if (!urls.length) {
-    slider.classList.add('placeholder-mode');
-    const ph = document.createElement('div');
-    ph.className = 'ps-solo-placeholder';
-    const muteBtn = document.getElementById('ps-mute');
-    if (muteBtn) {
-      ph.appendChild(muteBtn);
-      muteBtn.addEventListener('click', toggleMute);
-    }
-    slider.querySelector('.ps-inner').appendChild(ph);
-    document.getElementById('ps-prev').addEventListener('click', () => {});
-    document.getElementById('ps-next').addEventListener('click', () => {});
-    return;
-  }
+  /* Wipe whatever the HTML shipped with */
+  inner.innerHTML = '';
 
-  urls.forEach((u, i) => {
-    const slide = document.createElement('div');
-    slide.className = 'ps-slide';
+  if (!urls.length) return;
+
+  /* Build DOM */
+  const wrap = document.createElement('div');
+  wrap.className = 'mgx-wrap';
+
+  const stage = document.createElement('div');
+  stage.id = 'mgx-stage';
+  stage.className = 'mgx-stage';
+
+  const btnPrev = document.createElement('button');
+  btnPrev.className = 'ps-arrow ps-prev';
+  btnPrev.id = 'ps-prev';
+  btnPrev.setAttribute('aria-label', 'Previous');
+  btnPrev.textContent = '‹';
+
+  const btnNext = document.createElement('button');
+  btnNext.className = 'ps-arrow ps-next';
+  btnNext.id = 'ps-next';
+  btnNext.setAttribute('aria-label', 'Next');
+  btnNext.textContent = '›';
+
+  const btnMute = document.createElement('button');
+  btnMute.className = 'mgx-mute';
+  btnMute.id = 'mgx-mute';
+  btnMute.setAttribute('aria-label', 'Toggle sound');
+  btnMute.textContent = '🔇';
+
+  const dotsRow = document.createElement('div');
+  dotsRow.className = 'ps-dots';
+  dotsRow.id = 'ps-dots';
+
+  /* Create videos + dots */
+  mgxVideos = [];
+  mgxDots   = [];
+  slideIdx  = 0;
+
+  urls.forEach((url, i) => {
     const v = document.createElement('video');
-    v.src = u;
+    v.src = url;
     v.muted = true;
     v.loop = true;
     v.playsInline = true;
     v.setAttribute('playsinline', '');
     v.setAttribute('webkit-playsinline', '');
-    v.preload = i === 0 ? 'auto' : 'metadata';
-    slide.appendChild(v);
-    track.appendChild(slide);
-    slide.addEventListener('click', () => {
-      ensureUnmute();
-      if (i === slideIdx) v.play().catch(() => {});
-      else goSlide(i);
-    });
+    v.preload = (i === 0) ? 'auto' : 'metadata';
+    if (i === 0) v.classList.add('mgx-active');
+    stage.appendChild(v);
+    mgxVideos.push(v);
 
     const dot = document.createElement('button');
     dot.className = 'ps-dot' + (i === 0 ? ' active' : '');
-    dot.addEventListener('click', () => { ensureUnmute(); goSlide(i); });
-    dots.appendChild(dot);
+    dot.setAttribute('aria-label', 'Preview ' + (i + 1));
+    dot.addEventListener('click', () => mgxGo(i));
+    dotsRow.appendChild(dot);
+    mgxDots.push(dot);
   });
 
-  slideEls = [...track.querySelectorAll('.ps-slide')];
-  videos = [...track.querySelectorAll('video')];
+  /* Mute button goes last inside stage so it layers on top */
+  stage.appendChild(btnMute);
 
-  /* Force square slides — retry until layout is ready */
-  function sizeSlides() {
-    const vp = slider.querySelector('.ps-viewport');
-    if (!vp || !slideEls.length) return;
-    const vpW = vp.getBoundingClientRect().width;
-    if (!vpW) { requestAnimationFrame(sizeSlides); return; }
-    const sz = Math.min(Math.round(vpW * 0.66), 500);
-    slideEls.forEach(el => {
-      el.style.width  = sz + 'px';
-      el.style.height = sz + 'px';
-      el.style.flex   = 'none';
-    });
-    centerActive();
-  }
+  wrap.appendChild(btnPrev);
+  wrap.appendChild(stage);
+  wrap.appendChild(btnNext);
+  inner.appendChild(wrap);
+  inner.appendChild(dotsRow);
 
-  $('#ps-prev').addEventListener('click', () => { ensureUnmute(); goSlide(slideIdx - 1); });
-  $('#ps-next').addEventListener('click', () => { ensureUnmute(); goSlide(slideIdx + 1); });
-  $('#ps-mute').addEventListener('click', toggleMute);
+  /* Wire arrows */
+  btnPrev.addEventListener('click', () => mgxGo(slideIdx - 1));
+  btnNext.addEventListener('click', () => mgxGo(slideIdx + 1));
 
-  // swipe
-  let sx = null;
-  const vp = slider.querySelector('.ps-viewport');
-  vp.addEventListener('touchstart', (e) => (sx = e.touches[0].clientX), { passive: true });
-  vp.addEventListener('touchend', (e) => {
-    if (sx == null) return;
-    const dx = e.changedTouches[0].clientX - sx;
-    if (Math.abs(dx) > 40) { ensureUnmute(); goSlide(dx < 0 ? slideIdx + 1 : slideIdx - 1); }
-    sx = null;
+  /* Wire mute */
+  btnMute.addEventListener('click', mgxToggleMute);
+
+  /* Touch swipe */
+  let swipeX = null;
+  stage.addEventListener('touchstart', (e) => { swipeX = e.touches[0].clientX; }, { passive: true });
+  stage.addEventListener('touchend', (e) => {
+    if (swipeX === null) return;
+    const dx = e.changedTouches[0].clientX - swipeX;
+    if (Math.abs(dx) > 40) mgxGo(dx < 0 ? slideIdx + 1 : slideIdx - 1);
+    swipeX = null;
   });
 
-  window.addEventListener('resize', sizeSlides);
-  sizeSlides();
-  goSlide(0);
-  if (videos[0]) videos[0].addEventListener('loadeddata', sizeSlides, { once: true });
-  setTimeout(sizeSlides, 100);
+  /* Autoplay first video */
+  mgxVideos[0].play().catch(() => {});
 }
 
-function centerActive() {
-  if (!slideEls.length) return;
-  const vp = $('#preview-slider').querySelector('.ps-viewport');
-  const el = slideEls[slideIdx];
-  const x = el.offsetLeft + el.offsetWidth / 2;
-  $('#ps-track').style.transform = `translateX(${Math.round(vp.clientWidth / 2 - x)}px)`;
+function mgxGo(n) {
+  if (!mgxVideos.length) return;
+  const from = slideIdx;
+  slideIdx = (n + mgxVideos.length) % mgxVideos.length;
+  if (from === slideIdx) return;
+
+  mgxVideos[from].classList.remove('mgx-active');
+  mgxVideos[slideIdx].classList.add('mgx-active');
+  mgxVideos[from].pause();
+
+  /* Preload the one after next */
+  mgxVideos[(slideIdx + 1) % mgxVideos.length].preload = 'auto';
+
+  mgxVideos[slideIdx].muted = slideMuted;
+  mgxVideos[slideIdx].play().catch(() => {});
+
+  mgxDots.forEach((d, i) => d.classList.toggle('active', i === slideIdx));
 }
 
-function goSlide(n) {
-  if (!slideEls.length) return;
-  slideIdx = (n + slideEls.length) % slideEls.length;
-  slideEls.forEach((el, i) => el.classList.toggle('active', i === slideIdx));
-  $('#ps-dots').querySelectorAll('.ps-dot').forEach((d, i) => d.classList.toggle('active', i === slideIdx));
-  videos.forEach((v, i) => {
-    if (Math.abs(i - slideIdx) <= 1) v.preload = 'auto';
-    if (i === slideIdx) { v.muted = slideMuted; v.play().catch(() => {}); }
-    else v.pause();
-  });
-  centerActive();
-}
-
-function ensureUnmute() {
-  if (!slideMuted) return;
-  slideMuted = false;
-  videos.forEach((v) => (v.muted = false));
-  const m = $('#ps-mute');
-  if (m) m.textContent = '🔊';
-  if (videos[slideIdx]) videos[slideIdx].play().catch(() => {});
-}
-
-function toggleMute() {
-  if (slideMuted) {
-    ensureUnmute();
-  } else {
-    slideMuted = true;
-    videos.forEach((v) => (v.muted = true));
-    $('#ps-mute').textContent = '🔇';
-  }
+function mgxToggleMute() {
+  slideMuted = !slideMuted;
+  mgxVideos.forEach((v) => { v.muted = slideMuted; });
+  const m = document.getElementById('mgx-mute');
+  if (m) m.textContent = slideMuted ? '🔇' : '🔊';
+  if (!slideMuted && mgxVideos[slideIdx]) mgxVideos[slideIdx].play().catch(() => {});
 }
 
 /* ---------------- tiers ---------------- */
@@ -366,6 +387,7 @@ function initReveal() {
   }, { threshold: 0.07 });
   document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
 }
+
 
 boot();
 initReveal();
