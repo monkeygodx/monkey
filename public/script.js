@@ -87,9 +87,8 @@ async function boot() {
 /* ---------------- preview slider (clean square, one-at-a-time) ---------------- */
 let slideIdx   = 0;
 let slideMuted = true;
-let mgxVideos   = [];
-let mgxBgVideos = [];
-let mgxDots     = [];
+let mgxVideos = [];
+let mgxDots   = [];
 
 /* Inject CSS once — nukes old coverflow styles, installs the square layout */
 (function injectSliderCSS() {
@@ -101,13 +100,9 @@ let mgxDots     = [];
 /* wrap keeps arrows outside the square */
 .mgx-wrap{position:relative;max-width:600px;margin:0 auto;padding:0 52px;box-sizing:border-box}
 /* THE square — aspect-ratio works because this is a plain block, not a flex child */
-.mgx-stage{aspect-ratio:1/1;position:relative;overflow:hidden;border-radius:18px;background:#070707;width:100%;border:1px solid rgba(168,85,247,.8);box-shadow:0 0 15px rgba(168,85,247,.25),0 0 35px rgba(168,85,247,.12)}
-/* bg layer: blurred fill, always muted, clipped by overflow:hidden + scale pushes blur edges out */
-.mgx-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(22px) brightness(0.5);transform:scale(1.12);opacity:0;transition:opacity .35s ease;pointer-events:none;z-index:1;display:block}
-.mgx-bg.mgx-active{opacity:1}
-/* fg layer: contain so full video is always visible, sits above bg */
-.mgx-fg{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity .35s ease;pointer-events:none;z-index:2;display:block;background:transparent}
-.mgx-fg.mgx-active{opacity:1;pointer-events:auto}
+.mgx-stage{aspect-ratio:1/1;position:relative;overflow:hidden;border-radius:18px;width:100%;border:1px solid rgba(168,85,247,.8);box-shadow:0 0 15px rgba(168,85,247,.25),0 0 35px rgba(168,85,247,.12)}
+.mgx-stage video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;display:block;opacity:0;transition:opacity .35s ease;pointer-events:none}
+.mgx-stage video.mgx-active{opacity:1;pointer-events:auto}
 /* mute lives inside the square, bottom-right corner */
 .mgx-mute{position:absolute;bottom:12px;right:12px;z-index:10;background:rgba(0,0,0,.55);border:none;border-radius:50%;width:36px;height:36px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);color:#fff;line-height:1}
 /* arrows flank the stage */
@@ -164,28 +159,11 @@ function buildSlider(urls) {
   dotsRow.id = 'ps-dots';
 
   /* Create videos + dots */
-  mgxVideos   = [];
-  mgxBgVideos = [];
-  mgxDots     = [];
-  slideIdx    = 0;
+  mgxVideos = [];
+  mgxDots   = [];
+  slideIdx  = 0;
 
   urls.forEach((url, i) => {
-    /* ── background layer: cover + blur, always muted ── */
-    const bg = document.createElement('video');
-    bg.src = url;
-    bg.muted = true;
-    bg.loop = true;
-    bg.playsInline = true;
-    bg.setAttribute('playsinline', '');
-    bg.setAttribute('webkit-playsinline', '');
-    bg.preload = 'auto';
-    bg.autoplay = true;
-    bg.className = 'mgx-bg';
-    if (i === 0) bg.classList.add('mgx-active');
-    stage.appendChild(bg);
-    mgxBgVideos.push(bg);
-
-    /* ── foreground layer: contain, what the user sees ── */
     const v = document.createElement('video');
     v.src = url;
     v.muted = true;
@@ -195,7 +173,6 @@ function buildSlider(urls) {
     v.setAttribute('webkit-playsinline', '');
     v.preload = 'auto';
     v.autoplay = true;
-    v.className = 'mgx-fg';
     if (i === 0) v.classList.add('mgx-active');
     stage.appendChild(v);
     mgxVideos.push(v);
@@ -234,8 +211,7 @@ function buildSlider(urls) {
     swipeX = null;
   });
 
-  /* Attempt autoplay on all layers — browsers may silently block non-visible ones */
-  mgxBgVideos.forEach((v) => v.play().catch(() => {}));
+  /* Attempt autoplay on all — browsers may silently block non-visible ones */
   mgxVideos.forEach((v) => v.play().catch(() => {}));
 }
 
@@ -245,18 +221,11 @@ function mgxGo(n) {
   slideIdx = (n + mgxVideos.length) % mgxVideos.length;
   if (from === slideIdx) return;
 
-  /* Foreground — mute-controlled, what the user sees */
   mgxVideos[from].classList.remove('mgx-active');
   mgxVideos[slideIdx].classList.add('mgx-active');
   mgxVideos[from].pause();
   mgxVideos[slideIdx].muted = slideMuted;
   mgxVideos[slideIdx].play().catch(() => {});
-
-  /* Background — always muted, switches in lockstep with foreground */
-  mgxBgVideos[from].classList.remove('mgx-active');
-  mgxBgVideos[slideIdx].classList.add('mgx-active');
-  mgxBgVideos[from].pause();
-  mgxBgVideos[slideIdx].play().catch(() => {});
 
   mgxDots.forEach((d, i) => d.classList.toggle('active', i === slideIdx));
 }
