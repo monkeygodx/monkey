@@ -161,10 +161,15 @@ function buildSlider(urls) {
     sx = null;
   });
 
-  window.addEventListener('resize', centerActive);
+  const enforceSquare = () => slideEls.forEach(el => {
+    el.style.height = el.getBoundingClientRect().width + 'px';
+  });
+  window.addEventListener('resize', () => { enforceSquare(); centerActive(); });
+  enforceSquare();
+
   goSlide(0);
-  if (videos[0]) videos[0].addEventListener('loadeddata', centerActive, { once: true });
-  setTimeout(centerActive, 60);
+  if (videos[0]) videos[0].addEventListener('loadeddata', () => { enforceSquare(); centerActive(); }, { once: true });
+  setTimeout(() => { enforceSquare(); centerActive(); }, 60);
 }
 
 function centerActive() {
