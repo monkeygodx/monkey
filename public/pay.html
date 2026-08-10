@@ -399,9 +399,9 @@
     }
 
     const TIER_UI = {
-      basic:     { label: 'Basic',     features: ['1,000+ Videos', 'Fresh Content', 'High Quality Videos', 'Lifetime Access'] },
-      premium:   { label: 'Premium',   features: ['5,000+ Videos', 'Exclusive Content & Early Access', 'Fresh Content & Updates', 'Higher Quality Videos', 'Lifetime Access'] },
-      exclusive: { label: 'Exclusive', features: ['10,000+ Videos', 'Extra Omegle Wins Channel', 'Every Category Unlocked', 'Highest Quality + Sound', 'Lifetime Access'] },
+      basic:     { label: 'Basic' },
+      premium:   { label: 'Premium' },
+      exclusive: { label: 'Exclusive' },
     };
 
     async function init() {
@@ -429,9 +429,6 @@
           <span class="pay-discount-badge" id="pay-discount-badge" style="display:none">10% OFF</span>
         </div>
         <div class="pay-onetime">One-time · Lifetime access · Instant delivery</div>
-        <ul class="tier-features" style="margin-bottom:1rem">
-          ${td.features.map(f => `<li><span class="check-icon">✓</span>${f}</li>`).join('')}
-        </ul>
         <div class="pay-promo">
           <div class="pay-promo-row">
             <input class="pay-promo-input" id="promo-input" type="text" placeholder="Promo code" maxlength="20" autocomplete="off" />
