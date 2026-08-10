@@ -161,15 +161,10 @@ function buildSlider(urls) {
     sx = null;
   });
 
-  const enforceSquare = () => slideEls.forEach(el => {
-    el.style.height = el.getBoundingClientRect().width + 'px';
-  });
-  window.addEventListener('resize', () => { enforceSquare(); centerActive(); });
-  enforceSquare();
-
+  window.addEventListener('resize', centerActive);
   goSlide(0);
-  if (videos[0]) videos[0].addEventListener('loadeddata', () => { enforceSquare(); centerActive(); }, { once: true });
-  setTimeout(() => { enforceSquare(); centerActive(); }, 60);
+  if (videos[0]) videos[0].addEventListener('loadeddata', centerActive, { once: true });
+  setTimeout(centerActive, 60);
 }
 
 function centerActive() {
@@ -359,13 +354,6 @@ function initReveal() {
   }, { threshold: 0.07 });
   document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
 }
-
-/* Force video to fit inside square without cropping or stretching */
-(function(){
-  const s = document.createElement('style');
-  s.textContent = '.ps-slide video { object-fit: contain; background: #000; }';
-  document.head.appendChild(s);
-})();
 
 boot();
 initReveal();
