@@ -142,11 +142,13 @@ function buildSlider(urls) {
   slideEls = [...track.querySelectorAll('.ps-slide')];
   videos = [...track.querySelectorAll('video')];
 
-  /* Force square slides via JS — bypasses all flex/CSS sizing issues */
+  /* Force square slides — retry until layout is ready */
   function sizeSlides() {
     const vp = slider.querySelector('.ps-viewport');
     if (!vp || !slideEls.length) return;
-    const sz = Math.min(Math.round(vp.offsetWidth * 0.66), 500);
+    const vpW = vp.getBoundingClientRect().width;
+    if (!vpW) { requestAnimationFrame(sizeSlides); return; }
+    const sz = Math.min(Math.round(vpW * 0.66), 500);
     slideEls.forEach(el => {
       el.style.width  = sz + 'px';
       el.style.height = sz + 'px';
