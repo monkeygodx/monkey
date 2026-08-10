@@ -360,6 +360,13 @@ function initReveal() {
   document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
 }
 
+/* Force video to fit inside square without cropping or stretching */
+(function(){
+  const s = document.createElement('style');
+  s.textContent = '.ps-slide video { object-fit: contain; background: #000; }';
+  document.head.appendChild(s);
+})();
+
 boot();
 initReveal();
 wireCryptoModal();
