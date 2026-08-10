@@ -98,10 +98,10 @@ let mgxDots    = [];
 .ps-viewport,.ps-track,.ps-slide,.ps-mute{display:none!important}
 .ps-inner{padding:0!important}
 /* wrap keeps arrows outside the square */
-.mgx-wrap{position:relative;max-width:480px;margin:0 auto;padding:0 48px;box-sizing:border-box}
+.mgx-wrap{position:relative;max-width:600px;margin:0 auto;padding:0 52px;box-sizing:border-box}
 /* THE square — aspect-ratio works because this is a plain block, not a flex child */
-.mgx-stage{aspect-ratio:1/1;position:relative;overflow:hidden;border-radius:18px;background:#070707;width:100%}
-.mgx-stage video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .35s ease;pointer-events:none}
+.mgx-stage{aspect-ratio:1/1;position:relative;overflow:hidden;border-radius:18px;background:#070707;width:100%;border:1px solid rgba(168,85,247,.8);box-shadow:0 0 15px rgba(168,85,247,.25),0 0 35px rgba(168,85,247,.12)}
+.mgx-stage video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;opacity:0;transition:opacity .35s ease;pointer-events:none}
 .mgx-stage video.mgx-active{opacity:1;pointer-events:auto}
 /* mute lives inside the square, bottom-right corner */
 .mgx-mute{position:absolute;bottom:12px;right:12px;z-index:10;background:rgba(0,0,0,.55);border:none;border-radius:50%;width:36px;height:36px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);color:#fff;line-height:1}
@@ -113,7 +113,8 @@ let mgxDots    = [];
 .ps-dots{display:flex;gap:6px;justify-content:center;margin-top:10px}
 .ps-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.25);border:none;cursor:pointer;padding:0;transition:all .25s}
 .ps-dot.active{background:linear-gradient(90deg,#c084fc,#a855f7);width:22px;border-radius:4px}
-@media(max-width:520px){.mgx-wrap{padding:0 40px}}
+@media(max-width:560px){.mgx-wrap{padding:0 40px}}
+@media(max-width:420px){.mgx-wrap{padding:0 36px}}
 </style>`);
 })();
 
@@ -170,7 +171,8 @@ function buildSlider(urls) {
     v.playsInline = true;
     v.setAttribute('playsinline', '');
     v.setAttribute('webkit-playsinline', '');
-    v.preload = (i === 0) ? 'auto' : 'metadata';
+    v.preload = 'auto';
+    v.autoplay = true;
     if (i === 0) v.classList.add('mgx-active');
     stage.appendChild(v);
     mgxVideos.push(v);
@@ -209,8 +211,8 @@ function buildSlider(urls) {
     swipeX = null;
   });
 
-  /* Autoplay first video */
-  mgxVideos[0].play().catch(() => {});
+  /* Attempt autoplay on all — browsers may block non-visible ones but we try */
+  mgxVideos.forEach((v) => v.play().catch(() => {}));
 }
 
 function mgxGo(n) {
