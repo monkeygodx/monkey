@@ -100,8 +100,9 @@ let mgxDots   = [];
 /* wrap keeps arrows outside the square */
 .mgx-wrap{position:relative;max-width:600px;margin:0 auto;padding:0 52px;box-sizing:border-box}
 /* THE square — aspect-ratio works because this is a plain block, not a flex child */
-.mgx-stage{aspect-ratio:1/1;position:relative;overflow:hidden;border-radius:18px;width:100%;border:1px solid rgba(168,85,247,.8);box-shadow:0 0 15px rgba(168,85,247,.25),0 0 35px rgba(168,85,247,.12)}
-.mgx-stage video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;display:block;opacity:0;transition:opacity .35s ease;pointer-events:none}
+.mgx-stage{aspect-ratio:1/1;position:relative;overflow:hidden;border-radius:18px;width:100%;border:1px solid rgba(168,85,247,.8);box-shadow:0 0 15px rgba(168,85,247,.25),0 0 35px rgba(168,85,247,.12);background:#0a0a0a;font-size:0;line-height:0}
+/* inset:0 alone stretches to all four edges — no width/height needed, avoids subpixel border-box conflicts */
+.mgx-stage video{position:absolute;top:0;right:0;bottom:0;left:0;object-fit:cover;object-position:center center;display:block;margin:0;padding:0;border:0;opacity:0;transition:opacity .35s ease;pointer-events:none}
 .mgx-stage video.mgx-active{opacity:1;pointer-events:auto}
 /* mute lives inside the square, bottom-right corner */
 .mgx-mute{position:absolute;bottom:12px;right:12px;z-index:10;background:rgba(0,0,0,.55);border:none;border-radius:50%;width:36px;height:36px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);color:#fff;line-height:1}
@@ -174,6 +175,20 @@ function buildSlider(urls) {
     v.preload = 'auto';
     v.autoplay = true;
     if (i === 0) v.classList.add('mgx-active');
+
+    /* Adjust focal point once dimensions are known — minimises visible crop */
+    v.addEventListener('loadedmetadata', () => {
+      const r = v.videoWidth / v.videoHeight;
+      if (r < 0.75) {
+        /* Portrait (e.g. 9:16) — subject is usually in the upper half */
+        v.style.objectPosition = 'center 30%';
+      } else if (r >= 0.75 && r < 1.0) {
+        /* Slightly portrait — subtle upward shift */
+        v.style.objectPosition = 'center 40%';
+      }
+      /* Landscape & square: center center is already optimal — no override */
+    }, { once: true });
+
     stage.appendChild(v);
     mgxVideos.push(v);
 
