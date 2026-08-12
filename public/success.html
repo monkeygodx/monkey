@@ -325,12 +325,11 @@ a{color:inherit;text-decoration:none}
   function show(el){ el.style.display = ''; }
   function hide(el){ el.style.display = 'none'; }
 
-  function renderOk(tier, joinUrl, adminUrl){
+  function renderOk(tier){
     var label = TIER_LABEL[tier] || tier;
     heroSub.textContent  = label + ' access confirmed. Join your private channel below.';
     btnLabel.textContent = 'Join ' + label + ' Channel';
-    linkBtn.href  = joinUrl  || TIER_LINKS[tier] || '#';
-    adminLink.href = adminUrl || 'https://t.me/cynski';
+    linkBtn.href = TIER_LINKS[tier] || '#';
     hide(stateLoading);
     show(stateOk);
   }
@@ -340,30 +339,15 @@ a{color:inherit;text-decoration:none}
     show(stateInvalid);
   }
 
-  // ── token from URL: /success?t=TOKEN ──────────────────────────────────────
-  var token = new URLSearchParams(window.location.search).get('t');
+  // ── server injects window.__MG__ = { tier } into <head> before serving ────
+  var tier = window.__MG__ && window.__MG__.tier;
 
-  if(!token){
+  if(!tier || !TIER_LINKS[tier]){
     renderInvalid();
     return;
   }
 
-  // ── verify token with server ──────────────────────────────────────────────
-  fetch('/api/verify?t=' + encodeURIComponent(token))
-    .then(function(r){
-      if(!r.ok) throw new Error('invalid');
-      return r.json();
-    })
-    .then(function(data){
-      // expected: { valid: true, tier: 'premium', joinUrl?: '...', adminUrl?: '...' }
-      if(!data.valid || !data.tier){ throw new Error('invalid'); }
-      var joinUrl  = data.joinUrl  || TIER_LINKS[data.tier] || null;
-      var adminUrl = data.adminUrl || null;
-      renderOk(data.tier, joinUrl, adminUrl);
-    })
-    .catch(function(){
-      renderInvalid();
-    });
+  renderOk(tier);
 
 })();
 </script>
