@@ -375,11 +375,15 @@ app.post('/api/charge', async (req, res) => {
       paymentId: payment && payment.id,
       status: payment && payment.status,
     });
+    // Generate a signed claim token tied to this payment — the success page
+    // verifies it server-side before showing the tier-specific channel link.
+    // Anyone typing /success without a valid token gets bounced.
+    const claimToken = generateClaimToken(tier, payment && payment.id);
     return res.json({
       ok: true,
       paymentId: payment && payment.id,
       status: payment && payment.status,
-      redirect: `/success?tier=${encodeURIComponent(tier)}`,
+      redirect: `/success?t=${encodeURIComponent(claimToken)}`,
     });
   } catch (err) {
     console.error('[charge] fatal', err);
@@ -387,6 +391,8 @@ app.post('/api/charge', async (req, res) => {
   }
 });
 // Create a Square hosted-checkout link for {tier} and return its URL.
+// Token is pre-generated and baked into the redirect URL so Square can pass it
+// back after checkout without us needing a webhook.
 app.post('/api/checkout', async (req, res) => {
   try {
     const { tier } = req.body || {};
@@ -400,6 +406,8 @@ app.post('/api/checkout', async (req, res) => {
         message: 'Card checkout is not live yet. Pay with crypto or DM the admin to complete your order.',
       });
     }
+    // Pre-generate the claim token so Square can carry it through the redirect.
+    const claimToken = generateClaimToken(tier, 'checkout-' + crypto.randomUUID());
     const body = {
       idempotency_key: crypto.randomUUID(),
       order: {
@@ -407,7 +415,7 @@ app.post('/api/checkout', async (req, res) => {
         line_items: [{ name: product.name, quantity: '1', base_price_money: { amount: product.amount, currency: 'USD' } }],
       },
       checkout_options: {
-        redirect_url: `${PUBLIC_BASE_URL}/success?tier=${encodeURIComponent(tier)}`,
+        redirect_url: `${PUBLIC_BASE_URL}/success?t=${encodeURIComponent(claimToken)}`,
         ask_for_shipping_address: false,
       },
     };
@@ -448,10 +456,28 @@ app.get('/.well-known/apple-developer-merchantid-domain-association', (req, res)
   res.type('text/plain');
   res.sendFile(path.join(__dirname, 'public', '.well-known', 'apple-developer-merchantid-domain-association'));
 });
-app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
+// Success page — MUST be before express.static so this handler fires first.
+// Verifies the signed claim token in ?t=, injects the tier into the HTML, then
+// serves it. No valid token → redirect to home. Prevents free access via URL.
 app.get('/success', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'success.html'));
+  const token = (req.query.t || '').trim();
+  const tier = token ? verifyClaimToken(token) : null;
+  if (!tier) return res.redirect('/');
+  try {
+    const html = fs.readFileSync(path.join(__dirname, 'public', 'success.html'), 'utf8');
+    const injected = html.replace(
+      '</head>',
+      `<script>window.__MG__={tier:${JSON.stringify(tier)}}</script></head>`
+    );
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('Content-Type', 'text/html');
+    res.send(injected);
+  } catch (e) {
+    console.error('[success] could not read success.html', e.message);
+    res.redirect('/');
+  }
 });
+app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
 // FIX: bind to 0.0.0.0 so Railway's proxy can reach the server on all interfaces.
 app.listen(PORT, '0.0.0.0', async () => {
   const cfg = await loadConfig();
