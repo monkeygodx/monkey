@@ -119,23 +119,31 @@
       cursor: pointer;
       margin-bottom: .75rem;
     }
-    /* Google Pay container — SDK injects an iframe here; force it to match Apple Pay */
-    #google-pay-container {
+    /* Google Pay — custom button, tokenize() direct (no iframe, identical on all browsers) */
+    #google-pay-button {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
       width: 100%;
       height: 48px;
-      margin-bottom: .75rem;
+      background: #000;
+      border: none;
       border-radius: 8px;
-      overflow: hidden;
-      display: block;
+      cursor: pointer;
+      margin-bottom: .75rem;
+      padding: 0;
+      transition: filter .18s;
     }
-    #google-pay-container > div,
-    #google-pay-container iframe,
-    #google-pay-container button {
-      width: 100% !important;
-      height: 48px !important;
-      min-height: 48px !important;
-      border-radius: 8px !important;
-      display: block !important;
+    #google-pay-button:hover { filter: brightness(1.18); }
+    #google-pay-button:disabled { opacity: .55; cursor: wait; filter: none; }
+    #google-pay-button .gpay-text {
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Roboto', 'Segoe UI', sans-serif;
+      font-size: 19px;
+      font-weight: 500;
+      letter-spacing: .25px;
+      line-height: 1;
     }
 
     .wallet-divider {
@@ -533,10 +541,18 @@
           total: { amount: (product.amount / 100).toFixed(2), label: product.name },
         });
 
-        /* Build skeleton — Apple Pay is a native WebKit button, Google Pay attaches into its div */
+        /* Build skeleton — Apple Pay is a native WebKit button, Google Pay uses custom button + tokenize() */
         area.innerHTML = `
           <button id="apple-pay-button" lang="en" aria-label="Pay with Apple Pay"></button>
-          <div id="google-pay-container"></div>
+          <button id="google-pay-button" aria-label="Pay with Google Pay">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" style="flex-shrink:0;display:block">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            </svg>
+            <span class="gpay-text">Pay</span>
+          </button>
           <div id="wallet-sep"></div>
           <div id="card-container"></div>
           <button class="btn-pay" id="btn-pay">💳 Pay ${appliedPromo ? money(discountedAmount) : price}</button>
@@ -549,43 +565,67 @@
            Render the native WebKit button yourself and call tokenize() on click.
            Only fires in Safari on Apple devices with a card saved to Wallet.
         */
+        /* ── Apple Pay ──
+           Only available in Safari on Apple devices with a card saved to Wallet.
+           Guard behind window.ApplePaySession so Chrome never even tries —
+           newer Square SDK versions don't throw immediately on non-Apple browsers,
+           which caused the button to flash visible then disappear.
+        */
         let applePayInstance = null;
-        try {
-          applePayInstance = await payments.applePay(payReq);
-          const apBtn = document.getElementById('apple-pay-button');
-          apBtn.style.display = 'block';
-          apBtn.addEventListener('click', async () => {
-            showErr(null);
-            try {
-              const tokenResult = await applePayInstance.tokenize();
-              if (tokenResult.status === 'OK') return submit(tier, tokenResult.token, price);
-              showErr(tokenResult.errors?.[0]?.message || 'Apple Pay failed — try card.');
-            } catch (e) {
-              showErr('Apple Pay error: ' + e.message);
-            }
-          });
-          hasWallet = true;
-          console.log('[apple-pay] ready');
-        } catch (e) {
-          console.warn('[apple-pay] not available:', e.message,
-            '— requires: Safari on iOS/macOS, production Square creds, verified domain');
+        if (typeof window.ApplePaySession !== 'undefined' && ApplePaySession.canMakePayments()) {
+          try {
+            applePayInstance = await payments.applePay(payReq);
+            const apBtn = document.getElementById('apple-pay-button');
+            apBtn.style.display = 'block';
+            apBtn.addEventListener('click', async () => {
+              showErr(null);
+              try {
+                const tokenResult = await applePayInstance.tokenize();
+                if (tokenResult.status === 'OK') return submit(tier, tokenResult.token, price);
+                showErr(tokenResult.errors?.[0]?.message || 'Apple Pay failed — try card.');
+              } catch (e) {
+                showErr('Apple Pay error: ' + e.message);
+              }
+            });
+            hasWallet = true;
+            console.log('[apple-pay] ready');
+          } catch (e) {
+            console.warn('[apple-pay] not available:', e.message);
+          }
+        } else {
+          console.log('[apple-pay] skipped — not Safari or no Apple Pay cards in Wallet');
         }
 
         /* ── Google Pay ──
-           Gated behind CONFIG.googlePayEnabled (set in R2 config.json).
-           Square account must be verified for Google Pay before enabling —
-           the button renders without verification but pay.google.com rejects the charge.
-           To enable: add "googlePayEnabled": true to your R2 data/config.json.
+           Gated behind CONFIG.googlePayEnabled (GOOGLE_PAY_ENABLED Railway env var).
+           ontokenization fires with event.detail.error (not tokenResult) when Google
+           rejects the session — guard for that before touching tokenResult.status.
+        */
+        /* ── Google Pay ──
+           Custom button + direct tokenize() — no iframe, identical look on all browsers.
+           payments.googlePay() initializes the session; clicking our button calls tokenize()
+           which opens the Google Pay payment sheet natively.
         */
         if (CONFIG.googlePayEnabled === true) {
           try {
             const googlePay = await payments.googlePay(payReq);
-            await googlePay.attach('#google-pay-container');
-            googlePay.addEventListener('ontokenization', async (event) => {
-              const { tokenResult } = event.detail;
+            const gpBtn = document.getElementById('google-pay-button');
+            gpBtn.style.display = 'flex';
+            gpBtn.addEventListener('click', async () => {
               showErr(null);
-              if (tokenResult.status === 'OK') return submit(tier, tokenResult.token, price);
-              showErr(tokenResult.errors?.[0]?.message || 'Google Pay failed — try card.');
+              gpBtn.disabled = true;
+              try {
+                const tokenResult = await googlePay.tokenize();
+                if (!tokenResult || tokenResult.status !== 'OK') {
+                  showErr(tokenResult?.errors?.[0]?.message || 'Google Pay failed — try card.');
+                  gpBtn.disabled = false;
+                  return;
+                }
+                return submit(tier, tokenResult.token, price);
+              } catch (e) {
+                showErr(e.message || 'Google Pay failed — try card.');
+                gpBtn.disabled = false;
+              }
             });
             hasWallet = true;
             console.log('[google-pay] ready');
@@ -593,7 +633,7 @@
             console.warn('[google-pay] not available:', e.message);
           }
         } else {
-          console.log('[google-pay] disabled — set googlePayEnabled:true in R2 config once Square verifies your account');
+          console.log('[google-pay] disabled — set GOOGLE_PAY_ENABLED=true in Railway');
         }
 
         if (hasWallet) {
