@@ -652,8 +652,10 @@
               fontSize: '14px',
             },
             'input::placeholder': { color: 'rgba(0,0,0,.4)' },
-            '.message-text': { color: '#374151' },
-            '.message-icon': { color: '#374151' },
+            /* White before filter → inverts to ~#141414 (≈ site bg) → invisible.
+               Square's native messages are fully suppressed; we relay them below the box. */
+            '.message-text': { color: '#ffffff' },
+            '.message-icon': { color: '#ffffff' },
           },
         });
         await card.attach('#card-container');
@@ -666,9 +668,16 @@
 
         if (sqIframe) {
           sqIframe.style.filter = 'invert(0.92) hue-rotate(180deg)';
-          // Let iframe size naturally — no height capping.
-          // overflow:hidden on the container clips Square's empty bottom message
-          // area visually once the iframe renders at full height.
+
+          // Clip container to card fields only, removing Square's empty bottom message area.
+          // Guard: h > 130 ensures we're measuring the full iframe (fields + message area),
+          // not a partially-rendered state where h is still small.
+          const clipToFields = () => {
+            const h = sqIframe.offsetHeight;
+            if (h > 130) sqContainer.style.height = (h - 46) + 'px';
+          };
+          setTimeout(clipToFields, 600);
+          setTimeout(clipToFields, 1200);
         }
 
         // Wire border color to Square card state events — can't use :focus-within on a cross-origin iframe
@@ -676,6 +685,9 @@
         card.addEventListener('errorClassAdded', () => {
           sqErrActive = true;
           sqContainer.style.borderColor = 'rgba(239,68,68,.55)';
+          // Re-color any hint text already showing to error-red
+          const errEl = document.getElementById('pay-error');
+          if (errEl && errEl.style.display !== 'none') errEl.style.color = '#f87171';
         });
         card.addEventListener('errorClassRemoved', () => {
           sqErrActive = false;
@@ -689,7 +701,7 @@
           if (!sqErrActive) sqContainer.style.borderColor = 'rgba(255,255,255,.06)';
         });
 
-        /* Hide any processor branding injected into the DOM by the SDK */
+        /* Hide Square's processor branding inside card-container */
         const hideProcessorBranding = () => {
           document.querySelectorAll('#card-container *').forEach(el => {
             if (!el.children.length && /square/i.test(el.textContent)) {
@@ -701,6 +713,36 @@
         new MutationObserver(hideProcessorBranding).observe(
           document.getElementById('card-container'),
           { childList: true, subtree: true, characterData: true }
+        );
+
+        /* Square SDK injects a validation message div as a sibling in the host DOM.
+           Intercept it: relay text to #pay-error (below the border box), suppress
+           Square's native element. Error state = red, hint state = muted. */
+        const knownPaymentIds = new Set([
+          'apple-pay-button','google-pay-button','wallet-sep',
+          'card-container','pay-error','btn-pay'
+        ]);
+        const relaySquareMessages = () => {
+          document.querySelectorAll('#payment-area > *').forEach(el => {
+            if (knownPaymentIds.has(el.id)) return;
+            const msg = (el.innerText || el.textContent || '').trim();
+            const errEl = document.getElementById('pay-error');
+            if (errEl) {
+              if (msg) {
+                errEl.innerHTML = `<span>${msg}</span>`;
+                errEl.style.display = 'flex';
+                errEl.style.color = sqErrActive ? '#f87171' : '#6b7280';
+              } else if (!sqErrActive) {
+                errEl.style.display = 'none';
+              }
+            }
+            el.style.cssText = 'display:none!important';
+          });
+        };
+        relaySquareMessages();
+        new MutationObserver(relaySquareMessages).observe(
+          document.getElementById('payment-area'),
+          { childList: true }
         );
 
         $('#btn-pay').addEventListener('click', async () => {
