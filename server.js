@@ -223,6 +223,7 @@ async function loadConfig() {
         for (const kk of Object.keys(remote.tierLinks)) if (remote.tierLinks[kk]) base.tierLinks[kk] = remote.tierLinks[kk];
       }
       if (remote.discordWebhook) base.discordWebhook = remote.discordWebhook;
+      if (remote.googlePayEnabled === true) base.googlePayEnabled = true;
     }
   } catch (e) {
     console.warn('[config] using env fallback:', e.message);
@@ -309,6 +310,7 @@ app.get('/api/config', async (req, res) => {
     squareEnv: sq.env,
     squareAppId: sq.appId,
     squareLocationId: sq.locationId,
+    googlePayEnabled: cfg.googlePayEnabled === true,
     paymentSiteUrl: PAYMENT_SITE_URL,
     mainSiteUrl: MAIN_SITE_URL,
   });
@@ -452,12 +454,12 @@ app.get('/', (req, res, next) => {
 app.get(['/pay', '/basic', '/premium', '/exclusive'], (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'pay.html'));
 });
-// Apple Pay domain verification — strips trailing whitespace/newlines before
-// serving so the file is byte-exact regardless of what git does to it on disk.
 app.get('/.well-known/apple-developer-merchantid-domain-association', (req, res) => {
   try {
     const filePath = path.join(__dirname, 'public', '.well-known', 'apple-developer-merchantid-domain-association');
     const raw = fs.readFileSync(filePath);
+    // Strip any trailing whitespace/newline bytes that editors or git may have
+    // silently appended — Apple Pay's verification requires byte-exact content.
     let end = raw.length;
     while (end > 0 && (raw[end - 1] === 0x0a || raw[end - 1] === 0x0d || raw[end - 1] === 0x20)) end--;
     const clean = end < raw.length ? raw.slice(0, end) : raw;
