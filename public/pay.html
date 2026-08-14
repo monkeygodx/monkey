@@ -641,23 +641,22 @@
         /* ── Card form ── */
         const card = await payments.card({
           style: {
-            /* Dark-mode card form — body + containers blend with #141418 site bg */
-            'body': { backgroundColor: '#141418' },
+            /* Square SDK only supports: borderColor/borderRadius on containers,
+               color/fontSize on inputs, color on message elements.
+               backgroundColor is NOT supported — the iframe body cannot be styled. */
             '.input-container': {
               borderColor: 'transparent',
               borderRadius: '0',
-              backgroundColor: '#141418',
             },
-            '.input-container.is-focus': { borderColor: 'transparent', backgroundColor: '#141418' },
-            '.input-container.is-error': { borderColor: 'transparent', backgroundColor: '#141418' },
+            '.input-container.is-focus': { borderColor: 'transparent' },
+            '.input-container.is-error': { borderColor: 'transparent' },
             input: {
-              backgroundColor: '#141418',
-              color: '#e2e8f0',
+              color: '#1a1a2e',
               fontSize: '14px',
             },
-            'input::placeholder': { color: 'rgba(255,255,255,.3)' },
-            '.message-text': { color: '#9ca3af' },
-            '.message-icon': { color: '#9ca3af' },
+            'input::placeholder': { color: 'rgba(0,0,0,.4)' },
+            '.message-text': { color: '#6b7280' },
+            '.message-icon': { color: '#6b7280' },
           },
         });
         await card.attach('#card-container');
