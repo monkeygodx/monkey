@@ -572,24 +572,28 @@
         }
 
         /* ── Google Pay ──
-           Square's googlePay() attaches a button into #google-pay-container.
-           Only shows when the user has Google Pay configured in their browser.
-           Requires production Square credentials + Square account verified for Google Pay.
+           Gated behind CONFIG.googlePayEnabled (set in R2 config.json).
+           Square account must be verified for Google Pay before enabling —
+           the button renders without verification but pay.google.com rejects the charge.
+           To enable: add "googlePayEnabled": true to your R2 data/config.json.
         */
-        try {
-          const googlePay = await payments.googlePay(payReq);
-          await googlePay.attach('#google-pay-container');
-          googlePay.addEventListener('ontokenization', async (event) => {
-            const { tokenResult } = event.detail;
-            showErr(null);
-            if (tokenResult.status === 'OK') return submit(tier, tokenResult.token, price);
-            showErr(tokenResult.errors?.[0]?.message || 'Google Pay failed — try card.');
-          });
-          hasWallet = true;
-          console.log('[google-pay] ready');
-        } catch (e) {
-          console.warn('[google-pay] not available:', e.message,
-            '— requires: production Square creds, Square account verified for Google Pay');
+        if (CONFIG.googlePayEnabled === true) {
+          try {
+            const googlePay = await payments.googlePay(payReq);
+            await googlePay.attach('#google-pay-container');
+            googlePay.addEventListener('ontokenization', async (event) => {
+              const { tokenResult } = event.detail;
+              showErr(null);
+              if (tokenResult.status === 'OK') return submit(tier, tokenResult.token, price);
+              showErr(tokenResult.errors?.[0]?.message || 'Google Pay failed — try card.');
+            });
+            hasWallet = true;
+            console.log('[google-pay] ready');
+          } catch (e) {
+            console.warn('[google-pay] not available:', e.message);
+          }
+        } else {
+          console.log('[google-pay] disabled — set googlePayEnabled:true in R2 config once Square verifies your account');
         }
 
         if (hasWallet) {
