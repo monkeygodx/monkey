@@ -112,7 +112,6 @@
       background: rgba(255,255,255,.03);
       border: 1px solid rgba(255,255,255,.07);
       border-radius: 12px;
-      overflow: hidden;
       transition: border-color .25s;
       margin-bottom: 8px;
     }
@@ -701,21 +700,8 @@
         if (sqIframe) {
           sqIframe.style.filter = 'invert(0.92) hue-rotate(180deg)';
 
-          // Clip container to card fields only — removes Square's empty bottom message space.
-          // IIFE with done-guard: fires at 4 staggered delays to catch the iframe at full height.
-          // Guard h > 130: only clips when full iframe (fields + message area) is rendered.
-          const clipToFields = (() => {
-            let done = false;
-            return () => {
-              if (done) return;
-              const h = sqIframe.offsetHeight;
-              if (h > 130) {
-                sqContainer.style.height = (h - 46) + 'px';
-                done = true;
-              }
-            };
-          })();
-          [300, 700, 1400, 2800].forEach(d => setTimeout(clipToFields, d));
+          // No height clipping needed — cleanSquareWidget hides Square's message div
+          // with display:none which collapses the space in the host DOM naturally.
         }
 
         // Wire border color to Square card state events — can't use :focus-within on a cross-origin iframe
