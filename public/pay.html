@@ -231,15 +231,14 @@
 
     /* ── Error / info boxes ── */
     .pay-error-box {
-      background: rgba(220,38,38,.1);
-      border: 1px solid rgba(220,38,38,.28);
-      border-radius: 10px;
-      padding: .85rem 1rem;
-      font-size: .8rem;
-      color: #fca5a5;
-      margin-bottom: .9rem;
-      line-height: 1.55;
       display: none;
+      align-items: center;
+      gap: .45rem;
+      font-size: .8rem;
+      color: #f87171;
+      margin-bottom: .9rem;
+      line-height: 1.5;
+      padding: .25rem 0;
     }
     .pay-info-box {
       background: rgba(147,51,234,.07);
@@ -416,8 +415,8 @@
       const el = $('#pay-error');
       if (!el) return;
       if (!msg) { el.style.display = 'none'; return; }
-      el.textContent = msg;
-      el.style.display = 'block';
+      el.innerHTML = `<svg width="15" height="15" viewBox="0 0 15 15" fill="none" style="flex-shrink:0;margin-top:1px"><circle cx="7.5" cy="7.5" r="7" stroke="#f87171"/><rect x="6.75" y="6.5" width="1.5" height="4.5" rx=".75" fill="#f87171"/><circle cx="7.5" cy="4.5" r=".9" fill="#f87171"/></svg><span>${msg}</span>`;
+      el.style.display = 'flex';
       el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
