@@ -192,6 +192,7 @@ function envDefaults() {
       exclusive: process.env.TIER_LINK_EXCLUSIVE || '',
     },
     discordWebhook: process.env.DISCORD_WEBHOOK || '',
+    googlePayEnabled: process.env.GOOGLE_PAY_ENABLED === 'true',
   };
 }
 // Merge the bucket config over the env defaults (bucket wins where it provides a
