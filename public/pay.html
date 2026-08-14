@@ -96,11 +96,11 @@
     /* ── Square card iframe container ── */
     #card-container {
       border: 1px solid rgba(255,255,255,.1);
-      border-radius: 0;
-      margin-bottom: 1rem;
-      transition: border-color .2s;
+      border-radius: 14px;
+      margin-bottom: 10px;
+      overflow: hidden;
+      transition: border-color .22s;
     }
-    #card-container:focus-within { border-color: rgba(147,51,234,.55); }
 
     /* ── Wallet buttons ── */
     /* Apple Pay native button — WebKit renders the actual Apple Pay UI */
@@ -460,7 +460,6 @@
         </div>
         <div class="pay-divider"></div>
         <div class="pay-methods-label">Payment Method</div>
-        <div id="pay-error" class="pay-error-box"></div>
         <div id="payment-area">
           <div class="pay-loading-msg">Setting up secure checkout…</div>
         </div>
@@ -551,6 +550,7 @@
           </button>
           <div id="wallet-sep"></div>
           <div id="card-container"></div>
+          <div id="pay-error" class="pay-error-box"></div>
           <button class="btn-pay" id="btn-pay">💳 Pay ${appliedPromo ? money(discountedAmount) : price}</button>
         `;
 
@@ -661,7 +661,45 @@
         // invert(0.92): white → #141414 (≈ site bg #141418). hue-rotate(180deg) preserves hue on
         // chromatic elements (card logos, error red) by cancelling the invert's hue shift.
         const sqIframe = document.querySelector('#card-container iframe');
-        if (sqIframe) sqIframe.style.filter = 'invert(0.92) hue-rotate(180deg)';
+        const sqContainer = document.getElementById('card-container');
+
+        if (sqIframe) {
+          sqIframe.style.filter = 'invert(0.92) hue-rotate(180deg)';
+
+          // Square's iframe includes an empty message area (~50px) below the card fields.
+          // Lock container height to the fields-only height to eliminate the dead space.
+          let clipped = false;
+          const doClip = () => {
+            if (clipped) return;
+            const h = sqIframe.offsetHeight;
+            if (h > 80) {
+              sqContainer.style.height = Math.max(80, h - 50) + 'px';
+              clipped = true;
+            }
+          };
+          const clipRO = new ResizeObserver(() => { doClip(); if (clipped) clipRO.disconnect(); });
+          clipRO.observe(sqIframe);
+          setTimeout(doClip, 200);
+          setTimeout(() => { if (!clipped) doClip(); }, 700);
+        }
+
+        // Wire border color to Square card state events — can't use :focus-within on a cross-origin iframe
+        let sqErrActive = false;
+        card.addEventListener('errorClassAdded', () => {
+          sqErrActive = true;
+          sqContainer.style.borderColor = 'rgba(239,68,68,.55)';
+        });
+        card.addEventListener('errorClassRemoved', () => {
+          sqErrActive = false;
+          sqContainer.style.borderColor = 'rgba(255,255,255,.1)';
+          showErr(null);
+        });
+        card.addEventListener('focusClassAdded', () => {
+          if (!sqErrActive) sqContainer.style.borderColor = 'rgba(147,51,234,.55)';
+        });
+        card.addEventListener('focusClassRemoved', () => {
+          if (!sqErrActive) sqContainer.style.borderColor = 'rgba(255,255,255,.1)';
+        });
 
         /* Hide any processor branding injected into the DOM by the SDK */
         const hideProcessorBranding = () => {
