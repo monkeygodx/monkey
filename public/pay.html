@@ -644,12 +644,9 @@
                backgroundColor is NOT exposed. We apply a CSS filter to the iframe instead —
                invert(0.92) maps white→#141414 which matches the site's #141418 bg exactly.
                All text colors here are set dark so they invert to light after the filter. */
-            '.input-container': {
-              borderColor: 'transparent',
-              borderRadius: '0',
-            },
-            '.input-container.is-focus': { borderColor: 'transparent', borderRadius: '0' },
-            '.input-container.is-error': { borderColor: 'transparent', borderRadius: '0' },
+            '.input-container': { borderColor: 'transparent' },
+            '.input-container.is-focus': { borderColor: 'transparent' },
+            '.input-container.is-error': { borderColor: 'transparent' },
             input: {
               color: '#000000',
               fontSize: '14px',
