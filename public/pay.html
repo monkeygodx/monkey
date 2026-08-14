@@ -95,11 +95,12 @@
 
     /* ── Square card iframe container ── */
     #card-container {
-      border: 1px solid rgba(255,255,255,.1);
+      border: 1px solid rgba(255,255,255,.06);
       border-radius: 14px;
       margin-bottom: 10px;
       overflow: hidden;
       transition: border-color .22s;
+      background: rgba(255,255,255,.03);
     }
 
     /* ── Wallet buttons ── */
@@ -665,22 +666,9 @@
 
         if (sqIframe) {
           sqIframe.style.filter = 'invert(0.92) hue-rotate(180deg)';
-
-          // Square's iframe includes an empty message area (~50px) below the card fields.
-          // Lock container height to the fields-only height to eliminate the dead space.
-          let clipped = false;
-          const doClip = () => {
-            if (clipped) return;
-            const h = sqIframe.offsetHeight;
-            if (h > 80) {
-              sqContainer.style.height = Math.max(80, h - 50) + 'px';
-              clipped = true;
-            }
-          };
-          const clipRO = new ResizeObserver(() => { doClip(); if (clipped) clipRO.disconnect(); });
-          clipRO.observe(sqIframe);
-          setTimeout(doClip, 200);
-          setTimeout(() => { if (!clipped) doClip(); }, 700);
+          // Let iframe size naturally — no height capping.
+          // overflow:hidden on the container clips Square's empty bottom message
+          // area visually once the iframe renders at full height.
         }
 
         // Wire border color to Square card state events — can't use :focus-within on a cross-origin iframe
@@ -691,14 +679,14 @@
         });
         card.addEventListener('errorClassRemoved', () => {
           sqErrActive = false;
-          sqContainer.style.borderColor = 'rgba(255,255,255,.1)';
+          sqContainer.style.borderColor = 'rgba(255,255,255,.06)';
           showErr(null);
         });
         card.addEventListener('focusClassAdded', () => {
-          if (!sqErrActive) sqContainer.style.borderColor = 'rgba(147,51,234,.55)';
+          if (!sqErrActive) sqContainer.style.borderColor = 'rgba(147,51,234,.5)';
         });
         card.addEventListener('focusClassRemoved', () => {
-          if (!sqErrActive) sqContainer.style.borderColor = 'rgba(255,255,255,.1)';
+          if (!sqErrActive) sqContainer.style.borderColor = 'rgba(255,255,255,.06)';
         });
 
         /* Hide any processor branding injected into the DOM by the SDK */
