@@ -93,14 +93,28 @@
       margin-bottom: .9rem;
     }
 
+    /* ── Card section label ── */
+    .card-section-label {
+      display: flex;
+      align-items: center;
+      gap: .42rem;
+      font-size: .56rem;
+      font-weight: 800;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      font-family: ui-monospace, monospace;
+      margin-bottom: .55rem;
+    }
+
     /* ── Square card iframe container ── */
     #card-container {
-      border: 1px solid rgba(255,255,255,.06);
-      border-radius: 14px;
-      margin-bottom: 10px;
-      overflow: hidden;
-      transition: border-color .22s;
       background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: border-color .25s;
+      margin-bottom: 8px;
     }
 
     /* ── Wallet buttons ── */
@@ -550,6 +564,13 @@
             <span class="gpay-text">Pay</span>
           </button>
           <div id="wallet-sep"></div>
+          <div id="card-label" class="card-section-label">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect x="1" y="5" width="22" height="14" rx="3" stroke="currentColor" stroke-width="2"/>
+              <path d="M1 10h22" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            Card details
+          </div>
           <div id="card-container"></div>
           <div id="pay-error" class="pay-error-box"></div>
           <button class="btn-pay" id="btn-pay">💳 Pay ${appliedPromo ? money(discountedAmount) : price}</button>
@@ -669,15 +690,21 @@
         if (sqIframe) {
           sqIframe.style.filter = 'invert(0.92) hue-rotate(180deg)';
 
-          // Clip container to card fields only, removing Square's empty bottom message area.
-          // Guard: h > 130 ensures we're measuring the full iframe (fields + message area),
-          // not a partially-rendered state where h is still small.
-          const clipToFields = () => {
-            const h = sqIframe.offsetHeight;
-            if (h > 130) sqContainer.style.height = (h - 46) + 'px';
-          };
-          setTimeout(clipToFields, 600);
-          setTimeout(clipToFields, 1200);
+          // Clip container to card fields only — removes Square's empty bottom message space.
+          // IIFE with done-guard: fires at 4 staggered delays to catch the iframe at full height.
+          // Guard h > 130: only clips when full iframe (fields + message area) is rendered.
+          const clipToFields = (() => {
+            let done = false;
+            return () => {
+              if (done) return;
+              const h = sqIframe.offsetHeight;
+              if (h > 130) {
+                sqContainer.style.height = (h - 46) + 'px';
+                done = true;
+              }
+            };
+          })();
+          [300, 700, 1400, 2800].forEach(d => setTimeout(clipToFields, d));
         }
 
         // Wire border color to Square card state events — can't use :focus-within on a cross-origin iframe
@@ -720,7 +747,7 @@
            Square's native element. Error state = red, hint state = muted. */
         const knownPaymentIds = new Set([
           'apple-pay-button','google-pay-button','wallet-sep',
-          'card-container','pay-error','btn-pay'
+          'card-label','card-container','pay-error','btn-pay'
         ]);
         const relaySquareMessages = () => {
           document.querySelectorAll('#payment-area > *').forEach(el => {
