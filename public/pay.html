@@ -96,9 +96,8 @@
     /* ── Square card iframe container ── */
     #card-container {
       border: 1px solid rgba(255,255,255,.1);
-      border-radius: 10px;
+      border-radius: 0;
       margin-bottom: 1rem;
-      overflow: hidden;
       transition: border-color .2s;
     }
     #card-container:focus-within { border-color: rgba(147,51,234,.55); }
@@ -649,8 +648,8 @@
               borderColor: 'transparent',
               borderRadius: '0',
             },
-            '.input-container.is-focus': { borderColor: 'transparent' },
-            '.input-container.is-error': { borderColor: 'transparent' },
+            '.input-container.is-focus': { borderColor: 'transparent', borderRadius: '0' },
+            '.input-container.is-error': { borderColor: 'transparent', borderRadius: '0' },
             input: {
               color: '#000000',
               fontSize: '14px',
