@@ -641,9 +641,10 @@
         /* ── Card form ── */
         const card = await payments.card({
           style: {
-            /* Square SDK only supports: borderColor/borderRadius on containers,
-               color/fontSize on inputs, color on message elements.
-               backgroundColor is NOT supported — the iframe body cannot be styled. */
+            /* Square SDK supports: borderColor/borderRadius on containers, color/fontSize on inputs.
+               backgroundColor is NOT exposed. We apply a CSS filter to the iframe instead —
+               invert(0.92) maps white→#141414 which matches the site's #141418 bg exactly.
+               All text colors here are set dark so they invert to light after the filter. */
             '.input-container': {
               borderColor: 'transparent',
               borderRadius: '0',
@@ -651,15 +652,21 @@
             '.input-container.is-focus': { borderColor: 'transparent' },
             '.input-container.is-error': { borderColor: 'transparent' },
             input: {
-              color: '#1a1a2e',
+              color: '#000000',
               fontSize: '14px',
             },
             'input::placeholder': { color: 'rgba(0,0,0,.4)' },
-            '.message-text': { color: '#6b7280' },
-            '.message-icon': { color: '#6b7280' },
+            '.message-text': { color: '#374151' },
+            '.message-icon': { color: '#374151' },
           },
         });
         await card.attach('#card-container');
+
+        // backgroundColor is not in Square's style API — apply filter to the iframe directly.
+        // invert(0.92): white → #141414 (≈ site bg #141418). hue-rotate(180deg) preserves hue on
+        // chromatic elements (card logos, error red) by cancelling the invert's hue shift.
+        const sqIframe = document.querySelector('#card-container iframe');
+        if (sqIframe) sqIframe.style.filter = 'invert(0.92) hue-rotate(180deg)';
 
         /* Hide any processor branding injected into the DOM by the SDK */
         const hideProcessorBranding = () => {
