@@ -116,6 +116,17 @@
       transition: border-color .25s;
       margin-bottom: 8px;
     }
+    /* Square injects a wrapper div inside #card-container with its own border/bg/radius.
+       Strip it — our container already provides the visual box. */
+    #card-container > div {
+      border: none !important;
+      outline: none !important;
+      box-shadow: none !important;
+      background: transparent !important;
+      border-radius: 0 !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
 
     /* ── Wallet buttons ── */
     /* Apple Pay native button — WebKit renders the actual Apple Pay UI */
@@ -728,16 +739,41 @@
           if (!sqErrActive) sqContainer.style.borderColor = 'rgba(255,255,255,.06)';
         });
 
-        /* Hide Square's processor branding inside card-container */
-        const hideProcessorBranding = () => {
+        /* cleanSquareWidget: strips Square's injected wrapper styling and relays
+           its message div (inside the wrapper) to #pay-error below the container. */
+        const cleanSquareWidget = () => {
+          document.querySelectorAll('#card-container > div').forEach(wrapper => {
+            wrapper.style.setProperty('border', 'none', 'important');
+            wrapper.style.setProperty('outline', 'none', 'important');
+            wrapper.style.setProperty('box-shadow', 'none', 'important');
+            wrapper.style.setProperty('background', 'transparent', 'important');
+            wrapper.style.setProperty('border-radius', '0', 'important');
+            wrapper.style.setProperty('padding', '0', 'important');
+            wrapper.style.setProperty('margin', '0', 'important');
+            // Relay message children to #pay-error, then hide them
+            Array.from(wrapper.children).forEach(child => {
+              if (child.tagName.toLowerCase() === 'iframe' || child.querySelector('iframe')) return;
+              const msg = (child.innerText || child.textContent || '').trim();
+              if (msg) {
+                const errEl = document.getElementById('pay-error');
+                if (errEl) {
+                  errEl.innerHTML = `<span>${msg}</span>`;
+                  errEl.style.display = 'flex';
+                  errEl.style.color = sqErrActive ? '#f87171' : '#6b7280';
+                }
+              }
+              child.style.cssText = 'display:none!important';
+            });
+          });
+          // Strip Square branding text nodes
           document.querySelectorAll('#card-container *').forEach(el => {
             if (!el.children.length && /square/i.test(el.textContent)) {
               el.style.cssText = 'display:none!important';
             }
           });
         };
-        hideProcessorBranding();
-        new MutationObserver(hideProcessorBranding).observe(
+        cleanSquareWidget();
+        new MutationObserver(cleanSquareWidget).observe(
           document.getElementById('card-container'),
           { childList: true, subtree: true, characterData: true }
         );
