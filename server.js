@@ -452,9 +452,25 @@ app.get('/', (req, res, next) => {
 app.get(['/pay', '/basic', '/premium', '/exclusive'], (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'pay.html'));
 });
+// Apple Pay domain verification — strips trailing whitespace/newlines before
+// serving so the file is byte-exact regardless of what git does to it on disk.
 app.get('/.well-known/apple-developer-merchantid-domain-association', (req, res) => {
-  res.type('text/plain');
-  res.sendFile(path.join(__dirname, 'public', '.well-known', 'apple-developer-merchantid-domain-association'));
+  try {
+    const filePath = path.join(__dirname, 'public', '.well-known', 'apple-developer-merchantid-domain-association');
+    const raw = fs.readFileSync(filePath);
+    let end = raw.length;
+    while (end > 0 && (raw[end - 1] === 0x0a || raw[end - 1] === 0x0d || raw[end - 1] === 0x20)) end--;
+    const clean = end < raw.length ? raw.slice(0, end) : raw;
+    if (end < raw.length) {
+      console.log(`[apple-pay] stripped ${raw.length - end} trailing byte(s) — serving ${end} bytes`);
+    }
+    res.setHeader('Content-Type', 'application/octet-stream');
+    res.setHeader('Content-Length', clean.length);
+    res.send(clean);
+  } catch (e) {
+    console.error('[apple-pay] domain association file missing:', e.message);
+    res.status(404).send('Not found');
+  }
 });
 // Success page — MUST be before express.static so this handler fires first.
 // Verifies the signed claim token in ?t=, injects the tier into the HTML, then
