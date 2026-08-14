@@ -119,6 +119,13 @@
       cursor: pointer;
       margin-bottom: .75rem;
     }
+    /* Google Pay container — SDK injects the button here */
+    #google-pay-container {
+      margin-bottom: .75rem;
+    }
+    #google-pay-container iframe {
+      border-radius: 8px !important;
+    }
 
     .wallet-divider {
       display: flex;
@@ -515,24 +522,21 @@
           total: { amount: (product.amount / 100).toFixed(2), label: product.name },
         });
 
-        /* Build skeleton — Apple Pay button is a native WebKit element */
+        /* Build skeleton — Apple Pay is a native WebKit button, Google Pay attaches into its div */
         area.innerHTML = `
           <button id="apple-pay-button" lang="en" aria-label="Pay with Apple Pay"></button>
+          <div id="google-pay-container"></div>
           <div id="wallet-sep"></div>
           <div id="card-container"></div>
           <button class="btn-pay" id="btn-pay">💳 Pay ${appliedPromo ? money(discountedAmount) : price}</button>
         `;
 
-        /* Google Pay disabled — Square merchant account not yet verified for Google Pay.
-           Contact Square support to enable. To re-enable: add <div id="google-pay-container"></div>
-           to the innerHTML above and uncomment the googlePay block below.
-        */
-
         let hasWallet = false;
 
         /* ── Apple Pay ──
            Square's applePay() returns an instance but has NO attach() method.
-           You must render the native WebKit button yourself and call tokenize() on click.
+           Render the native WebKit button yourself and call tokenize() on click.
+           Only fires in Safari on Apple devices with a card saved to Wallet.
         */
         let applePayInstance = null;
         try {
@@ -550,9 +554,31 @@
             }
           });
           hasWallet = true;
+          console.log('[apple-pay] ready');
         } catch (e) {
-          console.warn('[apple-pay] not available:', e.message);
-          /* Not available — button stays hidden */
+          console.warn('[apple-pay] not available:', e.message,
+            '— requires: Safari on iOS/macOS, production Square creds, verified domain');
+        }
+
+        /* ── Google Pay ──
+           Square's googlePay() attaches a button into #google-pay-container.
+           Only shows when the user has Google Pay configured in their browser.
+           Requires production Square credentials + Square account verified for Google Pay.
+        */
+        try {
+          const googlePay = await payments.googlePay(payReq);
+          await googlePay.attach('#google-pay-container');
+          googlePay.addEventListener('ontokenization', async (event) => {
+            const { tokenResult } = event.detail;
+            showErr(null);
+            if (tokenResult.status === 'OK') return submit(tier, tokenResult.token, price);
+            showErr(tokenResult.errors?.[0]?.message || 'Google Pay failed — try card.');
+          });
+          hasWallet = true;
+          console.log('[google-pay] ready');
+        } catch (e) {
+          console.warn('[google-pay] not available:', e.message,
+            '— requires: production Square creds, Square account verified for Google Pay');
         }
 
         if (hasWallet) {
