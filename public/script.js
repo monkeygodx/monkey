@@ -180,6 +180,27 @@ function buildSlider(urls) {
     v.autoplay = true;
     if (i === 0) v.classList.add('mgx-active');
 
+    /* Eject broken slides the moment the browser reports an error */
+    v.addEventListener('error', () => {
+      const pos = mgxVideos.indexOf(v);
+      if (pos === -1) return;
+      const wasActive = v.classList.contains('mgx-active');
+      v.remove();
+      mgxVideos.splice(pos, 1);
+      mgxDots[pos].remove();
+      mgxDots.splice(pos, 1);
+      if (slideIdx > pos) slideIdx--;
+      else if (slideIdx === pos) slideIdx = Math.min(slideIdx, mgxVideos.length - 1);
+      if (slideIdx < 0) slideIdx = 0;
+      if (wasActive && mgxVideos.length > 0) {
+        mgxVideos[slideIdx].classList.add('mgx-active');
+        mgxVideos[slideIdx].muted = slideMuted;
+        mgxVideos[slideIdx].play().catch(() => {});
+        mgxDots.forEach((d, i) => d.classList.toggle('active', i === slideIdx));
+      }
+      if (!mgxVideos.length) document.getElementById('preview-slider').hidden = true;
+    });
+
     stage.appendChild(v);
     mgxVideos.push(v);
 
