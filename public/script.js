@@ -40,6 +40,7 @@ const TIER_DATA = {
     ],
   },
 };
+
 const TIER_ORDER = ['basic', 'premium', 'exclusive'];
 
 let CONFIG = null;
@@ -66,21 +67,13 @@ async function boot() {
   }
   $('#btn-channel').href = CONFIG.links.channel;
   $('#btn-chatroom').href = CONFIG.links.chatroom;
-  $('#btn-admin').href = CONFIG.links.admin;
-  $('#cr-admin').href = CONFIG.links.admin;
+  $('#btn-admin').href   = CONFIG.links.admin;
+  $('#cr-admin').href    = CONFIG.links.admin;
 
   buildSlider([
-    '/assets/preview1.mp4',
     '/assets/preview9.mp4',
-    '/assets/preview10.mp4',
-    '/assets/preview8.mp4',
-    '/assets/preview3.mp4',
-    '/assets/preview6.mp4',
-    '/assets/preview2.mp4',
-    '/assets/preview5.mp4',
-    '/assets/preview7.mp4',
-    '/assets/preview4.mp4',
   ]);
+
   renderTiers();
   wireFaq();
   animateMembers();
@@ -88,7 +81,7 @@ async function boot() {
 }
 
 /* ---------------- preview slider (clean square, one-at-a-time) ---------------- */
-let slideIdx   = 0;
+let slideIdx  = 0;
 let slideMuted = true;
 let mgxVideos = [];
 let mgxDots   = [];
@@ -102,8 +95,6 @@ let mgxDots   = [];
 .ps-inner{padding:0!important}
 /* wrap keeps arrows outside the square */
 .mgx-wrap{position:relative;max-width:600px;margin:0 auto;padding:0 52px;box-sizing:border-box}
-/* THE square — aspect-ratio works because this is a plain block, not a flex child */
-/* No aspect-ratio here — the active video's intrinsic height drives the container */
 .mgx-stage{position:relative!important;overflow:hidden!important;border-radius:18px!important;width:100%!important;border:1px solid rgba(168,85,247,.8);box-shadow:0 0 15px rgba(168,85,247,.25),0 0 35px rgba(168,85,247,.12);background:#0a0a0a;font-size:0;line-height:0}
 /* Inactive: absolute so they don't push layout, but invisible */
 .mgx-stage video{display:block!important;width:100%!important;height:auto!important;position:absolute!important;top:0!important;left:0!important;object-fit:contain!important;object-position:center!important;transform:none!important;zoom:1!important;margin:0!important;padding:0!important;border:0!important;max-width:none!important;max-height:none!important;min-width:0!important;min-height:0!important;opacity:0;transition:opacity .35s ease;pointer-events:none!important}
@@ -316,7 +307,7 @@ function buy(tier, btn) {
 function openCrypto(tier) {
   const p = CONFIG.products[tier];
   if (!p) return;
-  $('#cr-amount').textContent = moneyShort(p.amount);
+  $('#cr-amount').textContent  = moneyShort(p.amount);
   $('#cr-product').textContent = p.name;
 
   const list = $('#crypto-list');
@@ -348,7 +339,7 @@ function openCrypto(tier) {
 
 /* ---------------- modal plumbing ---------------- */
 function show(sel) { $(sel).hidden = false; document.body.style.overflow = 'hidden'; }
-function hide(sel) { $(sel).hidden = true; document.body.style.overflow = ''; }
+function hide(sel) { $(sel).hidden = true;  document.body.style.overflow = ''; }
 
 function wireCryptoModal() {
   document.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', () => hide('#crypto-modal')));
@@ -392,7 +383,6 @@ function initReveal() {
   }, { threshold: 0.07 });
   document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
 }
-
 
 boot();
 initReveal();
