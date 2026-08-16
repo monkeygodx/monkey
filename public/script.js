@@ -72,6 +72,14 @@ async function boot() {
 
   buildSlider([
     '/assets/preview9.mp4',
+    '/assets/preview10.mp4',
+    '/assets/preview8.mp4',
+    '/assets/preview3.mp4',
+    '/assets/preview6.mp4',
+    '/assets/preview2.mp4',
+    '/assets/preview5.mp4',
+    '/assets/preview7.mp4',
+    '/assets/preview4.mp4',
   ]);
 
   renderTiers();
@@ -86,27 +94,19 @@ let slideMuted = true;
 let mgxVideos = [];
 let mgxDots   = [];
 
-/* Inject CSS once — nukes old coverflow styles, installs the square layout */
 (function injectSliderCSS() {
   if (document.getElementById('mgx-css')) return;
   document.head.insertAdjacentHTML('beforeend', `<style id="mgx-css">
-/* kill old coverflow elements */
 .ps-viewport,.ps-track,.ps-slide,.ps-mute{display:none!important}
 .ps-inner{padding:0!important}
-/* wrap keeps arrows outside the square */
 .mgx-wrap{position:relative;max-width:600px;margin:0 auto;padding:0 52px;box-sizing:border-box}
 .mgx-stage{position:relative!important;overflow:hidden!important;border-radius:18px!important;width:100%!important;border:1px solid rgba(168,85,247,.8);box-shadow:0 0 15px rgba(168,85,247,.25),0 0 35px rgba(168,85,247,.12);background:#0a0a0a;font-size:0;line-height:0}
-/* Inactive: absolute so they don't push layout, but invisible */
 .mgx-stage video{display:block!important;width:100%!important;height:auto!important;position:absolute!important;top:0!important;left:0!important;object-fit:contain!important;object-position:center!important;transform:none!important;zoom:1!important;margin:0!important;padding:0!important;border:0!important;max-width:none!important;max-height:none!important;min-width:0!important;min-height:0!important;opacity:0;transition:opacity .35s ease;pointer-events:none!important}
-/* Active: relative so it occupies flow and stage sizes to its natural height */
 .mgx-stage video.mgx-active{position:relative!important;opacity:1!important;pointer-events:auto!important}
-/* mute lives inside the square, bottom-right corner */
 .mgx-mute{position:absolute;bottom:12px;right:12px;z-index:10;background:rgba(0,0,0,.55);border:none;border-radius:50%;width:36px;height:36px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);color:#fff;line-height:1}
-/* arrows flank the stage */
 .ps-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:10;background:rgba(0,0,0,.5);border:none;border-radius:50%;width:38px;height:38px;font-size:22px;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);transition:background .2s}
 .ps-arrow:hover{background:rgba(80,0,180,.7)}
 .ps-prev{left:4px}.ps-next{right:4px}
-/* dots sit directly below the wrap */
 .ps-dots{display:flex;gap:6px;justify-content:center;margin-top:10px}
 .ps-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.25);border:none;cursor:pointer;padding:0;transition:all .25s}
 .ps-dot.active{background:linear-gradient(90deg,#c084fc,#a855f7);width:22px;border-radius:4px}
@@ -119,43 +119,33 @@ function buildSlider(urls) {
   const slider = document.getElementById('preview-slider');
   const inner  = slider.querySelector('.ps-inner');
   slider.hidden = false;
-
-  /* Wipe whatever the HTML shipped with */
   inner.innerHTML = '';
-
   if (!urls.length) return;
 
-  /* Build DOM */
-  const wrap = document.createElement('div');
+  const wrap    = document.createElement('div');
   wrap.className = 'mgx-wrap';
-
-  const stage = document.createElement('div');
+  const stage   = document.createElement('div');
   stage.id = 'mgx-stage';
   stage.className = 'mgx-stage';
 
   const btnPrev = document.createElement('button');
   btnPrev.className = 'ps-arrow ps-prev';
-  btnPrev.id = 'ps-prev';
   btnPrev.setAttribute('aria-label', 'Previous');
   btnPrev.textContent = '‹';
 
   const btnNext = document.createElement('button');
   btnNext.className = 'ps-arrow ps-next';
-  btnNext.id = 'ps-next';
   btnNext.setAttribute('aria-label', 'Next');
   btnNext.textContent = '›';
 
   const btnMute = document.createElement('button');
   btnMute.className = 'mgx-mute';
-  btnMute.id = 'mgx-mute';
   btnMute.setAttribute('aria-label', 'Toggle sound');
   btnMute.textContent = '🔇';
 
   const dotsRow = document.createElement('div');
   dotsRow.className = 'ps-dots';
-  dotsRow.id = 'ps-dots';
 
-  /* Create videos + dots */
   mgxVideos = [];
   mgxDots   = [];
   slideIdx  = 0;
@@ -171,7 +161,6 @@ function buildSlider(urls) {
     v.preload = 'auto';
     v.autoplay = true;
     if (i === 0) v.classList.add('mgx-active');
-
     stage.appendChild(v);
     mgxVideos.push(v);
 
@@ -183,23 +172,17 @@ function buildSlider(urls) {
     mgxDots.push(dot);
   });
 
-  /* Mute button goes last inside stage so it layers on top */
   stage.appendChild(btnMute);
-
   wrap.appendChild(btnPrev);
   wrap.appendChild(stage);
   wrap.appendChild(btnNext);
   inner.appendChild(wrap);
   inner.appendChild(dotsRow);
 
-  /* Wire arrows */
   btnPrev.addEventListener('click', () => mgxGo(slideIdx - 1));
   btnNext.addEventListener('click', () => mgxGo(slideIdx + 1));
-
-  /* Wire mute */
   btnMute.addEventListener('click', mgxToggleMute);
 
-  /* Touch swipe */
   let swipeX = null;
   stage.addEventListener('touchstart', (e) => { swipeX = e.touches[0].clientX; }, { passive: true });
   stage.addEventListener('touchend', (e) => {
@@ -209,7 +192,6 @@ function buildSlider(urls) {
     swipeX = null;
   });
 
-  /* Attempt autoplay on all — browsers may silently block non-visible ones */
   mgxVideos.forEach((v) => v.play().catch(() => {}));
 }
 
@@ -218,13 +200,11 @@ function mgxGo(n) {
   const from = slideIdx;
   slideIdx = (n + mgxVideos.length) % mgxVideos.length;
   if (from === slideIdx) return;
-
   mgxVideos[from].classList.remove('mgx-active');
   mgxVideos[slideIdx].classList.add('mgx-active');
   mgxVideos[from].pause();
   mgxVideos[slideIdx].muted = slideMuted;
   mgxVideos[slideIdx].play().catch(() => {});
-
   mgxDots.forEach((d, i) => d.classList.toggle('active', i === slideIdx));
 }
 
@@ -271,10 +251,7 @@ function renderTiers() {
       ${desc}
       <div class="tier-divider"></div>
       <ul class="tier-features">
-        ${d.features.map((f) => `
-          <li>
-            <span class="check-icon">✓</span>${f.t}
-          </li>`).join('')}
+        ${d.features.map((f) => `<li><span class="check-icon">✓</span>${f.t}</li>`).join('')}
       </ul>
       <div class="tier-card-footer">
         <button class="${btnCls}" data-tier="${key}">${btnLabel}</button>
@@ -287,7 +264,6 @@ function renderTiers() {
   grid.querySelectorAll('.tier-crypto').forEach((b) => b.addEventListener('click', () => openCrypto(b.dataset.crypto)));
 }
 
-/* Wire the bottom CTA button to the exclusive tier. */
 function wireCtaBtn() {
   const btn = $('#cta-exclusive-btn');
   if (!btn) return;
@@ -309,12 +285,10 @@ function openCrypto(tier) {
   if (!p) return;
   $('#cr-amount').textContent  = moneyShort(p.amount);
   $('#cr-product').textContent = p.name;
-
   const list = $('#crypto-list');
   list.innerHTML = '';
   if (!CONFIG.crypto.length) {
-    list.innerHTML =
-      '<div class="crypto-empty">Wallet addresses aren\'t published yet.<br>Tap "DM Admin" below and they\'ll send you the current address.</div>';
+    list.innerHTML = '<div class="crypto-empty">Wallet addresses aren\'t published yet.<br>Tap "DM Admin" below and they\'ll send you the current address.</div>';
   } else {
     for (const c of CONFIG.crypto) {
       const row = document.createElement('div');
