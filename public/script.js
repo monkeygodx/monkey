@@ -70,14 +70,14 @@ async function boot() {
   $('#btn-admin').href   = CONFIG.links.admin;
   $('#cr-admin').href    = CONFIG.links.admin;
 
-  buildSlider([
-    '/assets/preview9.mp4',
-    '/assets/preview8.mp4',
-    '/assets/preview3.mp4',
-    '/assets/preview2.mp4',
-    '/assets/preview7.mp4',
-    '/assets/preview4.mp4',
+ buildSlider([
     '/assets/preview1.mp4',
+    '/assets/preview2.mp4',
+    '/assets/preview3.mp4',
+    '/assets/preview4.mp4',
+    '/assets/preview7.mp4',
+    '/assets/preview8.mp4',
+    '/assets/preview9.mp4',
     '/assets/preview52.mp4',
   ]);
 
