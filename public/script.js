@@ -105,7 +105,7 @@ let mgxDots   = [];
 .mgx-wrap{position:relative;max-width:600px;margin:0 auto;padding:0 52px;box-sizing:border-box}
 .mgx-stage{position:relative!important;overflow:hidden!important;border-radius:18px!important;width:100%!important;aspect-ratio:1/1!important;border:1px solid rgba(168,85,247,.8);box-shadow:0 0 15px rgba(168,85,247,.25),0 0 35px rgba(168,85,247,.12);background:#0a0a0a;font-size:0;line-height:0}
 /* All videos absolute — stage size is ONLY driven by aspect-ratio, never by video intrinsic size */
-.mgx-stage video{display:block!important;width:100%!important;height:100%!important;position:absolute!important;top:0!important;left:0!important;object-fit:cover!important;object-position:center center!important;transform:none!important;zoom:1!important;margin:0!important;padding:0!important;border:0!important;max-width:none!important;max-height:none!important;min-width:0!important;min-height:0!important;opacity:0;transition:opacity .35s ease;pointer-events:none!important}
+.mgx-stage video{display:block!important;width:100%!important;height:100%!important;position:absolute!important;top:0!important;left:0!important;object-fit:cover!important;object-position:center top!important;transform:none!important;zoom:1!important;margin:0!important;padding:0!important;border:0!important;max-width:none!important;max-height:none!important;min-width:0!important;min-height:0!important;opacity:0;transition:opacity .35s ease;pointer-events:none!important}
 /* Active: opacity only — position NEVER changes, stage NEVER resizes */
 .mgx-stage video.mgx-active{opacity:1!important;pointer-events:auto!important}
 /* mute lives inside the square, bottom-right corner */
