@@ -103,11 +103,11 @@ let mgxDots   = [];
 .ps-inner{padding:0!important}
 /* wrap keeps arrows outside the square */
 .mgx-wrap{position:relative;max-width:600px;margin:0 auto;padding:0 52px;box-sizing:border-box}
-.mgx-stage{position:relative!important;overflow:hidden!important;border-radius:18px!important;width:100%!important;min-height:180px!important;border:1px solid rgba(168,85,247,.8);box-shadow:0 0 15px rgba(168,85,247,.25),0 0 35px rgba(168,85,247,.12);background:#0a0a0a;font-size:0;line-height:0}
-/* Inactive: absolute, invisible — stage height driven by active video's natural dimensions */
-.mgx-stage video{display:block!important;width:100%!important;height:auto!important;position:absolute!important;top:0!important;left:0!important;object-fit:cover!important;object-position:center!important;transform:none!important;zoom:1!important;margin:0!important;padding:0!important;border:0!important;max-width:none!important;max-height:none!important;min-width:0!important;min-height:0!important;opacity:0;transition:opacity .35s ease;pointer-events:none!important}
-/* Active: relative so video's natural height drives the stage — min-height on stage prevents collapse */
-.mgx-stage video.mgx-active{position:relative!important;opacity:1!important;pointer-events:auto!important}
+.mgx-stage{position:relative!important;overflow:hidden!important;border-radius:18px!important;width:100%!important;aspect-ratio:1/1!important;border:1px solid rgba(168,85,247,.8);box-shadow:0 0 15px rgba(168,85,247,.25),0 0 35px rgba(168,85,247,.12);background:#0a0a0a;font-size:0;line-height:0}
+/* All videos absolute — stage size is ONLY driven by aspect-ratio, never by video intrinsic size */
+.mgx-stage video{display:block!important;width:100%!important;height:100%!important;position:absolute!important;top:0!important;left:0!important;object-fit:cover!important;object-position:center top!important;transform:none!important;zoom:1!important;margin:0!important;padding:0!important;border:0!important;max-width:none!important;max-height:none!important;min-width:0!important;min-height:0!important;opacity:0;transition:opacity .35s ease;pointer-events:none!important}
+/* Active: opacity only — position NEVER changes, stage NEVER resizes */
+.mgx-stage video.mgx-active{opacity:1!important;pointer-events:auto!important}
 /* mute lives inside the square, bottom-right corner */
 .mgx-mute{position:absolute;bottom:12px;right:12px;z-index:10;background:rgba(0,0,0,.55);border:none;border-radius:50%;width:36px;height:36px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);color:#fff;line-height:1}
 /* arrows flank the stage */
