@@ -87,33 +87,25 @@ async function boot() {
   wireCtaBtn();
 }
 
-/* ---------------- preview slider (clean square, one-at-a-time) ---------------- */
+/* ---------------- preview slider (square, one-at-a-time) ---------------- */
 let slideIdx  = 0;
 let slideMuted = true;
 let mgxVideos = [];
 let mgxDots   = [];
 
-/* Inject CSS once — nukes old coverflow styles, installs the square layout */
 (function injectSliderCSS() {
   if (document.getElementById('mgx-css')) return;
   document.head.insertAdjacentHTML('beforeend', `<style id="mgx-css">
-/* kill old coverflow elements */
 .ps-viewport,.ps-track,.ps-slide,.ps-mute{display:none!important}
 .ps-inner{padding:0!important}
-/* wrap keeps arrows outside the square */
 .mgx-wrap{position:relative;max-width:560px;margin:0 auto;padding:0 52px;box-sizing:border-box}
-.mgx-stage{position:relative!important;overflow:hidden!important;border-radius:18px!important;width:100%!important;aspect-ratio:4/3!important;border:1px solid rgba(168,85,247,.8);box-shadow:0 0 15px rgba(168,85,247,.25),0 0 35px rgba(168,85,247,.12);background:#0a0a0a;font-size:0;line-height:0}
-/* All videos absolute — stage size is ONLY driven by aspect-ratio, never by video intrinsic size */
+.mgx-stage{position:relative!important;overflow:hidden!important;border-radius:18px!important;width:100%!important;aspect-ratio:1/1!important;border:1px solid rgba(168,85,247,.8);box-shadow:0 0 15px rgba(168,85,247,.25),0 0 35px rgba(168,85,247,.12);background:#0a0a0a;font-size:0;line-height:0}
 .mgx-stage video{display:block!important;width:100%!important;height:100%!important;position:absolute!important;top:0!important;left:0!important;object-fit:cover!important;object-position:center center!important;transform:none!important;zoom:1!important;margin:0!important;padding:0!important;border:0!important;max-width:none!important;max-height:none!important;min-width:0!important;min-height:0!important;opacity:0;transition:opacity .35s ease;pointer-events:none!important}
-/* Active: opacity only — position NEVER changes, stage NEVER resizes */
 .mgx-stage video.mgx-active{opacity:1!important;pointer-events:auto!important}
-/* mute lives inside the square, bottom-right corner */
 .mgx-mute{position:absolute;bottom:12px;right:12px;z-index:10;background:rgba(0,0,0,.55);border:none;border-radius:50%;width:36px;height:36px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);color:#fff;line-height:1}
-/* arrows flank the stage */
 .ps-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:10;background:rgba(0,0,0,.5);border:none;border-radius:50%;width:38px;height:38px;font-size:22px;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);transition:background .2s}
 .ps-arrow:hover{background:rgba(80,0,180,.7)}
 .ps-prev{left:4px}.ps-next{right:4px}
-/* dots sit directly below the wrap */
 .ps-dots{display:flex;gap:6px;justify-content:center;margin-top:10px}
 .ps-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.25);border:none;cursor:pointer;padding:0;transition:all .25s}
 .ps-dot.active{background:linear-gradient(90deg,#c084fc,#a855f7);width:22px;border-radius:4px}
@@ -126,13 +118,9 @@ function buildSlider(urls) {
   const slider = document.getElementById('preview-slider');
   const inner  = slider.querySelector('.ps-inner');
   slider.hidden = false;
-
-  /* Wipe whatever the HTML shipped with */
   inner.innerHTML = '';
-
   if (!urls.length) return;
 
-  /* Build DOM */
   const wrap = document.createElement('div');
   wrap.className = 'mgx-wrap';
 
@@ -162,7 +150,6 @@ function buildSlider(urls) {
   dotsRow.className = 'ps-dots';
   dotsRow.id = 'ps-dots';
 
-  /* Create videos + dots */
   mgxVideos = [];
   mgxDots   = [];
   slideIdx  = 0;
@@ -179,7 +166,6 @@ function buildSlider(urls) {
     v.autoplay = true;
     if (i === 0) v.classList.add('mgx-active');
 
-    /* Eject broken slides the moment the browser reports an error */
     v.addEventListener('error', () => {
       const pos = mgxVideos.indexOf(v);
       if (pos === -1) return;
@@ -211,23 +197,17 @@ function buildSlider(urls) {
     mgxDots.push(dot);
   });
 
-  /* Mute button goes last inside stage so it layers on top */
   stage.appendChild(btnMute);
-
   wrap.appendChild(btnPrev);
   wrap.appendChild(stage);
   wrap.appendChild(btnNext);
   inner.appendChild(wrap);
   inner.appendChild(dotsRow);
 
-  /* Wire arrows */
   btnPrev.addEventListener('click', () => mgxGo(slideIdx - 1));
   btnNext.addEventListener('click', () => mgxGo(slideIdx + 1));
-
-  /* Wire mute */
   btnMute.addEventListener('click', mgxToggleMute);
 
-  /* Touch swipe */
   let swipeX = null;
   stage.addEventListener('touchstart', (e) => { swipeX = e.touches[0].clientX; }, { passive: true });
   stage.addEventListener('touchend', (e) => {
@@ -237,19 +217,6 @@ function buildSlider(urls) {
     swipeX = null;
   });
 
-  /* Auto-detect exact aspect ratio from whichever video fires loadedmetadata first */
-  let ratioSet = false;
-  function applyRatio(v) {
-    if (ratioSet || !v.videoWidth || !v.videoHeight) return;
-    ratioSet = true;
-    stage.style.setProperty('aspect-ratio', v.videoWidth + '/' + v.videoHeight, 'important');
-  }
-  mgxVideos.forEach((v) => {
-    v.addEventListener('loadedmetadata', () => applyRatio(v));
-    if (v.readyState >= 1) applyRatio(v);
-  });
-
-  /* Attempt autoplay on all — browsers may silently block non-visible ones */
   mgxVideos.forEach((v) => v.play().catch(() => {}));
 }
 
@@ -258,13 +225,11 @@ function mgxGo(n) {
   const from = slideIdx;
   slideIdx = (n + mgxVideos.length) % mgxVideos.length;
   if (from === slideIdx) return;
-
   mgxVideos[from].classList.remove('mgx-active');
   mgxVideos[slideIdx].classList.add('mgx-active');
   mgxVideos[from].pause();
   mgxVideos[slideIdx].muted = slideMuted;
   mgxVideos[slideIdx].play().catch(() => {});
-
   mgxDots.forEach((d, i) => d.classList.toggle('active', i === slideIdx));
 }
 
@@ -327,7 +292,6 @@ function renderTiers() {
   grid.querySelectorAll('.tier-crypto').forEach((b) => b.addEventListener('click', () => openCrypto(b.dataset.crypto)));
 }
 
-/* Wire the bottom CTA button to the exclusive tier. */
 function wireCtaBtn() {
   const btn = $('#cta-exclusive-btn');
   if (!btn) return;
@@ -349,7 +313,6 @@ function openCrypto(tier) {
   if (!p) return;
   $('#cr-amount').textContent  = moneyShort(p.amount);
   $('#cr-product').textContent = p.name;
-
   const list = $('#crypto-list');
   list.innerHTML = '';
   if (!CONFIG.crypto.length) {
