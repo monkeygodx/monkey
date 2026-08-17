@@ -87,7 +87,7 @@ async function boot() {
   wireCtaBtn();
 }
 
-/* ---------------- preview slider (clean portrait, one-at-a-time) ---------------- */
+/* ---------------- preview slider (square, one-at-a-time) ---------------- */
 let slideIdx  = 0;
 let slideMuted = true;
 let mgxVideos = [];
@@ -98,8 +98,8 @@ let mgxDots   = [];
   document.head.insertAdjacentHTML('beforeend', `<style id="mgx-css">
 .ps-viewport,.ps-track,.ps-slide,.ps-mute{display:none!important}
 .ps-inner{padding:0!important}
-.mgx-wrap{position:relative;max-width:380px;margin:0 auto;padding:0 52px;box-sizing:border-box}
-.mgx-stage{position:relative!important;overflow:hidden!important;border-radius:18px!important;width:100%!important;aspect-ratio:9/16!important;border:1px solid rgba(168,85,247,.8);box-shadow:0 0 15px rgba(168,85,247,.25),0 0 35px rgba(168,85,247,.12);background:#0a0a0a;font-size:0;line-height:0}
+.mgx-wrap{position:relative;max-width:560px;margin:0 auto;padding:0 52px;box-sizing:border-box}
+.mgx-stage{position:relative!important;overflow:hidden!important;border-radius:18px!important;width:100%!important;aspect-ratio:1/1!important;border:1px solid rgba(168,85,247,.8);box-shadow:0 0 15px rgba(168,85,247,.25),0 0 35px rgba(168,85,247,.12);background:#0a0a0a;font-size:0;line-height:0}
 .mgx-stage video{display:block!important;width:100%!important;height:100%!important;position:absolute!important;top:0!important;left:0!important;object-fit:cover!important;object-position:center center!important;transform:none!important;zoom:1!important;margin:0!important;padding:0!important;border:0!important;max-width:none!important;max-height:none!important;min-width:0!important;min-height:0!important;opacity:0;transition:opacity .35s ease;pointer-events:none!important}
 .mgx-stage video.mgx-active{opacity:1!important;pointer-events:auto!important}
 .mgx-mute{position:absolute;bottom:12px;right:12px;z-index:10;background:rgba(0,0,0,.55);border:none;border-radius:50%;width:36px;height:36px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);color:#fff;line-height:1}
