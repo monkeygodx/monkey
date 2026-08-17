@@ -16,7 +16,7 @@
       display: flex;
       align-items: flex-start;
       justify-content: center;
-      padding: 80px 1.5rem 3rem;
+      padding: calc(80px + var(--banner-h)) 1.5rem 3rem;
       position: relative;
       z-index: 1;
     }
@@ -368,6 +368,16 @@
 </head>
 <body>
 
+  <!-- ANNOUNCEMENT BANNER -->
+  <div class="announce-bar" id="announce-bar">
+    <span class="announce-text">
+      🎉 5K SALE — Code <strong class="announce-code">5K</strong> · 20% off
+      &nbsp;·&nbsp;
+      <span class="announce-timer-wrap">⏱ <span class="announce-timer" id="announce-timer">24:00:00</span> left</span>
+    </span>
+    <button class="announce-close" id="announce-close" aria-label="Dismiss banner">✕</button>
+  </div>
+
   <div class="site-bg" aria-hidden="true">
     <div class="bg-grid"></div>
     <div class="bg-glow-top"></div>
@@ -405,7 +415,7 @@
     const $ = s => document.querySelector(s);
     let CONFIG = null;
     let currentProduct = null;
-    const VALID_PROMOS = { 'NEW': 0.10 };
+    const VALID_PROMOS = { 'NEW': 0.10, '5K': 0.20 };
     let appliedPromo = null;
     let discountedAmount = null;
 
@@ -523,6 +533,7 @@
         $('#pay-price-original').textContent = price;
         $('#pay-price-original').style.display = 'inline';
         $('#pay-price-display').textContent = newPrice;
+        $('#pay-discount-badge').textContent = Math.round(rate * 100) + '% OFF';
         $('#pay-discount-badge').style.display = 'inline-flex';
         // Update pay button if already rendered
         const btnPay = $('#btn-pay');
@@ -905,6 +916,51 @@
     }
 
     init();
+  </script>
+  <script>
+  /* ── 24h Sale Countdown (pay page) ── */
+  (function () {
+    var SALE_DURATION = 24 * 60 * 60 * 1000;
+    var SALE_KEY      = 'mg_sale_start';
+    var EXPIRED_KEY   = 'mg_sale_expired';
+    var bar     = document.getElementById('announce-bar');
+    var timerEl = document.getElementById('announce-timer');
+    var closeBtn= document.getElementById('announce-close');
+    function hideBanner(instant) {
+      if (!bar) return;
+      bar.classList.add('announce-hidden');
+      document.documentElement.style.setProperty('--banner-h', '0px');
+      if (instant) { bar.hidden = true; }
+      else         { setTimeout(function(){ bar.hidden = true; }, 320); }
+    }
+    if (localStorage.getItem(EXPIRED_KEY)) { hideBanner(true); return; }
+    if (!localStorage.getItem(SALE_KEY)) {
+      localStorage.setItem(SALE_KEY, String(Date.now()));
+    }
+    var saleStart = parseInt(localStorage.getItem(SALE_KEY), 10);
+    function pad(n) { return String(n).padStart(2, '0'); }
+    function tick() {
+      var remaining = SALE_DURATION - (Date.now() - saleStart);
+      if (remaining <= 0) {
+        hideBanner(false);
+        localStorage.setItem(EXPIRED_KEY, '1');
+        clearInterval(iv);
+        return;
+      }
+      var h = Math.floor(remaining / 3600000);
+      var m = Math.floor((remaining % 3600000) / 60000);
+      var s = Math.floor((remaining % 60000) / 1000);
+      if (timerEl) timerEl.textContent = pad(h) + ':' + pad(m) + ':' + pad(s);
+    }
+    tick();
+    var iv = setInterval(tick, 1000);
+    function dismissBanner() {
+      hideBanner(false);
+      sessionStorage.setItem('mg_banner_dismissed', '1');
+    }
+    if (sessionStorage.getItem('mg_banner_dismissed')) { hideBanner(true); }
+    if (closeBtn) closeBtn.addEventListener('click', dismissBanner);
+  })();
   </script>
 </body>
 </html>
