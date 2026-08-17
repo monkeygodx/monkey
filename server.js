@@ -343,8 +343,8 @@ app.post('/api/charge', async (req, res) => {
         message: 'Card payments are not live yet. Pay with crypto or DM the admin.',
       });
     }
-    // Promo code — 'NEW' gives 10% off
-    const VALID_PROMOS = { 'NEW': 0.10 };
+    // Promo code — 'NEW' gives 10% off, '5K' gives 20% off (5K subscriber milestone)
+    const VALID_PROMOS = { 'NEW': 0.10, '5K': 0.20 };
     const discountRate = promoCode && VALID_PROMOS[(promoCode + '').trim().toUpperCase()];
     const chargeAmount = discountRate
       ? Math.round(product.amount * (1 - discountRate))
