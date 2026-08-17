@@ -26,6 +26,18 @@
 </head>
 <body>
 
+  <!-- ANNOUNCEMENT BANNER -->
+  <div class="announce-bar" id="announce-bar">
+    <span class="announce-text">
+      🎉 5K SALE — Code <strong class="announce-code">5K</strong> · 20% off
+      &nbsp;·&nbsp;
+      <span class="announce-timer-wrap">⏱ <span class="announce-timer" id="announce-timer">24:00:00</span> left</span>
+      &nbsp;·&nbsp;
+      <a href="#tiers" class="announce-link">Claim Now →</a>
+    </span>
+    <button class="announce-close" id="announce-close" aria-label="Dismiss banner">✕</button>
+  </div>
+
   <!-- Background effects -->
   <div class="site-bg" aria-hidden="true">
     <div class="bg-grid"></div>
@@ -303,13 +315,13 @@
   <div id="welcome-popup" class="welcome-overlay" hidden>
     <div class="welcome-card" role="dialog" aria-modal="true">
       <button class="welcome-close" id="welcome-close" aria-label="Close">✕</button>
-      <div class="welcome-tag">🎁 MEMBERS OFFER</div>
-      <h2 class="welcome-title">Get 10% Off Any Tier</h2>
-      <p class="welcome-sub">Join the free MONKEYGOD Telegram, then use this code at checkout:</p>
+      <div class="welcome-tag">🎉 5K MILESTONE</div>
+      <h2 class="welcome-title">Get 20% Off Any Tier</h2>
+      <p class="welcome-sub">We just hit 5,000 Telegram subscribers. Use this exclusive code at checkout:</p>
       <div class="welcome-code-chip">
         <div class="welcome-code-inner">
           <span class="welcome-code-label">DISCOUNT CODE</span>
-          <span class="welcome-code-val">NEW</span>
+          <span class="welcome-code-val">5K</span>
         </div>
         <button class="welcome-code-copy" id="welcome-copy" aria-label="Copy discount code">Copy</button>
       </div>
@@ -366,10 +378,67 @@
     popup.addEventListener('click', e => { if (e.target === popup) close(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && !popup.hidden) close(); });
     document.getElementById('welcome-copy').addEventListener('click', async function () {
-      try { await navigator.clipboard.writeText('NEW'); } catch {}
+      try { await navigator.clipboard.writeText('5K'); } catch {}
       this.textContent = 'Copied ✓';
       setTimeout(() => { if (this) this.textContent = 'Copy'; }, 2000);
     });
+  })();
+  </script>
+  <script>
+  /* ── 24h Sale Countdown ── */
+  (function () {
+    var SALE_DURATION = 24 * 60 * 60 * 1000;
+    var SALE_KEY      = 'mg_sale_start';
+    var EXPIRED_KEY   = 'mg_sale_expired';
+
+    var bar     = document.getElementById('announce-bar');
+    var timerEl = document.getElementById('announce-timer');
+    var closeBtn= document.getElementById('announce-close');
+
+    function hideBanner(instant) {
+      if (!bar) return;
+      bar.classList.add('announce-hidden');
+      document.documentElement.style.setProperty('--banner-h', '0px');
+      if (instant) { bar.hidden = true; }
+      else         { setTimeout(function(){ bar.hidden = true; }, 320); }
+    }
+
+    function killSale() {
+      hideBanner(false);
+      sessionStorage.setItem('mg_popup_seen', '1'); // suppress popup
+      localStorage.setItem(EXPIRED_KEY, '1');
+    }
+
+    // Already expired?
+    if (localStorage.getItem(EXPIRED_KEY)) { hideBanner(true); return; }
+
+    // Set sale start on first visit
+    if (!localStorage.getItem(SALE_KEY)) {
+      localStorage.setItem(SALE_KEY, String(Date.now()));
+    }
+    var saleStart = parseInt(localStorage.getItem(SALE_KEY), 10);
+
+    function pad(n) { return String(n).padStart(2, '0'); }
+
+    function tick() {
+      var remaining = SALE_DURATION - (Date.now() - saleStart);
+      if (remaining <= 0) { killSale(); clearInterval(iv); return; }
+      var h = Math.floor(remaining / 3600000);
+      var m = Math.floor((remaining % 3600000) / 60000);
+      var s = Math.floor((remaining % 60000) / 1000);
+      if (timerEl) timerEl.textContent = pad(h) + ':' + pad(m) + ':' + pad(s);
+    }
+
+    tick();
+    var iv = setInterval(tick, 1000);
+
+    // X closes the banner visually for this session, but timer keeps running
+    function dismissBanner() {
+      hideBanner(false);
+      sessionStorage.setItem('mg_banner_dismissed', '1');
+    }
+    if (sessionStorage.getItem('mg_banner_dismissed')) { hideBanner(true); }
+    if (closeBtn) closeBtn.addEventListener('click', dismissBanner);
   })();
   </script>
   <script>
