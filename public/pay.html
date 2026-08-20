@@ -805,21 +805,29 @@
           { childList: true }
         );
 
-// line 808-827: card tokenize click handler
-$('#btn-pay').addEventListener('click', async () => {
-  ...
-  if (result.status !== 'OK') {
-    showErr(...);
-    btn.disabled = false;
-    btn.innerHTML = `💳 Pay ${price}`;   // ❌ stale full price, drops the promo
-    return;
-  }
-  await submit(tier, result.token, price);
-} catch {
-  showErr('Something went wrong. Please try again.');
-  btn.disabled = false;
-  btn.innerHTML = `💳 Pay ${price}`;      // ❌ same bug
-}
+        $('#btn-pay').addEventListener('click', async () => {
+          const btn = $('#btn-pay');
+          const activePrice = appliedPromo ? money(discountedAmount) : price;
+          btn.disabled = true;
+          btn.textContent = 'Processing…';
+          showErr(null);
+          try {
+            const result = await card.tokenize();
+            if (result.status !== 'OK') {
+              showErr(result.errors?.[0]?.message || 'Check your card details and try again.');
+              btn.disabled = false;
+              btn.innerHTML = `💳 Pay ${activePrice}`;
+              return;
+            }
+            await submit(tier, result.token, price);
+          } catch {
+            showErr('Something went wrong. Please try again.');
+            btn.disabled = false;
+            btn.innerHTML = `💳 Pay ${activePrice}`;
+          }
+        });
+
+      } catch (e) {
         console.error('[checkout]', e);
         area.innerHTML = `
           <div class="pay-error-box" style="display:block">
