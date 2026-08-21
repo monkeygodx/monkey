@@ -434,7 +434,9 @@
       const seg = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
       if (['basic', 'premium', 'exclusive'].includes(seg)) return seg;
       const t = (new URLSearchParams(window.location.search).get('tier') || '').toLowerCase();
-      return ['basic', 'premium', 'exclusive'].includes(t) ? t : null;
+      // tier2bundle is query-param only (/pay?tier=tier2bundle) — deliberately no
+      // pretty /tier2bundle path, since it's meant to stay unlisted.
+      return ['basic', 'premium', 'exclusive', 'tier2bundle'].includes(t) ? t : null;
     }
     function loadScript(src) {
       return new Promise((res, rej) => {
@@ -459,6 +461,7 @@
       basic:     { label: 'Basic' },
       premium:   { label: 'Premium' },
       exclusive: { label: 'Exclusive' },
+      tier2bundle: { label: 'Secret VIP' },
     };
 
     async function init() {
