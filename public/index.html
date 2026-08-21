@@ -29,7 +29,7 @@
   <!-- ANNOUNCEMENT BANNER -->
   <div class="announce-bar" id="announce-bar">
     <span class="announce-text">
-      🎉 5K SALE — Code <strong class="announce-code">5K</strong> · 20% off
+      🎉 New here? Code <strong class="announce-code">NEW</strong> · 10% off
       &nbsp;·&nbsp;
       <span class="announce-timer-wrap">⏱ <span class="announce-timer" id="announce-timer">24:00:00</span> left</span>
       &nbsp;·&nbsp;
@@ -315,13 +315,13 @@
   <div id="welcome-popup" class="welcome-overlay" hidden>
     <div class="welcome-card" role="dialog" aria-modal="true">
       <button class="welcome-close" id="welcome-close" aria-label="Close">✕</button>
-      <div class="welcome-tag">🎉 5K MILESTONE</div>
-      <h2 class="welcome-title">Get 20% Off Any Tier</h2>
-      <p class="welcome-sub">We just hit 5,000 Telegram subscribers. Use this exclusive code at checkout:</p>
+      <div class="welcome-tag">🎉 WELCOME</div>
+      <h2 class="welcome-title">Get 10% Off Any Tier</h2>
+      <p class="welcome-sub">First time here? Use this code at checkout:</p>
       <div class="welcome-code-chip">
         <div class="welcome-code-inner">
           <span class="welcome-code-label">DISCOUNT CODE</span>
-          <span class="welcome-code-val">5K</span>
+          <span class="welcome-code-val">NEW</span>
         </div>
         <button class="welcome-code-copy" id="welcome-copy" aria-label="Copy discount code">Copy</button>
       </div>
@@ -378,18 +378,17 @@
     popup.addEventListener('click', e => { if (e.target === popup) close(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && !popup.hidden) close(); });
     document.getElementById('welcome-copy').addEventListener('click', async function () {
-      try { await navigator.clipboard.writeText('5K'); } catch {}
+      try { await navigator.clipboard.writeText('NEW'); } catch {}
       this.textContent = 'Copied ✓';
       setTimeout(() => { if (this) this.textContent = 'Copy'; }, 2000);
     });
   })();
   </script>
   <script>
-  /* ── 24h Sale Countdown ── */
+  /* ── 24h Banner Countdown (code NEW · 10% off) ── */
   (function () {
-    var SALE_DURATION = 24 * 60 * 60 * 1000;
-    var SALE_KEY      = 'mg_sale_start';
-    var EXPIRED_KEY   = 'mg_sale_expired';
+    var COUNTDOWN_DURATION = 24 * 60 * 60 * 1000;
+    var COUNTDOWN_KEY      = 'mg_countdown_start';
 
     var bar     = document.getElementById('announce-bar');
     var timerEl = document.getElementById('announce-timer');
@@ -403,26 +402,18 @@
       else         { setTimeout(function(){ bar.hidden = true; }, 320); }
     }
 
-    function killSale() {
-      hideBanner(false);
-      sessionStorage.setItem('mg_popup_seen', '1'); // suppress popup
-      localStorage.setItem(EXPIRED_KEY, '1');
+    // Countdown restarts every 24h per visitor — it's a recurring nudge
+    // toward the evergreen NEW/10% code, not a one-time expiring sale.
+    if (!localStorage.getItem(COUNTDOWN_KEY)) {
+      localStorage.setItem(COUNTDOWN_KEY, String(Date.now()));
     }
-
-    // Already expired?
-    if (localStorage.getItem(EXPIRED_KEY)) { hideBanner(true); return; }
-
-    // Set sale start on first visit
-    if (!localStorage.getItem(SALE_KEY)) {
-      localStorage.setItem(SALE_KEY, String(Date.now()));
-    }
-    var saleStart = parseInt(localStorage.getItem(SALE_KEY), 10);
+    var countdownStart = parseInt(localStorage.getItem(COUNTDOWN_KEY), 10);
 
     function pad(n) { return String(n).padStart(2, '0'); }
 
     function tick() {
-      var remaining = SALE_DURATION - (Date.now() - saleStart);
-      if (remaining <= 0) { killSale(); clearInterval(iv); return; }
+      var elapsed = Date.now() - countdownStart;
+      var remaining = COUNTDOWN_DURATION - (elapsed % COUNTDOWN_DURATION);
       var h = Math.floor(remaining / 3600000);
       var m = Math.floor((remaining % 3600000) / 60000);
       var s = Math.floor((remaining % 60000) / 1000);
@@ -432,7 +423,8 @@
     tick();
     var iv = setInterval(tick, 1000);
 
-    // X closes the banner visually for this session, but timer keeps running
+    // X closes the banner visually for this session; timer keeps running
+    // in the background and it reappears on the next fresh session.
     function dismissBanner() {
       hideBanner(false);
       sessionStorage.setItem('mg_banner_dismissed', '1');
