@@ -60,21 +60,13 @@ const PRODUCTS = {
   exclusive: { id: 'exclusive', name: 'MONKEYGOD — EXCLUSIVE', amount: 4999 },
   // Unlisted bundle — deliberately NOT in TIER_ORDER on the client, so it
   // never renders on the public tier grid. Only reachable by whoever has the
-  // direct link to the hidden page. Reuses the Tier 2 (premium) channel link.
-  tier2bundle: { id: 'tier2bundle', name: 'MONKEYGOD — TIER 2 + GUIDES BUNDLE', amount: 3499 },
+  // direct link to the hidden page. Every buyer gets the same invite link.
+  tier2bundle: { id: 'tier2bundle', name: 'MONKEYGOD — TIER 2 BUNDLE', amount: 1000 },
 };
-// Files delivered to tier2bundle buyers, on top of the Tier 2 channel invite.
-// Kept outside /public so they can only be reached through the signed /dl route.
-const GUIDES = {
-  guide1: {
-    name: process.env.GUIDE_1_NAME || 'Guide 1',
-    path: path.resolve(process.env.GUIDE_1_PATH || './protected/guide-1.pdf'),
-  },
-  guide2: {
-    name: process.env.GUIDE_2_NAME || 'Guide 2',
-    path: path.resolve(process.env.GUIDE_2_PATH || './protected/guide-2.pdf'),
-  },
-};
+// Invite link every tier2bundle buyer gets immediately after paying.
+// Override via BUNDLE_INVITE_URL env var if it ever needs to change.
+const BUNDLE_INVITE_URL = process.env.BUNDLE_INVITE_URL || 'https://t.me/+6jk_mChyWTlkYjlh';
+
 // ---------------------------------------------------------------------------
 // Cloudflare R2 (S3 API) — where the live config/secrets live.
 // ---------------------------------------------------------------------------
@@ -341,33 +333,13 @@ app.get('/api/claim', async (req, res) => {
   const cfg = await loadConfig();
 
   if (tier === 'tier2bundle') {
-    // Bundle rides on the Tier 2 (premium) channel invite, plus two guide downloads.
-    const channelLink = cfg.tierLinks && cfg.tierLinks.premium;
-    if (!channelLink) return res.status(404).json({ error: 'No channel link configured. Contact the admin.' });
-    return res.json({
-      tier,
-      channelLink,
-      guides: [
-        { key: 'guide1', name: GUIDES.guide1.name },
-        { key: 'guide2', name: GUIDES.guide2.name },
-      ],
-    });
+    // Every bundle buyer gets the same fixed invite link — no per-tier config lookup.
+    return res.json({ tier, channelLink: BUNDLE_INVITE_URL });
   }
 
   const link = cfg.tierLinks && cfg.tierLinks[tier];
   if (!link) return res.status(404).json({ error: 'No link configured for this tier. Contact the admin.' });
   return res.json({ link, tier });
-});
-// Signed guide downloads for tier2bundle buyers only — a valid basic/premium/
-// exclusive claim token will NOT work here, and vice versa.
-app.get('/dl/:which', (req, res) => {
-  const token = (req.query.token || '').trim();
-  const tier = verifyClaimToken(token);
-  if (tier !== 'tier2bundle') return res.status(401).send('Invalid or expired download link.');
-  const guide = GUIDES[req.params.which];
-  if (!guide) return res.status(404).send('Unknown file.');
-  if (!fs.existsSync(guide.path)) return res.status(404).send('File not found on server.');
-  res.download(guide.path, path.basename(guide.path));
 });
 // EMBEDDED card charge: the browser tokenizes the card with the Web Payments SDK
 // and posts the one-time {sourceId} here; we charge it server-side.
