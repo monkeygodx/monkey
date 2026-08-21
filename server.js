@@ -332,12 +332,9 @@ app.get('/api/claim', async (req, res) => {
   if (!tier) return res.status(401).json({ error: 'Invalid or expired token. Contact the admin.' });
   const cfg = await loadConfig();
 
-  if (tier === 'tier2bundle') {
-    // Every bundle buyer gets the same fixed invite link — no per-tier config lookup.
-    return res.json({ tier, channelLink: BUNDLE_INVITE_URL });
-  }
-
-  const link = cfg.tierLinks && cfg.tierLinks[tier];
+  // tier2bundle isn't in the R2/env tierLinks config — every buyer gets the
+  // same fixed invite link, so it's handled here rather than in cfg.
+  const link = tier === 'tier2bundle' ? BUNDLE_INVITE_URL : (cfg.tierLinks && cfg.tierLinks[tier]);
   if (!link) return res.status(404).json({ error: 'No link configured for this tier. Contact the admin.' });
   return res.json({ link, tier });
 });
