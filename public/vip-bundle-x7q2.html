@@ -188,37 +188,28 @@
       const res = await fetch('/api/claim?token=' + encodeURIComponent(token));
       if (!res.ok) return false;
       const data = await res.json();
-      if (!data.channelLink && !data.guides) return false;
-      renderUnlock(data, token);
+      if (!data.channelLink) return false;
+      renderUnlock(data);
       return true;
     } catch { return false; }
   }
 
-  function renderUnlock(data, token){
+  function renderUnlock(data){
     $('#pay-card').innerHTML = `
       <div class="check"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#86efac" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       <h2>You're in</h2>
-      <p>Everything below is unlocked now.</p>
+      <p>Tap below to join.</p>
       <div id="unlock-list"></div>
     `;
     $('#pay-card').id = 'unlock';
     $('#unlock').classList.add('show');
     const list = $('#unlock-list');
 
-    if (data.channelLink) {
-      const row = document.createElement('div');
-      row.className = 'unlock-item';
-      row.innerHTML = `<div><div class="name">Tier 2 Channel</div><div class="sub">Invite link</div></div>
-        <a href="${data.channelLink}" target="_blank" rel="noopener">Join →</a>`;
-      list.appendChild(row);
-    }
-    (data.guides || []).forEach(g => {
-      const row = document.createElement('div');
-      row.className = 'unlock-item';
-      row.innerHTML = `<div><div class="name">${g.name}</div><div class="sub">PDF guide</div></div>
-        <a href="/dl/${g.key}?token=${encodeURIComponent(token)}">Download</a>`;
-      list.appendChild(row);
-    });
+    const row = document.createElement('div');
+    row.className = 'unlock-item';
+    row.innerHTML = `<div><div class="name">Tier 2 Channel</div><div class="sub">Invite link</div></div>
+      <a href="${data.channelLink}" target="_blank" rel="noopener">Join →</a>`;
+    list.appendChild(row);
   }
 
   async function init(){
@@ -235,7 +226,7 @@
 
     $('#pay-card').innerHTML = `
       <div class="pay-tier-name">Unlisted Bundle</div>
-      <div class="pay-title">Tier 2 + Both Guides</div>
+      <div class="pay-title">Tier 2 Bundle Access</div>
       <div class="pay-price-wrap">
         <span class="pay-price" id="pay-price-display">${price}</span>
         <span class="pay-price-original" id="pay-price-original" style="display:none"></span>
@@ -244,8 +235,6 @@
       <div class="pay-onetime">One-time · Instant unlock · No subscription</div>
       <ul class="includes">
         <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#86efac" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Tier 2 channel access — invite sent instantly</li>
-        <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#86efac" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Guide 1 — instant download</li>
-        <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#86efac" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Guide 2 — instant download</li>
       </ul>
       <div class="pay-promo">
         <div class="pay-promo-row">
@@ -383,7 +372,7 @@
 
   function openCrypto(product){
     $('#cr-amount').textContent = appliedPromo ? money(discountedAmount) : money(product.amount);
-    $('#cr-product').textContent = 'Tier 2 + Guides Bundle';
+    $('#cr-product').textContent = 'Tier 2 Bundle';
     if (CONFIG.links?.admin) $('#cr-admin').href = CONFIG.links.admin;
     const list = $('#crypto-list');
     list.innerHTML = '';
