@@ -371,7 +371,7 @@
   <!-- ANNOUNCEMENT BANNER -->
   <div class="announce-bar" id="announce-bar">
     <span class="announce-text">
-      🎉 5K SALE — Code <strong class="announce-code">5K</strong> · 20% off
+      🎉 New here? Code <strong class="announce-code">NEW</strong> · 10% off
       &nbsp;·&nbsp;
       <span class="announce-timer-wrap">⏱ <span class="announce-timer" id="announce-timer">24:00:00</span> left</span>
     </span>
@@ -415,7 +415,7 @@
     const $ = s => document.querySelector(s);
     let CONFIG = null;
     let currentProduct = null;
-    const VALID_PROMOS = { 'NEW': 0.10, '5K': 0.20 };
+    const VALID_PROMOS = { 'NEW': 0.10 };
     let appliedPromo = null;
     let discountedAmount = null;
 
@@ -919,11 +919,10 @@
     init();
   </script>
   <script>
-  /* ── 24h Sale Countdown (pay page) ── */
+  /* ── 24h Banner Countdown — code NEW · 10% off (pay page) ── */
   (function () {
-    var SALE_DURATION = 24 * 60 * 60 * 1000;
-    var SALE_KEY      = 'mg_sale_start';
-    var EXPIRED_KEY   = 'mg_sale_expired';
+    var COUNTDOWN_DURATION = 24 * 60 * 60 * 1000;
+    var COUNTDOWN_KEY      = 'mg_countdown_start';
     var bar     = document.getElementById('announce-bar');
     var timerEl = document.getElementById('announce-timer');
     var closeBtn= document.getElementById('announce-close');
@@ -934,20 +933,14 @@
       if (instant) { bar.hidden = true; }
       else         { setTimeout(function(){ bar.hidden = true; }, 320); }
     }
-    if (localStorage.getItem(EXPIRED_KEY)) { hideBanner(true); return; }
-    if (!localStorage.getItem(SALE_KEY)) {
-      localStorage.setItem(SALE_KEY, String(Date.now()));
+    if (!localStorage.getItem(COUNTDOWN_KEY)) {
+      localStorage.setItem(COUNTDOWN_KEY, String(Date.now()));
     }
-    var saleStart = parseInt(localStorage.getItem(SALE_KEY), 10);
+    var countdownStart = parseInt(localStorage.getItem(COUNTDOWN_KEY), 10);
     function pad(n) { return String(n).padStart(2, '0'); }
     function tick() {
-      var remaining = SALE_DURATION - (Date.now() - saleStart);
-      if (remaining <= 0) {
-        hideBanner(false);
-        localStorage.setItem(EXPIRED_KEY, '1');
-        clearInterval(iv);
-        return;
-      }
+      var elapsed = Date.now() - countdownStart;
+      var remaining = COUNTDOWN_DURATION - (elapsed % COUNTDOWN_DURATION);
       var h = Math.floor(remaining / 3600000);
       var m = Math.floor((remaining % 3600000) / 60000);
       var s = Math.floor((remaining % 60000) / 1000);
