@@ -79,6 +79,11 @@ async function boot() {
     '/assets/preview8.mp4',
     '/assets/preview9.mp4',
     '/assets/preview52.mp4',
+    // To nudge the crop on one specific clip without affecting the rest,
+    // swap its string entry for an object, e.g.:
+    // { url: '/assets/preview9.mp4', position: 'center 30%' }
+    // 'position' takes any valid CSS object-position value. Omit it (plain
+    // string entries, as above) to use the default centered crop.
   ]);
 
   renderTiers();
@@ -100,7 +105,7 @@ let mgxDots   = [];
 .ps-inner{padding:0!important}
 .mgx-wrap{position:relative;max-width:560px;margin:0 auto;padding:0 52px;box-sizing:border-box}
 .mgx-stage{position:relative!important;overflow:hidden!important;border-radius:10px!important;width:100%!important;aspect-ratio:1/1!important;border:1px solid rgba(168,85,247,.8);box-shadow:0 0 15px rgba(168,85,247,.25),0 0 35px rgba(168,85,247,.12);background:#0a0a0a;font-size:0;line-height:0}
-.mgx-stage video{display:block!important;width:100%!important;height:100%!important;position:absolute!important;top:0!important;left:0!important;object-fit:cover!important;object-position:center 25%!important;transform:none!important;zoom:1!important;margin:0!important;padding:0!important;border:0!important;max-width:none!important;max-height:none!important;min-width:0!important;min-height:0!important;opacity:0;transition:opacity .35s ease;pointer-events:none!important}
+.mgx-stage video{display:block!important;width:100%!important;height:100%!important;position:absolute!important;top:0!important;left:0!important;object-fit:cover!important;transform:none!important;zoom:1!important;margin:0!important;padding:0!important;border:0!important;max-width:none!important;max-height:none!important;min-width:0!important;min-height:0!important;opacity:0;transition:opacity .35s ease;pointer-events:none!important}
 .mgx-stage video.mgx-active{opacity:1!important;pointer-events:auto!important}
 .mgx-mute{position:absolute;bottom:12px;right:12px;z-index:10;background:rgba(0,0,0,.55);border:none;border-radius:50%;width:36px;height:36px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);color:#fff;line-height:1}
 .ps-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:10;background:rgba(0,0,0,.5);border:none;border-radius:50%;width:38px;height:38px;font-size:22px;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);transition:background .2s}
@@ -114,12 +119,16 @@ let mgxDots   = [];
 </style>`);
 })();
 
-function buildSlider(urls) {
+function buildSlider(items) {
   const slider = document.getElementById('preview-slider');
   const inner  = slider.querySelector('.ps-inner');
   slider.hidden = false;
   inner.innerHTML = '';
-  if (!urls.length) return;
+  if (!items.length) return;
+
+  // Normalize: each entry is either a plain URL string, or {url, position}
+  // for a per-clip object-position override.
+  const entries = items.map(it => typeof it === 'string' ? { url: it, position: null } : it);
 
   const wrap = document.createElement('div');
   wrap.className = 'mgx-wrap';
@@ -154,9 +163,10 @@ function buildSlider(urls) {
   mgxDots   = [];
   slideIdx  = 0;
 
-  urls.forEach((url, i) => {
+  entries.forEach(({ url, position }, i) => {
     const v = document.createElement('video');
     v.src = url;
+    if (position) v.style.objectPosition = position; // overrides the CSS default (center center) for just this clip
     v.muted = true;
     v.loop = true;
     v.playsInline = true;
