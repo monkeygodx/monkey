@@ -58,6 +58,22 @@ const PRODUCTS = {
   basic: { id: 'basic', name: 'MONKEYGOD — BASIC', amount: 1999 },
   premium: { id: 'premium', name: 'MONKEYGOD — PREMIUM', amount: 2999 },
   exclusive: { id: 'exclusive', name: 'MONKEYGOD — EXCLUSIVE', amount: 4999 },
+  // Unlisted bundle — deliberately NOT in TIER_ORDER on the client, so it
+  // never renders on the public tier grid. Only reachable by whoever has the
+  // direct link to the hidden page. Reuses the Tier 2 (premium) channel link.
+  tier2bundle: { id: 'tier2bundle', name: 'MONKEYGOD — TIER 2 + GUIDES BUNDLE', amount: 3499 },
+};
+// Files delivered to tier2bundle buyers, on top of the Tier 2 channel invite.
+// Kept outside /public so they can only be reached through the signed /dl route.
+const GUIDES = {
+  guide1: {
+    name: process.env.GUIDE_1_NAME || 'Guide 1',
+    path: path.resolve(process.env.GUIDE_1_PATH || './protected/guide-1.pdf'),
+  },
+  guide2: {
+    name: process.env.GUIDE_2_NAME || 'Guide 2',
+    path: path.resolve(process.env.GUIDE_2_PATH || './protected/guide-2.pdf'),
+  },
 };
 // ---------------------------------------------------------------------------
 // Cloudflare R2 (S3 API) — where the live config/secrets live.
@@ -323,9 +339,35 @@ app.get('/api/claim', async (req, res) => {
   const tier = verifyClaimToken(token);
   if (!tier) return res.status(401).json({ error: 'Invalid or expired token. Contact the admin.' });
   const cfg = await loadConfig();
+
+  if (tier === 'tier2bundle') {
+    // Bundle rides on the Tier 2 (premium) channel invite, plus two guide downloads.
+    const channelLink = cfg.tierLinks && cfg.tierLinks.premium;
+    if (!channelLink) return res.status(404).json({ error: 'No channel link configured. Contact the admin.' });
+    return res.json({
+      tier,
+      channelLink,
+      guides: [
+        { key: 'guide1', name: GUIDES.guide1.name },
+        { key: 'guide2', name: GUIDES.guide2.name },
+      ],
+    });
+  }
+
   const link = cfg.tierLinks && cfg.tierLinks[tier];
   if (!link) return res.status(404).json({ error: 'No link configured for this tier. Contact the admin.' });
   return res.json({ link, tier });
+});
+// Signed guide downloads for tier2bundle buyers only — a valid basic/premium/
+// exclusive claim token will NOT work here, and vice versa.
+app.get('/dl/:which', (req, res) => {
+  const token = (req.query.token || '').trim();
+  const tier = verifyClaimToken(token);
+  if (tier !== 'tier2bundle') return res.status(401).send('Invalid or expired download link.');
+  const guide = GUIDES[req.params.which];
+  if (!guide) return res.status(404).send('Unknown file.');
+  if (!fs.existsSync(guide.path)) return res.status(404).send('File not found on server.');
+  res.download(guide.path, path.basename(guide.path));
 });
 // EMBEDDED card charge: the browser tokenizes the card with the Web Payments SDK
 // and posts the one-time {sourceId} here; we charge it server-side.
@@ -343,8 +385,8 @@ app.post('/api/charge', async (req, res) => {
         message: 'Card payments are not live yet. Pay with crypto or DM the admin.',
       });
     }
-    // Promo code — 'NEW' gives 10% off, '5K' gives 20% off (5K subscriber milestone)
-    const VALID_PROMOS = { 'NEW': 0.10, '5K': 0.20 };
+    // Promo code — 'NEW' gives 10% off. The 5K milestone code + sale are retired.
+    const VALID_PROMOS = { 'NEW': 0.10 };
     const discountRate = promoCode && VALID_PROMOS[(promoCode + '').trim().toUpperCase()];
     const chargeAmount = discountRate
       ? Math.round(product.amount * (1 - discountRate))
@@ -386,6 +428,7 @@ app.post('/api/charge', async (req, res) => {
       ok: true,
       paymentId: payment && payment.id,
       status: payment && payment.status,
+      claimToken,
       redirect: `/success?t=${encodeURIComponent(claimToken)}`,
     });
   } catch (err) {
@@ -495,6 +538,13 @@ app.get('/success', (req, res) => {
     console.error('[success] could not read success.html', e.message);
     res.redirect('/');
   }
+});
+// Unlisted bundle page — reachable ONLY by whoever has this exact URL. Not
+// linked from index.html, pay.html, sitemap, or nav anywhere. Rename the
+// slug (both here and the filename in /public) any time for a fresh link.
+app.get('/vip-bundle-x7q2', (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.sendFile(path.join(__dirname, 'public', 'vip-bundle-x7q2.html'));
 });
 app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
 // FIX: bind to 0.0.0.0 so Railway's proxy can reach the server on all interfaces.
