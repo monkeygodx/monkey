@@ -12,6 +12,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/styles.css?v=28" />
   <style>
+    /* This page has no announcement banner, so the shared --banner-h offset
+       (which pushes .site-nav down to sit below the banner on other pages)
+       would otherwise leave a floating gap above the nav here. Zero it out. */
+    :root { --banner-h: 0px; }
     .teaser-page {
       min-height: 100vh;
       display: flex;
