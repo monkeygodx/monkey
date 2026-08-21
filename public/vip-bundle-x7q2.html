@@ -5,122 +5,71 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="dark only" />
   <meta name="robots" content="noindex, nofollow, noarchive" />
-  <title>MONKEYGOD — Bundle Access</title>
+  <title>MONKEYGOD — Secret Access</title>
   <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/styles.css?v=28" />
   <style>
-    .pay-page {
+    .teaser-page {
       min-height: 100vh;
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: center;
       padding: 80px 1.5rem 3rem;
       position: relative;
       z-index: 1;
     }
-    .pay-card {
+    .teaser-card {
       background: #141418;
       border: 1px solid rgba(255,255,255,.09);
       border-radius: 22px;
-      padding: 2.5rem 2rem;
-      max-width: 480px;
+      padding: 3rem 2.25rem;
+      max-width: 440px;
       width: 100%;
+      text-align: center;
       box-shadow: 0 0 90px -20px rgba(147,51,234,.5);
-      margin-top: 1rem;
     }
-    .pay-tier-name {
-      font-size: .62rem;
-      font-weight: 900;
-      letter-spacing: .18em;
-      text-transform: uppercase;
-      color: var(--purple-light);
-      font-family: ui-monospace, monospace;
-      margin-bottom: .5rem;
+    .lock-badge {
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      background: rgba(147,51,234,.12);
+      border: 1px solid rgba(147,51,234,.3);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 1.4rem;
+      font-size: 1.6rem;
     }
-    .pay-title { font-size: 1.5rem; font-weight: 900; letter-spacing: -.03em; color: var(--text); margin-bottom: .25rem; }
-    .pay-price-wrap { display: flex; align-items: baseline; gap: .65rem; flex-wrap: wrap; margin-bottom: .3rem; }
-    .pay-price {
-      font-size: 2.8rem; font-weight: 900; line-height: 1; letter-spacing: -.04em;
+    .teaser-tag {
+      font-size: .62rem; font-weight: 900; letter-spacing: .2em; text-transform: uppercase;
+      color: var(--purple-light); font-family: ui-monospace, monospace; margin-bottom: .7rem;
+    }
+    .teaser-title {
+      font-size: 1.7rem; font-weight: 900; letter-spacing: -.03em; color: var(--text);
+      margin-bottom: .6rem; line-height: 1.15;
+    }
+    .teaser-price {
+      font-size: 2.6rem; font-weight: 900; line-height: 1; letter-spacing: -.04em;
       background: linear-gradient(140deg, #d4a8ff 0%, #8b2be2 100%);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: .4rem;
     }
-    .pay-price-original { font-size: 1.1rem; font-weight: 700; color: var(--text-dim); text-decoration: line-through; line-height: 1; }
-    .pay-discount-badge {
-      display: inline-flex; align-items: center; height: 22px; padding: 0 .6rem;
-      background: rgba(134,239,172,.12); border: 1px solid rgba(134,239,172,.3); border-radius: 6px;
-      font-size: .55rem; font-weight: 900; letter-spacing: .1em; color: #86efac; font-family: ui-monospace, monospace;
+    .teaser-sub {
+      font-size: .86rem; color: var(--text-muted); line-height: 1.6;
+      margin-bottom: 1.8rem;
     }
-    .pay-onetime { font-size: .6rem; color: var(--text-dim); font-weight: 700; font-family: ui-monospace, monospace; letter-spacing: .07em; text-transform: uppercase; margin-bottom: 1.4rem; }
-
-    .includes { list-style: none; margin: 0 0 1.6rem; padding: 0; display: flex; flex-direction: column; gap: .5rem; }
-    .includes li { display: flex; align-items: center; gap: .55rem; font-size: .84rem; color: var(--text-muted); }
-    .includes li svg { flex-shrink: 0; }
-
-    .pay-divider { height: 1px; background: rgba(255,255,255,.07); margin: 1.25rem 0; }
-    .pay-methods-label { font-size: .55rem; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; color: var(--text-dim); font-family: ui-monospace, monospace; margin-bottom: .9rem; }
-
-    .method-toggle { display: flex; gap: .5rem; margin-bottom: 1.1rem; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.09); border-radius: 12px; padding: 4px; }
-    .method-btn { flex: 1; padding: .6rem .5rem; border-radius: 9px; border: none; background: transparent; color: var(--text-dim); font-family: var(--font); font-size: .8rem; font-weight: 700; cursor: pointer; transition: background .18s, color .18s; }
-    .method-btn.active { background: rgba(147,51,234,.18); color: var(--purple-light); }
-    #payment-area, #crypto-area { display: none; }
-    #payment-area.show, #crypto-area.show { display: block; }
-
-    .pay-promo { margin-bottom: 1rem; }
-    .pay-promo-row { display: flex; gap: .5rem; }
-    .pay-promo-input {
-      flex: 1; height: 42px; padding: 0 .85rem; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1);
-      border-radius: 9px; color: var(--text); font-family: var(--font); font-size: .82rem; font-weight: 700;
-      letter-spacing: .08em; text-transform: uppercase; outline: none; transition: border-color .2s;
-    }
-    .pay-promo-input::placeholder { text-transform: none; font-weight: 400; letter-spacing: 0; color: var(--text-dim); }
-    .pay-promo-input:focus { border-color: rgba(147,51,234,.5); }
-    .pay-promo-input:disabled { opacity: .55; cursor: not-allowed; }
-    .pay-promo-btn { height: 42px; padding: 0 1rem; background: rgba(147,51,234,.12); border: 1px solid rgba(147,51,234,.3); border-radius: 9px; color: var(--purple-light); font-family: var(--font); font-size: .78rem; font-weight: 700; cursor: pointer; white-space: nowrap; transition: background .18s; flex-shrink: 0; }
-    .pay-promo-btn:hover { background: rgba(147,51,234,.22); }
-    .pay-promo-msg { font-size: .72rem; font-weight: 600; margin-top: .4rem; min-height: 1em; }
-    .pay-promo-success { color: #86efac; }
-    .pay-promo-invalid { color: #fca5a5; }
-
-    #card-container { background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.07); border-radius: 12px; transition: border-color .25s; margin-bottom: 8px; }
-    #card-container > div { border: none !important; outline: none !important; box-shadow: none !important; background: transparent !important; border-radius: 0 !important; padding: 0 !important; margin: 0 !important; }
-
-    .btn-pay {
-      display: flex; align-items: center; justify-content: center; width: 100%; height: 52px;
+    .btn-join {
+      display: flex; align-items: center; justify-content: center; width: 100%; height: 54px;
       background: linear-gradient(135deg, var(--purple), var(--purple-dark)); color: #fff;
-      font-family: var(--font); font-size: .92rem; font-weight: 700; border-radius: var(--radius-btn); border: none;
-      cursor: pointer; box-shadow: 0 8px 28px rgba(147,51,234,.55); transition: filter .22s, transform .22s, box-shadow .22s;
-      margin-bottom: .75rem; letter-spacing: .01em; text-decoration: none;
+      font-family: var(--font); font-size: .95rem; font-weight: 700; border-radius: var(--radius-btn);
+      border: none; cursor: pointer; box-shadow: 0 8px 28px rgba(147,51,234,.55);
+      transition: filter .22s, transform .22s, box-shadow .22s; text-decoration: none; gap: .5rem;
     }
-    .btn-pay:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-2px); box-shadow: 0 14px 40px rgba(147,51,234,.72); }
-    .btn-pay:disabled { opacity: .5; cursor: wait; transform: none; filter: none; }
-    .btn-secondary {
-      display: flex; align-items: center; justify-content: center; width: 100%; height: 48px;
-      background: rgba(255,255,255,.04); color: var(--text-muted); font-family: var(--font); font-size: .86rem; font-weight: 600;
-      border-radius: var(--radius-btn); border: 1px solid rgba(255,255,255,.1); cursor: pointer;
-      transition: background .2s, border-color .2s, color .2s; margin-bottom: .75rem;
+    .btn-join:hover { filter: brightness(1.1); transform: translateY(-2px); box-shadow: 0 14px 40px rgba(147,51,234,.72); }
+    .teaser-secure {
+      display: flex; align-items: center; justify-content: center; gap: .4rem;
+      font-size: .6rem; color: var(--text-dim); font-weight: 600; margin-top: 1.2rem;
     }
-    .btn-secondary:hover { background: rgba(255,255,255,.09); border-color: rgba(255,255,255,.2); color: var(--text); }
-
-    .pay-error-box { display: none; align-items: center; gap: .45rem; font-size: .8rem; color: #f87171; margin-bottom: .9rem; line-height: 1.5; padding: .25rem 0; }
-    .pay-info-box { background: rgba(147,51,234,.07); border: 1px solid rgba(147,51,234,.22); border-radius: 10px; padding: .85rem 1rem; font-size: .8rem; color: var(--text-muted); margin-bottom: .9rem; line-height: 1.55; }
-    .pay-secure { display: flex; align-items: center; justify-content: center; gap: .4rem; font-size: .6rem; color: var(--text-dim); font-weight: 600; letter-spacing: .04em; margin-top: 1.25rem; }
-    .pay-loading-msg { text-align: center; padding: 2rem 0 1rem; color: var(--text-dim); font-size: .84rem; }
-
-    /* ── Unlock screen ── */
-    #unlock { display: none; text-align: center; }
-    #unlock.show { display: block; }
-    #unlock .check { width: 52px; height: 52px; border-radius: 50%; background: rgba(134,239,172,.12); border: 1px solid rgba(134,239,172,.35); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; }
-    #unlock h2 { font-size: 1.3rem; font-weight: 900; margin: 0 0 .3rem; color: var(--text); }
-    #unlock p { font-size: .82rem; color: var(--text-muted); margin: 0 0 1.6rem; }
-    .unlock-item { display: flex; align-items: center; justify-content: space-between; gap: .8rem; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.09); border-radius: 12px; padding: .85rem 1rem; margin-bottom: .7rem; text-align: left; }
-    .unlock-item .name { font-size: .86rem; font-weight: 700; color: var(--text); }
-    .unlock-item .sub { font-size: .62rem; color: var(--text-dim); font-family: ui-monospace, monospace; text-transform: uppercase; letter-spacing: .08em; }
-    .unlock-item a { flex-shrink: 0; background: rgba(147,51,234,.14); border: 1px solid rgba(147,51,234,.3); color: var(--purple-light); font-size: .76rem; font-weight: 700; padding: .5rem .9rem; border-radius: 9px; text-decoration: none; }
-
-    /* Crypto modal reuses .modal-overlay / .modal / .crypto-list from styles.css */
   </style>
 </head>
 <body>
@@ -136,284 +85,35 @@
     </div>
   </header>
 
-  <main class="pay-page">
-    <div class="pay-card" id="pay-card">
-      <div class="pay-loading-msg">Loading…</div>
+  <main class="teaser-page">
+    <div class="teaser-card">
+      <div class="lock-badge">🔒</div>
+      <div class="teaser-tag">Secret · Unlisted</div>
+      <div class="teaser-title">$10 VIP Access</div>
+      <div class="teaser-price" id="teaser-price">$10</div>
+      <p class="teaser-sub">Tier 2 channel, one-time payment, instant invite. Not posted anywhere — you're seeing this because someone sent you the link.</p>
+      <a class="btn-join" id="join-btn" href="/pay?tier=tier2bundle">Join Now — $10 →</a>
+      <div class="teaser-secure">🔒 Secure checkout · One-time charge · No subscription</div>
     </div>
   </main>
 
-  <div id="toast" class="toast" hidden></div>
-
-  <!-- CRYPTO MODAL -->
-  <div id="crypto-modal" class="modal-overlay" hidden>
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="cr-title">
-      <button class="modal-close" data-close>✕</button>
-      <h3 id="cr-title" class="modal-title">Pay with Crypto</h3>
-      <p class="modal-sub">Send <b id="cr-amount">—</b> for <b id="cr-product">—</b> to an address below. DM admin your TXID after sending — access is unlocked as soon as it's confirmed.</p>
-      <div id="crypto-list" class="crypto-list"></div>
-      <a id="cr-admin" class="pay-btn pay-btn-card" href="#" target="_blank" rel="noopener">📨 Message Admin</a>
-    </div>
-  </div>
-
   <script>
   'use strict';
-  const $ = s => document.querySelector(s);
-  let CONFIG = null;
-  let appliedPromo = null;
-  let discountedAmount = null;
-  let unlockToken = null;
-  const TIER = 'tier2bundle';
-
-  function money(cents){ const d = cents/100; return '$' + (Number.isInteger(d) ? d : d.toFixed(2)); }
-  function loadScript(src){
-    return new Promise((res, rej) => {
-      if (document.querySelector(`script[src="${src}"]`)) { res(); return; }
-      const s = document.createElement('script');
-      s.src = src; s.onload = res; s.onerror = () => rej(new Error('Failed to load Square SDK'));
-      document.head.appendChild(s);
-    });
-  }
-  function showErr(msg){
-    const el = $('#pay-error');
-    if (!el) return;
-    if (!msg) { el.style.display = 'none'; return; }
-    el.innerHTML = `<svg width="15" height="15" viewBox="0 0 15 15" fill="none" style="flex-shrink:0;margin-top:1px"><circle cx="7.5" cy="7.5" r="7" stroke="#f87171"/><rect x="6.75" y="6.5" width="1.5" height="4.5" rx=".75" fill="#f87171"/><circle cx="7.5" cy="4.5" r=".9" fill="#f87171"/></svg><span>${msg}</span>`;
-    el.style.display = 'flex';
-  }
-  function saveToken(t){ unlockToken = t; try { localStorage.setItem('mg_bundle_token', t); } catch {} }
-  function loadSavedToken(){ try { return localStorage.getItem('mg_bundle_token'); } catch { return null; } }
-
-  async function tryRevealUnlock(token){
+  // Pull the live price from config so this page never goes stale if the
+  // price changes — falls back to the static $10 already in the markup
+  // if the request fails for any reason.
+  (async function () {
     try {
-      const res = await fetch('/api/claim?token=' + encodeURIComponent(token));
-      if (!res.ok) return false;
-      const data = await res.json();
-      if (!data.channelLink) return false;
-      renderUnlock(data);
-      return true;
-    } catch { return false; }
-  }
-
-  function renderUnlock(data){
-    $('#pay-card').innerHTML = `
-      <div class="check"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#86efac" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      <h2>You're in</h2>
-      <p>Tap below to join.</p>
-      <div id="unlock-list"></div>
-    `;
-    $('#pay-card').id = 'unlock';
-    $('#unlock').classList.add('show');
-    const list = $('#unlock-list');
-
-    const row = document.createElement('div');
-    row.className = 'unlock-item';
-    row.innerHTML = `<div><div class="name">Tier 2 Channel</div><div class="sub">Invite link</div></div>
-      <a href="${data.channelLink}" target="_blank" rel="noopener">Join →</a>`;
-    list.appendChild(row);
-  }
-
-  async function init(){
-    try { CONFIG = await (await fetch('/api/config')).json(); }
-    catch { $('#pay-card').innerHTML = '<div class="pay-loading-msg">Connection error. Refresh to retry.</div>'; return; }
-
-    const product = CONFIG.products?.[TIER];
-    if (!product) { $('#pay-card').innerHTML = '<div class="pay-loading-msg">Bundle not configured yet.</div>'; return; }
-
-    const saved = loadSavedToken();
-    if (saved && await tryRevealUnlock(saved)) return;
-
-    const price = money(product.amount);
-
-    $('#pay-card').innerHTML = `
-      <div class="pay-tier-name">Unlisted Bundle</div>
-      <div class="pay-title">Tier 2 Bundle Access</div>
-      <div class="pay-price-wrap">
-        <span class="pay-price" id="pay-price-display">${price}</span>
-        <span class="pay-price-original" id="pay-price-original" style="display:none"></span>
-        <span class="pay-discount-badge" id="pay-discount-badge" style="display:none">10% OFF</span>
-      </div>
-      <div class="pay-onetime">One-time · Instant unlock · No subscription</div>
-      <ul class="includes">
-        <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#86efac" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Tier 2 channel access — invite sent instantly</li>
-      </ul>
-      <div class="pay-promo">
-        <div class="pay-promo-row">
-          <input class="pay-promo-input" id="promo-input" type="text" placeholder="Promo code" maxlength="20" autocomplete="off" />
-          <button class="pay-promo-btn" id="promo-apply">Apply</button>
-        </div>
-        <div class="pay-promo-msg" id="promo-msg"></div>
-      </div>
-      <div class="pay-divider"></div>
-      <div class="method-toggle">
-        <button class="method-btn active" id="tab-card">💳 Card</button>
-        <button class="method-btn" id="tab-crypto">₿ Crypto</button>
-      </div>
-      <div id="payment-area" class="show">
-        <div class="pay-loading-msg">Setting up secure checkout…</div>
-      </div>
-      <div id="crypto-area">
-        <button class="btn-secondary" id="btn-crypto-open">₿ Show Crypto Addresses</button>
-        <div class="pay-info-box">Crypto orders are confirmed manually via DM — message admin your TXID after sending and access is unlocked as soon as it's verified.</div>
-      </div>
-      <div class="pay-secure">🔒 Encrypted checkout · One-time charge · No subscription</div>
-    `;
-
-    wireMethodToggle();
-    wirePromo(product, price);
-    $('#btn-crypto-open').addEventListener('click', () => openCrypto(product));
-    wireCryptoModal();
-
-    if (CONFIG.squareEmbedReady) await initSquare(product, price);
-    else {
-      $('#payment-area').innerHTML = `<div class="pay-info-box">Card payments aren't live yet — use crypto.</div>`;
-      $('#tab-crypto').click();
-    }
-  }
-
-  function wireMethodToggle(){
-    $('#tab-card').addEventListener('click', () => {
-      $('#tab-card').classList.add('active'); $('#tab-crypto').classList.remove('active');
-      $('#payment-area').classList.add('show'); $('#crypto-area').classList.remove('show');
-    });
-    $('#tab-crypto').addEventListener('click', () => {
-      $('#tab-crypto').classList.add('active'); $('#tab-card').classList.remove('active');
-      $('#crypto-area').classList.add('show'); $('#payment-area').classList.remove('show');
-    });
-  }
-
-  function wirePromo(product, price){
-    const VALID_PROMOS = { 'NEW': 0.10 };
-    const promoInput = $('#promo-input');
-    const promoApply = $('#promo-apply');
-    const promoMsg   = $('#promo-msg');
-
-    function applyPromo(){
-      const code = (promoInput.value || '').trim().toUpperCase();
-      if (!code) return;
-      const rate = VALID_PROMOS[code];
-      if (!rate) { promoMsg.textContent = 'Invalid promo code.'; promoMsg.className = 'pay-promo-msg pay-promo-invalid'; return; }
-      if (appliedPromo) { promoMsg.textContent = 'Code already applied.'; promoMsg.className = 'pay-promo-msg pay-promo-invalid'; return; }
-      appliedPromo = code;
-      discountedAmount = Math.round(product.amount * (1 - rate));
-      const newPrice = money(discountedAmount);
-      $('#pay-price-original').textContent = price;
-      $('#pay-price-original').style.display = 'inline';
-      $('#pay-price-display').textContent = newPrice;
-      $('#pay-discount-badge').textContent = Math.round(rate * 100) + '% OFF';
-      $('#pay-discount-badge').style.display = 'inline-flex';
-      const btnPay = $('#btn-pay');
-      if (btnPay && !btnPay.disabled) btnPay.innerHTML = `💳 Pay ${newPrice}`;
-      promoMsg.textContent = `✓ Code "${code}" applied — ${Math.round(rate * 100)}% off!`;
-      promoMsg.className = 'pay-promo-msg pay-promo-success';
-      promoInput.disabled = true; promoApply.disabled = true;
-    }
-    promoApply.addEventListener('click', applyPromo);
-    promoInput.addEventListener('keydown', e => { if (e.key === 'Enter') applyPromo(); });
-  }
-
-  async function initSquare(product, price){
-    const area = $('#payment-area');
-    try {
-      const sdkUrl = CONFIG.squareEnv === 'production'
-        ? 'https://web.squarecdn.com/v1/square.js'
-        : 'https://sandbox.web.squarecdn.com/v1/square.js';
-      await loadScript(sdkUrl);
-      const payments = Square.payments(CONFIG.squareAppId, CONFIG.squareLocationId);
-
-      area.innerHTML = `
-        <div id="card-container"></div>
-        <div id="pay-error" class="pay-error-box"></div>
-        <button class="btn-pay" id="btn-pay">💳 Pay ${appliedPromo ? money(discountedAmount) : price}</button>
-      `;
-
-      const card = await payments.card({
-        style: {
-          input: { color: '#f4f2fa', fontSize: '14px' },
-          'input::placeholder': { color: 'rgba(244,242,250,.35)' },
-        },
-      });
-      await card.attach('#card-container');
-
-      $('#btn-pay').addEventListener('click', async () => {
-        const btn = $('#btn-pay');
-        const activePrice = appliedPromo ? money(discountedAmount) : price;
-        btn.disabled = true; btn.textContent = 'Processing…';
-        showErr(null);
-        try {
-          const result = await card.tokenize();
-          if (result.status !== 'OK') {
-            showErr(result.errors?.[0]?.message || 'Check your card details and try again.');
-            btn.disabled = false; btn.innerHTML = `💳 Pay ${activePrice}`;
-            return;
-          }
-          const res = await fetch('/api/charge', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ tier: TIER, sourceId: result.token, promoCode: appliedPromo || undefined }),
-          });
-          const data = await res.json().catch(() => ({}));
-          if (!res.ok || !data.ok) {
-            showErr(data.message || 'Payment declined. Try a different card or pay with crypto.');
-            btn.disabled = false; btn.innerHTML = `💳 Pay ${activePrice}`;
-            return;
-          }
-          saveToken(data.claimToken);
-          await tryRevealUnlock(data.claimToken);
-        } catch {
-          showErr('Something went wrong. Please try again.');
-          btn.disabled = false; btn.innerHTML = `💳 Pay ${activePrice}`;
-        }
-      });
-    } catch (e) {
-      console.error('[checkout]', e);
-      area.innerHTML = `<div class="pay-error-box" style="display:block"><strong>Checkout error:</strong> ${e?.message || 'Unknown error'}</div>`;
-    }
-  }
-
-  function openCrypto(product){
-    $('#cr-amount').textContent = appliedPromo ? money(discountedAmount) : money(product.amount);
-    $('#cr-product').textContent = 'Tier 2 Bundle';
-    if (CONFIG.links?.admin) $('#cr-admin').href = CONFIG.links.admin;
-    const list = $('#crypto-list');
-    list.innerHTML = '';
-    if (!CONFIG.crypto?.length) {
-      list.innerHTML = '<div class="crypto-empty">No addresses published yet.<br>Tap "Message Admin" below and they\'ll send you the current wallet address.</div>';
-    } else {
-      for (const c of CONFIG.crypto) {
-        const row = document.createElement('div');
-        row.className = 'crypto-row';
-        row.innerHTML = `
-          <div class="crypto-row-top">
-            <div class="crypto-coin">${c.coin}<small>${c.label}</small></div>
-            <button class="crypto-copy" data-addr="${c.address}">Copy</button>
-          </div>
-          <div class="crypto-addr">${c.address}</div>`;
-        list.appendChild(row);
+      const cfg = await (await fetch('/api/config')).json();
+      const amount = cfg?.products?.tier2bundle?.amountCents ?? cfg?.products?.tier2bundle?.amount;
+      if (typeof amount === 'number') {
+        const d = amount / 100;
+        const price = '$' + (Number.isInteger(d) ? d : d.toFixed(2));
+        document.getElementById('teaser-price').textContent = price;
+        document.getElementById('join-btn').textContent = 'Join Now — ' + price + ' →';
       }
-      list.querySelectorAll('.crypto-copy').forEach(b =>
-        b.addEventListener('click', async () => {
-          try { await navigator.clipboard.writeText(b.dataset.addr); } catch {}
-          b.textContent = 'Copied ✓'; setTimeout(() => b.textContent = 'Copy', 1500);
-        })
-      );
-    }
-    $('#crypto-modal').hidden = false;
-    document.body.style.overflow = 'hidden';
-  }
-
-  function wireCryptoModal(){
-    document.querySelectorAll('[data-close]').forEach(b =>
-      b.addEventListener('click', () => { $('#crypto-modal').hidden = true; document.body.style.overflow = ''; })
-    );
-    $('#crypto-modal').addEventListener('click', e => {
-      if (e.target === $('#crypto-modal')) { $('#crypto-modal').hidden = true; document.body.style.overflow = ''; }
-    });
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') { $('#crypto-modal').hidden = true; document.body.style.overflow = ''; }
-    });
-  }
-
-  init();
+    } catch {}
+  })();
   </script>
 </body>
 </html>
