@@ -302,12 +302,9 @@ a{color:inherit;text-decoration:none}
 (function(){
   'use strict';
 
-  var TIER_LINKS = {
-    basic:     'https://t.me/+6xwda1yALdk2YmFh',
-    premium:   'https://t.me/+rfiUbOIL5FVlM2Mx',
-    exclusive: 'https://t.me/+JXqqH4jHuRI5ZTEx',
-    tier2bundle: 'https://t.me/+6jk_mChyWTlkYjlh',
-  };
+  // Invite links are NOT stored here. This file is public — anything in it is
+  // readable with view-source by someone who never paid. The link is fetched
+  // from /api/claim, which verifies the signed token server-side first.
 
   var TIER_LABEL = {
     basic:     'Basic',
@@ -327,13 +324,25 @@ a{color:inherit;text-decoration:none}
   function show(el){ el.style.display = ''; }
   function hide(el){ el.style.display = 'none'; }
 
-  function renderOk(tier){
+  function renderOk(tier, link){
     var label = TIER_LABEL[tier] || tier;
     heroSub.textContent  = label + ' access confirmed. Join your private channel below.';
     btnLabel.textContent = 'Join ' + label + ' Channel';
-    linkBtn.href = TIER_LINKS[tier] || '#';
+    linkBtn.href = link;
     hide(stateLoading);
     show(stateOk);
+  }
+
+  // Exchange the signed token for the invite link. The server verifies the
+  // signature and expiry before it hands anything back.
+  function claim(token){
+    fetch('/api/claim?token=' + encodeURIComponent(token))
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(d){
+        if (d && d.link) { renderOk(d.tier, d.link); }
+        else { renderInvalid(); }
+      })
+      .catch(renderInvalid);
   }
 
   function renderInvalid(){
@@ -342,14 +351,18 @@ a{color:inherit;text-decoration:none}
   }
 
   // ── server injects window.__MG__ = { tier } into <head> before serving ────
-  var tier = window.__MG__ && window.__MG__.tier;
+  // Token comes back on the redirect from mycheckout.live (?t=...), or from
+  // window.__MG__ when the server rendered the page with one.
+  var qs    = new URLSearchParams(window.location.search);
+  var token = qs.get('t') || qs.get('token') ||
+              (window.__MG__ && window.__MG__.token) || '';
 
-  if(!tier || !TIER_LINKS[tier]){
+  if(!token){
     renderInvalid();
     return;
   }
 
-  renderOk(tier);
+  claim(token);
 
 })();
 </script>
