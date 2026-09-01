@@ -1623,31 +1623,6 @@ img, svg { display: block; }
   margin-right: auto;
 }
 
-/* Inner Circle cards: icon, text and arrow stacked and centred */
-.community-links {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-  max-width: 900px;
-  margin-left: auto;
-  margin-right: auto;
-}
-.community-card {
-  flex-direction: column;
-  text-align: center;
-  gap: .85rem;
-  padding: 1.9rem 1.4rem 1.6rem;
-  justify-content: flex-start;
-}
-.community-card:hover { transform: translateY(-3px); }
-.community-icon { margin: 0 auto; }
-.community-text { width: 100%; }
-.community-arrow { margin-top: .2rem; }
-.community-card:hover .community-arrow { transform: translateY(3px); }
-
-@media (max-width: 820px) {
-  .community-links {
-    grid-template-columns: 1fr;
-    max-width: 420px;
-  }
-}
+/* Inner Circle: original horizontal cards, text centred inside them */
+.community-text { text-align: center; width: 100%; }
+.community-title, .community-sub { text-align: center; }
