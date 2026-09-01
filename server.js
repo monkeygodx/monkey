@@ -4,13 +4,15 @@
  *
  * Config/secrets live in a Cloudflare R2 bucket (default "monkeygod") at
  * data/config.json. THIS server reads that file at runtime (short cache) via the
- * R2 S3 API, so the Square live key / location / crypto / links can be changed in
+ * R2 S3 API, so the crypto addresses / links can be changed in
  * the bucket without redeploying Railway. If no R2 creds are set, it falls back
  * to the matching environment variables (handy for local dev).
  *
  * Payment model (digital goods, manual fulfilment via Telegram):
- *   - Card  -> embedded Square Web Payments SDK; browser tokenizes the card and
- *             POSTs a one-time token to /api/charge, charged server-side.
+ *   - Card  -> handled off-site by mycheckout.live. Buyers leave with a tier key
+ *             (mg_basic / mg_premium / mg_exclusive); that host owns the Square
+ *             credentials, the charge, and post-payment link delivery. No Square
+ *             call exists in this file and no tier name ever reaches Square.
  *   - Crypto -> wallet addresses shown on-page; customer DMs admin the TXID.
  * There is NO PayPal path anywhere by design.
  */
@@ -43,11 +45,8 @@ const express = require('express');
 })();
 const PORT = parseInt(process.env.PORT || '4000', 10);
 const PUBLIC_BASE_URL = (process.env.PUBLIC_BASE_URL || `http://localhost:${PORT}`).replace(/\/$/, '');
-// Two-domain setup: main site (.fun) and the payment site (.cloud). Both are
-// served by THIS one app; requests are routed by hostname. The "Get" buttons on
-// the main site send the buyer to PAYMENT_SITE_URL to actually pay.
-const PAYMENT_HOST = (process.env.PAYMENT_HOST || 'monkeygod.cloud').toLowerCase();
-const PAYMENT_SITE_URL = (process.env.PAYMENT_SITE_URL || 'https://monkeygod.cloud').replace(/\/$/, '');
+// Single-domain setup: monkeygod.fun. The old .cloud payment host is retired —
+// card payments leave the site entirely for mycheckout.live.
 const MAIN_SITE_URL = (process.env.MAIN_SITE_URL || 'https://monkeygod.fun').replace(/\/$/, '');
 const PREVIEW_BASE_URL = (process.env.PREVIEW_BASE_URL || '').replace(/\/$/, '');
 // ---------------------------------------------------------------------------
@@ -63,9 +62,24 @@ const PRODUCTS = {
   // direct link to the hidden page. Every buyer gets the same invite link.
   tier2bundle: { id: 'tier2bundle', name: 'MONKEYGOD — TIER 2 BUNDLE', amount: 1000 },
 };
+// ── mycheckout.live ──────────────────────────────────────────────────────────
+// All card payments are handled off-site by mycheckout.live. It owns the Square
+// credentials, the real charge amount, and the post-payment link delivery, so
+// nothing here ever talks to Square and no tier name can reach it from this box.
+const CHECKOUT_URL = (process.env.CHECKOUT_URL || 'https://mycheckout.live').replace(/\/$/, '');
+const CHECKOUT_RETURN = (process.env.CHECKOUT_RETURN || 'monkeygod.fun').replace(/^https?:\/\//, '').replace(/\/$/, '');
+const CHECKOUT_TIERS = {
+  basic:       'mg_basic',
+  premium:     'mg_premium',
+  exclusive:   'mg_exclusive',
+  tier2bundle: 'mg_tier2bundle',
+};
+
 // Invite link every tier2bundle buyer gets immediately after paying.
 // Override via BUNDLE_INVITE_URL env var if it ever needs to change.
-const BUNDLE_INVITE_URL = process.env.BUNDLE_INVITE_URL || 'https://t.me/+6jk_mChyWTlkYjlh';
+// No invite link default here — a hardcoded fallback is how a private channel
+// ends up in a public git history. Must come from env or the R2 config.
+const BUNDLE_INVITE_URL = process.env.BUNDLE_INVITE_URL || '';
 
 // ---------------------------------------------------------------------------
 // Cloudflare R2 (S3 API) — where the live config/secrets live.
@@ -173,13 +187,6 @@ async function loadOverride() {
 // Defaults pulled from env vars (used locally / as fallback when R2 isn't set).
 function envDefaults() {
   return {
-    square: {
-      env: (process.env.SQUARE_ENV || 'sandbox').toLowerCase(),
-      accessToken: process.env.SQUARE_ACCESS_TOKEN || '',
-      locationId: process.env.SQUARE_LOCATION_ID || '',
-      appId: process.env.SQUARE_APP_ID || '',
-      version: process.env.SQUARE_VERSION || '',
-    },
     crypto: [
       { coin: 'BTC', label: 'Bitcoin', address: process.env.CRYPTO_BTC || '' },
       { coin: 'ETH', label: 'Ethereum (ERC-20)', address: process.env.CRYPTO_ETH || '' },
@@ -213,14 +220,6 @@ async function loadConfig() {
   try {
     const remote = await r2GetConfig();
     if (remote && typeof remote === 'object') {
-      const rs = remote.square || {};
-      base.square = {
-        env: (rs.env || base.square.env).toLowerCase(),
-        accessToken: rs.accessToken || base.square.accessToken,
-        locationId: rs.locationId || base.square.locationId,
-        appId: rs.appId || base.square.appId,
-        version: rs.version || base.square.version,
-      };
       if (Array.isArray(remote.crypto)) {
         const c = remote.crypto.filter((x) => x && x.address);
         if (c.length) base.crypto = c;
@@ -240,14 +239,6 @@ async function loadConfig() {
   _cfgCache = base;
   _cfgAt = Date.now();
   return base;
-}
-// Derived Square helpers from a resolved config.
-function squareCtx(cfg) {
-  const sq = cfg.square || {};
-  const apiBase = sq.env === 'production' ? 'https://connect.squareup.com' : 'https://connect.squareupsandbox.com';
-  const ready = Boolean(sq.accessToken && sq.locationId);
-  const embedReady = Boolean(ready && sq.appId);
-  return { sq, apiBase, ready, embedReady };
 }
 // Fire-and-forget Discord notification on a successful payment.
 async function notifyDiscord(webhook, { product, amountCents, paymentId, status }) {
@@ -308,19 +299,14 @@ app.use(async (req, res, next) => {
 // valid signed token generated after a successful charge.
 app.get('/api/config', async (req, res) => {
   const cfg = await loadConfig();
-  const { sq, ready, embedReady } = squareCtx(cfg);
   res.json({
     products: PRODUCTS,
     previews: listPreviews(),
     crypto: cfg.crypto,
     links: cfg.links,
-    squareReady: ready,
-    squareEmbedReady: embedReady,
-    squareEnv: sq.env,
-    squareAppId: sq.appId,
-    squareLocationId: sq.locationId,
-    googlePayEnabled: cfg.googlePayEnabled === true,
-    paymentSiteUrl: PAYMENT_SITE_URL,
+    checkoutUrl: CHECKOUT_URL,
+    checkoutReturn: CHECKOUT_RETURN,
+    checkoutTiers: CHECKOUT_TIERS,
     mainSiteUrl: MAIN_SITE_URL,
   });
 });
@@ -338,135 +324,15 @@ app.get('/api/claim', async (req, res) => {
   if (!link) return res.status(404).json({ error: 'No link configured for this tier. Contact the admin.' });
   return res.json({ link, tier });
 });
-// EMBEDDED card charge: the browser tokenizes the card with the Web Payments SDK
-// and posts the one-time {sourceId} here; we charge it server-side.
-app.post('/api/charge', async (req, res) => {
-  try {
-    const { tier, sourceId, buyerVerificationToken, promoCode } = req.body || {};
-    const product = PRODUCTS[tier];
-    if (!product) return res.status(400).json({ error: 'Unknown tier.' });
-    if (!sourceId) return res.status(400).json({ error: 'Missing card token.' });
-    const cfg = await loadConfig();
-    const { sq, apiBase, embedReady } = squareCtx(cfg);
-    if (!embedReady) {
-      return res.status(503).json({
-        error: 'card_unconfigured',
-        message: 'Card payments are not live yet. Pay with crypto or DM the admin.',
-      });
-    }
-    // Promo code — 'NEW' gives 10% off. The 5K milestone code + sale are retired.
-    const VALID_PROMOS = { 'NEW': 0.10 };
-    const discountRate = promoCode && VALID_PROMOS[(promoCode + '').trim().toUpperCase()];
-    const chargeAmount = discountRate
-      ? Math.round(product.amount * (1 - discountRate))
-      : product.amount;
-    const chargeNote = discountRate
-      ? `${product.name} [${promoCode.toUpperCase()} -${Math.round(discountRate * 100)}%]`
-      : product.name;
-    const body = {
-      idempotency_key: crypto.randomUUID(),
-      source_id: sourceId,
-      location_id: sq.locationId,
-      amount_money: { amount: chargeAmount, currency: 'USD' },
-      autocomplete: true,
-      note: chargeNote,
-    };
-    if (buyerVerificationToken) body.verification_token = buyerVerificationToken;
-    const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${sq.accessToken}` };
-    if (sq.version) headers['Square-Version'] = sq.version;
-    const sqRes = await fetch(`${apiBase}/v2/payments`, { method: 'POST', headers, body: JSON.stringify(body) });
-    const data = await sqRes.json().catch(() => ({}));
-    if (!sqRes.ok) {
-      console.error('[square] charge error', sqRes.status, JSON.stringify(data));
-      const detail = data && data.errors && data.errors[0] ? data.errors[0].detail : 'Card was declined.';
-      return res.status(402).json({ error: 'card_declined', message: detail });
-    }
-    const payment = data && data.payment;
-    notifyDiscord(cfg.discordWebhook, {
-      product: product.name,
-      amountCents: chargeAmount,
-      promoCode: promoCode || null,
-      paymentId: payment && payment.id,
-      status: payment && payment.status,
-    });
-    // Generate a signed claim token tied to this payment — the success page
-    // verifies it server-side before showing the tier-specific channel link.
-    // Anyone typing /success without a valid token gets bounced.
-    const claimToken = generateClaimToken(tier, payment && payment.id);
-    return res.json({
-      ok: true,
-      paymentId: payment && payment.id,
-      status: payment && payment.status,
-      claimToken,
-      redirect: `/success?t=${encodeURIComponent(claimToken)}`,
-    });
-  } catch (err) {
-    console.error('[charge] fatal', err);
-    return res.status(500).json({ error: 'server_error', message: 'Something went wrong taking the payment.' });
-  }
-});
-// Create a Square hosted-checkout link for {tier} and return its URL.
-// Token is pre-generated and baked into the redirect URL so Square can pass it
-// back after checkout without us needing a webhook.
-app.post('/api/checkout', async (req, res) => {
-  try {
-    const { tier } = req.body || {};
-    const product = PRODUCTS[tier];
-    if (!product) return res.status(400).json({ error: 'Unknown tier.' });
-    const cfg = await loadConfig();
-    const { sq, apiBase, ready } = squareCtx(cfg);
-    if (!ready) {
-      return res.status(503).json({
-        error: 'card_unconfigured',
-        message: 'Card checkout is not live yet. Pay with crypto or DM the admin to complete your order.',
-      });
-    }
-    // Pre-generate the claim token so Square can carry it through the redirect.
-    const claimToken = generateClaimToken(tier, 'checkout-' + crypto.randomUUID());
-    const body = {
-      idempotency_key: crypto.randomUUID(),
-      order: {
-        location_id: sq.locationId,
-        line_items: [{ name: product.name, quantity: '1', base_price_money: { amount: product.amount, currency: 'USD' } }],
-      },
-      checkout_options: {
-        redirect_url: `${PUBLIC_BASE_URL}/success?t=${encodeURIComponent(claimToken)}`,
-        ask_for_shipping_address: false,
-      },
-    };
-    const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${sq.accessToken}` };
-    if (sq.version) headers['Square-Version'] = sq.version;
-    const sqRes = await fetch(`${apiBase}/v2/online-checkout/payment-links`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(body),
-    });
-    const data = await sqRes.json().catch(() => ({}));
-    if (!sqRes.ok) {
-      console.error('[square] error', sqRes.status, JSON.stringify(data));
-      const detail = data && data.errors && data.errors[0] ? data.errors[0].detail : 'Square rejected the request.';
-      return res.status(502).json({ error: 'square_error', message: detail });
-    }
-    const url = data && data.payment_link && (data.payment_link.long_url || data.payment_link.url);
-    if (!url) return res.status(502).json({ error: 'no_url', message: 'No checkout URL returned.' });
-    return res.json({ url });
-  } catch (err) {
-    console.error('[checkout] fatal', err);
-    return res.status(500).json({ error: 'server_error', message: 'Something went wrong creating the checkout.' });
-  }
-});
-// Root routing by hostname.
-function isPaymentHost(req) {
-  const host = (req.hostname || '').toLowerCase();
-  return host === PAYMENT_HOST || host.endsWith('.cloud') || host.endsWith(PAYMENT_HOST);
-}
-app.get('/', (req, res, next) => {
-  if (isPaymentHost(req)) return res.sendFile(path.join(__dirname, 'public', 'pay.html'));
-  next();
-});
-app.get(['/pay', '/basic', '/premium', '/exclusive'], (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'pay.html'));
-});
+// Card payments live entirely at mycheckout.live — see CHECKOUT_TIERS above.
+// The old /api/charge and /api/checkout routes were removed: both sent the
+// product name to Square (note field, and line_items[].name), which is exactly
+// what must never happen. There is no Square call left in this file.
+
+// /pay and the monkeygod.cloud payment host are retired — pay.html hosted the
+// on-site Square card form, which no longer has a backend. Anything still
+// pointing at those paths is bounced to the tier grid.
+app.get(['/pay', '/basic', '/premium', '/exclusive'], (req, res) => res.redirect(302, '/#tiers'));
 app.get('/.well-known/apple-developer-merchantid-domain-association', (req, res) => {
   try {
     const filePath = path.join(__dirname, 'public', '.well-known', 'apple-developer-merchantid-domain-association');
@@ -519,14 +385,12 @@ app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] })
 // FIX: bind to 0.0.0.0 so Railway's proxy can reach the server on all interfaces.
 app.listen(PORT, '0.0.0.0', async () => {
   const cfg = await loadConfig();
-  const { sq, embedReady } = squareCtx(cfg);
   console.log('');
   console.log('  MONKEYGOD running');
   console.log(`  Local:        ${PUBLIC_BASE_URL}  (landing: /  ·  payment: /pay)`);
   console.log(`  Main site:    ${MAIN_SITE_URL}`);
-  console.log(`  Payment site: ${PAYMENT_SITE_URL}  (host "${PAYMENT_HOST}")`);
+  console.log(`  Checkout:     ${CHECKOUT_URL}  (tiers: ${Object.values(CHECKOUT_TIERS).join(', ')})`);
   console.log(`  Config from:  ${R2_READY ? `R2 bucket "${R2_BUCKET}" (${R2_CONFIG_KEY})` : 'env vars (.env) — R2 not configured'}`);
-  console.log(`  Square card:  ${embedReady ? `EMBEDDED ready (${sq.env})` : 'NOT live yet — needs token + location + appId (crypto/DM still work)'}`);
   console.log(`  Crypto coins: ${cfg.crypto.length ? cfg.crypto.map((c) => c.coin).join(', ') : 'none set'}`);
   console.log(`  Claim tokens: ${CLAIM_SECRET.length > 10 ? 'CLAIM_SECRET set ✓' : 'WARNING — CLAIM_SECRET not set, tokens won\'t survive restarts'}`);
   console.log('');
