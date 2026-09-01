@@ -1651,7 +1651,10 @@ body{background:var(--bg);}
 
 /* ── HERO ── */
 .hero{padding:88px 16px 96px;text-align:center;overflow-x:clip;box-sizing:border-box;width:100%}
-.hero-inner{max-width:760px;width:100%;margin:0 auto;padding:0;box-sizing:border-box}
+.hero-inner{
+  display:flex;flex-direction:column;align-items:center;
+  max-width:760px;width:100%;margin:0 auto;padding:0;box-sizing:border-box;
+}
 .hero-tagline-pill{
   display:inline-flex;align-items:center;gap:9px;
   padding:9px 18px;margin:0 auto 16px;border-radius:999px;
