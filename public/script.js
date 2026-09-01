@@ -310,11 +310,15 @@ function wireCtaBtn() {
 
 function buy(tier, btn) {
   if (!CONFIG.products[tier]) return;
+  // Card payments happen at mycheckout.live. We hand it a tier key and a return
+  // host; it owns the amount, the Square call, and the post-payment delivery.
+  const key = (CONFIG.checkoutTiers && CONFIG.checkoutTiers[tier]) || null;
+  const base = (CONFIG.checkoutUrl || 'https://mycheckout.live').replace(/\/$/, '');
+  if (!key) return;
   if (btn) { btn.disabled = true; btn.innerHTML = 'Loading…'; }
-  const base = CONFIG.paymentSiteUrl;
-  window.location.href = base
-    ? `${base.replace(/\/$/, '')}/${encodeURIComponent(tier)}`
-    : `/pay?tier=${encodeURIComponent(tier)}`;
+  const ret = CONFIG.checkoutReturn || 'monkeygod.fun';
+  window.location.href =
+    `${base}/?tier=${encodeURIComponent(key)}&return=${encodeURIComponent(ret)}`;
 }
 
 /* ---------------- crypto modal ---------------- */
