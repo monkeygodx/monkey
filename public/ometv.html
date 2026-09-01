@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark only" />
+  <title>MONKEYGOD | OmeTV Accounts &amp; Methods</title>
+  <meta name="description" content="Fresh accounts, no-ban setups, unban methods and targeting systems for OmeTV, Monkey.app and Omegle. Instant delivery on every order." />
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css?v=28" />
+  <style>
+    :root { --banner-h: 0px; }
+
+    .om-page { padding: 100px 1.5rem 4rem; position: relative; z-index: 1; }
+    .om-inner { max-width: var(--container); margin: 0 auto; text-align: center; }
+
+    .om-title {
+      font-size: clamp(1.9rem, 5vw, 3rem);
+      font-weight: 900; letter-spacing: -.035em; line-height: 1.08;
+      color: var(--text); margin-bottom: .8rem;
+    }
+    .om-title em {
+      font-style: normal;
+      background: linear-gradient(140deg,#d4a8ff 0%,#9333ea 55%,#7c28c7 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .om-sub {
+      font-size: .95rem; color: var(--text-muted); line-height: 1.65;
+      max-width: 56ch; margin: 0 auto 2.6rem;
+    }
+
+    /* stat chips */
+    .om-stats {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+      gap: .55rem; margin-bottom: 3.2rem;
+    }
+    .om-chip {
+      padding: .5rem 1.1rem; border-radius: 999px;
+      border: 1px solid rgba(147,51,234,.28); background: rgba(147,51,234,.06);
+      font-size: .74rem; font-weight: 700; letter-spacing: .04em; color: var(--purple-light);
+    }
+
+    /* bundle block */
+    .om-bundle {
+      background: linear-gradient(180deg, rgba(147,51,234,.11) 0%, rgba(20,20,24,0) 78%);
+      border: 1px solid rgba(147,51,234,.35);
+      border-radius: var(--radius-card);
+      padding: 2.6rem 2rem 2.2rem;
+      max-width: 620px; margin: 0 auto 3rem;
+      box-shadow: 0 0 80px -26px rgba(147,51,234,.55);
+    }
+    .om-bundle-tag {
+      font-size: .62rem; font-weight: 900; letter-spacing: .2em; text-transform: uppercase;
+      color: var(--purple-light); font-family: ui-monospace, monospace; margin-bottom: .8rem;
+    }
+    .om-bundle-name {
+      font-size: 1.5rem; font-weight: 900; letter-spacing: -.03em;
+      color: var(--text); margin-bottom: 1rem;
+    }
+    .om-bundle-price { display: flex; align-items: baseline; justify-content: center; gap: .7rem; margin-bottom: .5rem; }
+    .om-was { font-size: 1.1rem; color: var(--text-dim); text-decoration: line-through; }
+    .om-now {
+      font-size: 2.8rem; font-weight: 900; line-height: 1; letter-spacing: -.04em;
+      background: linear-gradient(140deg,#d4a8ff 0%,#8b2be2 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .om-save {
+      display: inline-block; margin-bottom: 1.5rem;
+      font-size: .68rem; font-weight: 800; letter-spacing: .1em;
+      color: #7ee7a8; background: rgba(34,197,94,.1);
+      border: 1px solid rgba(34,197,94,.3); border-radius: 999px; padding: .32rem .85rem;
+    }
+    .om-bundle-list {
+      list-style: none; padding: 0; margin: 0 0 1.8rem;
+      display: flex; flex-direction: column; align-items: center; gap: .7rem;
+    }
+    .om-bundle-list li {
+      font-size: .87rem; color: var(--text-muted); line-height: 1.5;
+      display: flex; align-items: flex-start; gap: .6rem; text-align: left; max-width: 34ch;
+    }
+    .om-bundle-list li::before { content: '✓'; color: var(--purple-mid); font-weight: 900; flex-shrink: 0; }
+
+    .om-btn {
+      display: flex; align-items: center; justify-content: center; gap: .5rem;
+      width: 100%; max-width: 340px; height: 52px; margin: 0 auto;
+      background: linear-gradient(135deg, var(--purple), var(--purple-dark)); color: #fff;
+      font-family: var(--font); font-size: .93rem; font-weight: 800;
+      border-radius: var(--radius-btn); border: none; text-decoration: none;
+      box-shadow: 0 8px 28px rgba(147,51,234,.5);
+      transition: filter .22s, transform .22s, box-shadow .22s;
+    }
+    .om-btn:hover { filter: brightness(1.1); transform: translateY(-2px); box-shadow: 0 14px 40px rgba(147,51,234,.7); }
+
+    .om-divider {
+      display: flex; align-items: center; justify-content: center; gap: 1rem;
+      max-width: 560px; margin: 0 auto 2.4rem;
+      font-size: .66rem; font-weight: 800; letter-spacing: .18em; color: var(--text-dim);
+    }
+    .om-divider::before, .om-divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    /* method cards */
+    .om-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;
+      max-width: 980px; margin: 0 auto 3.4rem;
+    }
+    .om-card {
+      background: rgba(255,255,255,.028);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.9rem 1.4rem 1.6rem;
+      display: flex; flex-direction: column; align-items: center; text-align: center;
+      transition: border-color .22s, background .22s, transform .22s;
+    }
+    .om-card:hover {
+      border-color: rgba(147,51,234,.35);
+      background: rgba(147,51,234,.05);
+      transform: translateY(-3px);
+    }
+    .om-icon {
+      width: 46px; height: 46px; border-radius: 13px;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(147,51,234,.12); border: 1px solid rgba(147,51,234,.28);
+      font-size: 1.2rem; margin-bottom: 1rem;
+    }
+    .om-card h3 {
+      font-size: 1rem; font-weight: 800; letter-spacing: -.015em;
+      color: var(--text); margin-bottom: .5rem;
+    }
+    .om-card p {
+      font-size: .82rem; color: var(--text-muted); line-height: 1.6;
+      margin-bottom: 1.2rem; max-width: 30ch;
+    }
+    .om-card-tags {
+      display: flex; flex-wrap: wrap; justify-content: center; gap: .35rem; margin-bottom: 1.3rem;
+    }
+    .om-tag {
+      font-size: .6rem; font-weight: 800; letter-spacing: .06em;
+      color: var(--text-dim); border: 1px solid var(--border);
+      border-radius: 999px; padding: .25rem .6rem;
+    }
+    .om-card-link {
+      margin-top: auto; width: 100%; height: 42px;
+      display: flex; align-items: center; justify-content: center; gap: .4rem;
+      border-radius: 10px; border: 1px solid rgba(147,51,234,.3);
+      background: rgba(147,51,234,.06); color: var(--purple-light);
+      font-size: .82rem; font-weight: 700; text-decoration: none;
+      transition: background .2s, color .2s, border-color .2s;
+    }
+    .om-card-link:hover {
+      background: rgba(147,51,234,.16); color: #fff; border-color: rgba(147,51,234,.55);
+    }
+
+    /* reviews */
+    .om-rvhead {
+      font-size: clamp(1.4rem, 3.4vw, 2rem); font-weight: 900;
+      letter-spacing: -.03em; color: var(--text); margin-bottom: .5rem;
+    }
+    .om-rvsub { font-size: .85rem; color: var(--text-muted); margin-bottom: 2rem; }
+    .om-rvgrid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;
+      max-width: 980px; margin: 0 auto 3.4rem;
+    }
+    .om-rv {
+      background: rgba(255,255,255,.028); border: 1px solid var(--border);
+      border-radius: 16px; padding: 1.6rem 1.4rem;
+      display: flex; flex-direction: column; text-align: left;
+    }
+    .om-rq { font-size: .84rem; color: var(--text-muted); line-height: 1.6; flex: 1; margin-bottom: 1.2rem; }
+    .om-rwho { display: flex; align-items: center; gap: .7rem; }
+    .om-rav {
+      width: 34px; height: 34px; flex-shrink: 0; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .68rem; font-weight: 900; color: var(--purple-light);
+      background: rgba(147,51,234,.12); border: 1px solid rgba(147,51,234,.3);
+    }
+    .om-rn { font-size: .82rem; font-weight: 800; color: var(--text); line-height: 1.3; }
+    .om-rm { font-size: .7rem; color: var(--text-dim); line-height: 1.3; }
+
+    /* back strip */
+    .om-back {
+      display: inline-flex; align-items: center; gap: .5rem;
+      font-size: .82rem; font-weight: 700; color: var(--text-dim);
+      transition: color .2s;
+    }
+    .om-back:hover { color: var(--purple-light); }
+
+    @media (max-width: 900px) {
+      .om-grid, .om-rvgrid { grid-template-columns: 1fr; max-width: 420px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="site-bg" aria-hidden="true">
+    <div class="bg-grid"></div>
+    <div class="bg-glow-top"></div>
+    <div class="bg-glow-mid"></div>
+  </div>
+
+  <header class="site-nav" id="site-nav">
+    <div class="nav-inner">
+      <a class="nav-logo" href="/">MONKEYGOD</a>
+      <nav class="nav-links" aria-label="Site navigation">
+        <a href="/#tiers">Tiers</a>
+        <a href="/#community">Community</a>
+        <a href="/#faq">FAQ</a>
+        <a href="/ometv">OmeTV Accounts</a>
+        <a href="https://jabigod.xyz" target="_blank" rel="noopener">Hijabi Content</a>
+        <a href="https://latinagod.xyz" target="_blank" rel="noopener">Latina Content</a>
+        <a href="https://blondebaddies.xyz" target="_blank" rel="noopener">Blonde Baddies</a>
+      </nav>
+      <a href="/#tiers" class="nav-cta">Get Access →</a>
+    </div>
+  </header>
+
+  <main class="om-page">
+    <div class="om-inner">
+
+      <h1 class="om-title">OmeTV Accounts <em>&amp; Methods</em></h1>
+      <p class="om-sub">
+        Fresh accounts, ban protection, and the targeting systems behind better matches.
+        Everything here is a one-time purchase, delivered to your email the moment payment clears.
+      </p>
+
+      <div class="om-stats">
+        <span class="om-chip">785+ orders fulfilled</span>
+        <span class="om-chip">4.9★ average rating</span>
+        <span class="om-chip">⚡ Instant email delivery</span>
+        <span class="om-chip">One-time payment</span>
+      </div>
+
+      <!-- BUNDLE -->
+      <div class="om-bundle">
+        <div class="om-bundle-tag">Best Value</div>
+        <div class="om-bundle-name">MonkeyGod Pro Bundle</div>
+        <div class="om-bundle-price">
+          <span class="om-was">$149.94</span>
+          <span class="om-now">$99.99</span>
+        </div>
+        <span class="om-save">SAVE $49.95</span>
+        <ul class="om-bundle-list">
+          <li>Every method and every guide in one purchase</li>
+          <li>No-Ban System plus the full unban steps</li>
+          <li>Account Creation Kit — never run dry again</li>
+          <li>All three Girls Only targeting tiers</li>
+          <li>Free updates whenever a method changes</li>
+        </ul>
+        <a class="om-btn" href="https://monkeygod.us/products/monkeygod-pro-bundle" target="_blank" rel="noopener">
+          Get The Bundle →
+        </a>
+      </div>
+
+      <div class="om-divider">OR BUY INDIVIDUALLY</div>
+
+      <!-- METHOD CARDS -->
+      <div class="om-grid">
+
+        <div class="om-card">
+          <div class="om-icon">🔑</div>
+          <h3>Account Creation Kit</h3>
+          <p>The full setup for making fresh accounts that stick. Never run out mid-session again.</p>
+          <div class="om-card-tags">
+            <span class="om-tag">FRESH ACCOUNTS</span>
+            <span class="om-tag">REUSABLE</span>
+          </div>
+          <a class="om-card-link" href="https://monkeygod.us/products/account-creation-kit" target="_blank" rel="noopener">View →</a>
+        </div>
+
+        <div class="om-card">
+          <div class="om-icon">🛡️</div>
+          <h3>No-Ban System</h3>
+          <p>Stay undetected, and get back in if you already caught one. Unban steps included.</p>
+          <div class="om-card-tags">
+            <span class="om-tag">PROTECTION</span>
+            <span class="om-tag">UNBAN INCLUDED</span>
+          </div>
+          <a class="om-card-link" href="https://monkeygod.us/products/no-ban-system" target="_blank" rel="noopener">View →</a>
+        </div>
+
+        <div class="om-card">
+          <div class="om-icon">🎯</div>
+          <h3>Girls Only Targeting</h3>
+          <p>Geo-pooling and gender routing, mapped end to end. Three tiers from core to advanced.</p>
+          <div class="om-card-tags">
+            <span class="om-tag">3 TIERS</span>
+            <span class="om-tag">TARGETING</span>
+          </div>
+          <a class="om-card-link" href="https://monkeygod.us/collections/all" target="_blank" rel="noopener">View →</a>
+        </div>
+
+        <div class="om-card">
+          <div class="om-icon">⚡</div>
+          <h3>Elite Unban Method</h3>
+          <p>Simple, safe, effective. Back online the same day rather than starting over.</p>
+          <div class="om-card-tags">
+            <span class="om-tag">SAME DAY</span>
+            <span class="om-tag">TESTED</span>
+          </div>
+          <a class="om-card-link" href="https://monkeygod.us/products/elite-unban-method" target="_blank" rel="noopener">View →</a>
+        </div>
+
+        <div class="om-card">
+          <div class="om-icon">🎥</div>
+          <h3>Benny Method</h3>
+          <p>Full OBS setup pack with pre-recorded files. Your camera setup stops costing you matches.</p>
+          <div class="om-card-tags">
+            <span class="om-tag">OBS PACK</span>
+            <span class="om-tag">VIDEO FILES</span>
+          </div>
+          <a class="om-card-link" href="https://monkeygod.us/products/benny-method" target="_blank" rel="noopener">View →</a>
+        </div>
+
+        <div class="om-card">
+          <div class="om-icon">🧩</div>
+          <h3>MonkeyGod Pro Extension</h3>
+          <p>The Chrome extension. One license key, lifetime activation, no subscription.</p>
+          <div class="om-card-tags">
+            <span class="om-tag">CHROME</span>
+            <span class="om-tag">LIFETIME KEY</span>
+          </div>
+          <a class="om-card-link" href="https://monkeygod.us/products/monkeygod-pro-license-key" target="_blank" rel="noopener">View →</a>
+        </div>
+
+      </div>
+
+      <!-- REVIEWS -->
+      <div class="om-rvhead">What buyers say</div>
+      <p class="om-rvsub">Collected from MonkeyGod.us, where these methods were first sold.</p>
+      <div class="om-rvgrid">
+
+        <div class="om-rv">
+          <p class="om-rq">"Actually kinda crazy, didn't know this much information was on monkey. Every night i be so happy cus i know when i get on it's so live!"</p>
+          <div class="om-rwho">
+            <div class="om-rav">AH</div>
+            <div>
+              <div class="om-rn">Alfred H.</div>
+              <div class="om-rm">Verified Buyer · Monkey.app</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="om-rv">
+          <p class="om-rq">"Great videos and order was literally instant! Check my email and the order came in like one minute. Opened it up and got exactly what the description said."</p>
+          <div class="om-rwho">
+            <div class="om-rav">YB</div>
+            <div>
+              <div class="om-rn">Yousef B.</div>
+              <div class="om-rm">Verified Buyer · MonkeyGod Guide</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="om-rv">
+          <p class="om-rq">"Order was instant, the guide is actually solid — covered things I didn't know about the app timing. Already seeing better sessions. Would recommend."</p>
+          <div class="om-rwho">
+            <div class="om-rav">CB</div>
+            <div>
+              <div class="om-rn">Cynere B.</div>
+              <div class="om-rm">Verified Buyer · MonkeyGod Guide</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="om-rv">
+          <p class="om-rq">"Literally got into a room full of girls within 10 minutes of following the method. This is not a scam lol. Actually works."</p>
+          <div class="om-rwho">
+            <div class="om-rav">MR</div>
+            <div>
+              <div class="om-rn">Marcus R.</div>
+              <div class="om-rm">Verified Buyer · Girls Only Method</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="om-rv">
+          <p class="om-rq">"No Ban method is real. Been banned twice before buying this, haven't been banned since. The unban steps work too."</p>
+          <div class="om-rwho">
+            <div class="om-rav">TK</div>
+            <div>
+              <div class="om-rn">Tyler K.</div>
+              <div class="om-rm">Verified Buyer · No-Ban System</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="om-rv">
+          <p class="om-rq">"Got the bundle. Honestly should've been the first thing I bought. Covers everything and the PDF is clean — easy to follow."</p>
+          <div class="om-rwho">
+            <div class="om-rav">DS</div>
+            <div>
+              <div class="om-rn">Devon S.</div>
+              <div class="om-rm">Verified Buyer · Pro Bundle</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <a class="om-back" href="/">← Back to the vault</a>
+
+    </div>
+  </main>
+
+</body>
+</html>
