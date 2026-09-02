@@ -1642,11 +1642,11 @@ body{background:var(--bg);}
 .bg-grid{
   position:fixed;inset:0;pointer-events:none;
   background-image:
-    linear-gradient(rgba(147,51,234,.055) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(147,51,234,.055) 1px,transparent 1px);
-  background-size:96px 96px;
-  mask-image:radial-gradient(ellipse 90% 70% at 50% 0%,#000 30%,transparent 78%);
-  -webkit-mask-image:radial-gradient(ellipse 90% 70% at 50% 0%,#000 30%,transparent 78%);
+    linear-gradient(rgba(147,51,234,.075) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(147,51,234,.075) 1px,transparent 1px);
+  background-size:64px 64px;
+  mask-image:linear-gradient(180deg,#000 0%,#000 65%,transparent 100%);
+  -webkit-mask-image:linear-gradient(180deg,#000 0%,#000 65%,transparent 100%);
 }
 
 /* ── HERO ── */
@@ -1704,10 +1704,11 @@ body{background:var(--bg);}
 .hero-ghost:hover{border-color:var(--pg-t40);color:var(--pg-hi)}
 
 /* ── TIER HEADER ── */
-.tiers-title{display:flex;flex-direction:column;gap:2px;line-height:1.02;margin:0 0 18px}
+.tiers-title{display:flex;flex-direction:column;align-items:center;gap:4px;line-height:1.12;margin:0 0 18px}
 .tt-a{font-size:clamp(1.7rem,4vw,2.6rem);font-weight:800;color:#f4f1ea;letter-spacing:-.02em}
 .tt-b{
   font-size:clamp(1.8rem,4.3vw,2.85rem);font-weight:900;font-style:italic;letter-spacing:-.025em;
+  padding-right:.06em;
   background:var(--pg-grad);
   -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
 }
@@ -1789,10 +1790,11 @@ body{background:var(--bg);}
 
 /* ── COMMUNITY (blondebaddies 3-up, centered) ── */
 .section-title em{
-  font-style:italic;font-weight:900;
+  font-style:italic;font-weight:900;padding-right:.05em;
   background:var(--pg-grad);
   -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
 }
+.page-section .section-title{line-height:1.15}
 .community-links{
   display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
   gap:22px;margin-top:44px;
@@ -1816,7 +1818,15 @@ body{background:var(--bg);}
 .community-text{display:flex;flex-direction:column;gap:9px;align-items:center}
 .community-title{font-size:1.14rem;font-weight:800;color:var(--text)}
 .community-sub{font-size:.92rem;line-height:1.55;color:var(--text-muted);max-width:30ch}
-.community-arrow{display:none}
+.community-btn{
+  display:inline-flex;align-items:center;gap:7px;margin-top:20px;
+  padding:11px 22px;border-radius:999px;
+  background:var(--pg-grad);color:var(--pg-ink);
+  font-size:.8rem;font-weight:800;letter-spacing:.02em;
+  box-shadow:0 0 20px rgba(147,51,234,.32);
+  transition:transform .16s ease,box-shadow .16s ease;
+}
+.community-card:hover .community-btn{transform:translateY(-2px);box-shadow:0 0 30px rgba(147,51,234,.5)}
 
 /* ── SISTER SITES SLAB ── */
 .sister-section{padding:70px 20px}
